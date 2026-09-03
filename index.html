@@ -268,11 +268,6 @@
   </div>
 
   <section class="verdict" id="verdict"></section>
-  <section class="o-next" id="suiteNext" hidden style="margin:14px 0 0">
-    <div class="k">Next step</div>
-    <a data-suite="navigator" href="#"><span class="n">&rarr;</span><div><b>Run the call</b><span>You know what they qualify for. Open the matching script in the Script Navigator.</span></div></a>
-    <a data-suite="planning" href="#"><span class="n">$</span><div><b>See what this pays you</b><span>Drop the premium into the Commission Calculator for your contract level.</span></div></a>
-  </section>
 
 
 
@@ -553,13 +548,18 @@ iul: {
     {id:"nlgiul", name:"National Life Group", prod:"FlexLife / PeakLife IUL", tag:"Fully underwritten"},
     {id:"smartul", name:"Foresters", prod:"SMART UL", tag:"Non-medical"},
     {id:"ffiul", name:"Transamerica", prod:"Financial Foundation IUL", tag:"Fully underwritten"},
-    {id:"amiul", name:"Americo", prod:"Instant Decision IUL (Series 336)", tag:"Instant decision", focus:"cash", src:"Agent guide 23-084-1 (10/25)"}
+    {id:"amiul", name:"Americo", prod:"Instant Decision IUL (Series 336)", tag:"Instant decision", src:"Agent guide 23-084-1 (10/25)"}
   ],
+  orders: {
+    protection: {label:"Protection", ids:["iule","rapid","ffiulx","nlgiul","amiul","smartul","ffiul"]},
+    both:       {label:"Both",       ids:["iule","rapid","amiul","ffiulx","smartul","nlgiul","ffiul"]},
+    cash:       {label:"Cash accumulation", ids:["rapid","amiul","ffiulx","smartul","nlgiul","ffiul"]}
+  },
   products: [
     {name:"Mutual of Omaha — Indexed Universal Life Express", pts:["Ages 18-75; simplified issue $25K-$550K (18-50), $450K (51-60), $350K (61-75); death benefit guaranteed to age 80-120", "Same simplified-issue knockouts and Rx exclusion list as Term Life Express; multiple impairments over Table 4 - decline; prior United of Omaha offer worse than Table 4 - not eligible", "Living benefit riders (critical, chronic, terminal) plus accidental death, waiver, DI and children's riders; signed illustration required"]},
     {name:"Foresters — SMART UL (non-medical)", pts:["Non-medical limits: ages 0-15 $150K; 16-55 $400K; 56-75 $150K; above that it is fully underwritten (paramed/blood)", "Same non-medical impairment guide as Strong Foundation, except COPD and insulin-treated / Type 1 diabetes are declines on SMART UL", "Non-tobacco = no nicotine product in 12 months (cigars count here); build must be within the non-medical chart; ratable over Table D - do not submit non-medical", "Risk Assessment Line 1-877-622-4249"]},
     {name:"National Life Group — FlexLife / PeakLife / SummitLife IUL", pts:["FlexLife: ages 0-85; EZ Underwriting (no fluids) up to $3M ages 18-50, $1M ages 51-60, $250K ages 61-65 (Sept 2025 guide); PeakLife and SummitLife minimum face $1M", "Quick quotes now run through the XRAE tool instead of the quotes mailbox", "Classes: Elite (60 mos nicotine-free), Preferred (36), Select (12), Standard, Express Standard 1 (up to Table 4), Express Standard 2 (Tables 5-8), Preferred Tobacco, Standard Tobacco", "Age 60+ must have had routine care and a physical within 24 months or NLG declines; MVR on every applicant 16+", "Quick quotes: UnderwritingQuotes@NationalLife.com (24-hr turnaround) — use before submitting anything on the uninsurable list"]},
-    {name:"Americo — Instant Decision IUL (Series 336)", pts:["Ages 18-70; $50K-$450K non-medical, no saliva; nicotine / non-nicotine only (no substandard); 24 mos nicotine-free for non-nicotine", "100% instant-decision eApp using app questions, MIB and Rx check; every health question is a knockout — the guide does not publish the list, so the grid column shows "not addressed" for every condition", "Living benefit riders (critical, chronic, terminal) included; 5-yr no-lapse guarantee; monthly bank draft only; internal replacements not allowed", "Build chart: 4'8\" 80-188 through 6'7\" 157-376"]},
+    {name:"Americo — Instant Decision IUL (Series 336)", pts:["Ages 18-70; $50K-$450K non-medical, no saliva; nicotine / non-nicotine only (no substandard); 24 mos nicotine-free for non-nicotine", "100% instant-decision eApp using app questions, MIB and Rx check; every health question is a knockout — the guide does not publish the list, so the grid column shows 'not addressed' for every condition", "Living benefit riders (critical, chronic, terminal) included; 5-yr no-lapse guarantee; monthly bank draft only; internal replacements not allowed", "Build chart: 4'8\" 80-188 through 6'7\" 157-376"]},
     {name:"National Life Group — RapidProtect / RapidProtect NL IUL", pts:["Simplified-issue IUL with instant decision; ages 0-60, $50K-$500K; Standard NT / Standard Tobacco plus substandard Express NT 1 and Express Tobacco; no table ratings or flat extras; no ABRs on Express classes", "Hard knockouts beyond the medical list: any felony, pending charges, violent crime, license suspended, single DUI within 1 yr, multiple DUIs within 5 yrs, SSDI/DI, hospital admission in past 12 mos, diagnostic testing in past 3 mos", "XRAE quick-quote tool cannot be used for RapidProtect; cells show the guide's qualifying / non-qualifying lists (Sept 2025)"]}
 ,
     {name:"Transamerica — Financial Foundation IUL (FFIUL)", pts:["Ages 0-85; nonmed to $250K through age 45 and $99K via iGO point-of-sale (18-50; $75K 51-60); paramed above; classes Preferred Elite, Preferred Plus, Preferred, Nontobacco, Preferred Tobacco, Tobacco", "Chronic and critical illness riders must be applied for and pass separate screening (see term snapshot for exclusions); LTC rider available to citizens / green card holders", "Same impairment table as Trendsetter — cell text shows the probable fully-underwritten offer"]},
@@ -832,7 +832,8 @@ $("#age").addEventListener("input",()=>{ $("#dob").value=""; });
 function ordered(key){
   const d=DATA[key]; const idx=d.carriers.map((c,i)=>i);
   if(!d.orders) return idx;
-  const ids=(d.orders[client.lb]||d.orders.lb).ids; const pos=i=>{const k=ids.indexOf(d.carriers[i].id);return k<0?99+i:k;};
+  const sel=key==="iul"?client.focus:client.lb;
+  const ids=(d.orders[sel]||d.orders[key==="iul"?"both":"lb"]).ids; const pos=i=>{const k=ids.indexOf(d.carriers[i].id);return k<0?99+i:k;};
   return idx.slice().sort((a,b)=>pos(a)-pos(b));
 }
 
@@ -956,7 +957,7 @@ function resolveWindow(cell,y,a){
 function renderVerdict(){
   const v=$("#verdict");
   const hasInput=client.age!=null||picked.length||client.face!=null||(client.hin!=null&&client.wt!=null);
-  if(!hasInput){v.innerHTML=""; const nx0=$("#suiteNext"); if(nx0) nx0.hidden=true; return;}
+  if(!hasInput){v.innerHTML=""; return;}
   const all=TYPE_ORDER.filter(([key])=>!(key==="term"&&client.focus==="cash")).map(([key,label])=>({key,label,list:verdictsFor(key)}));
   // best fit: first non-red carrier in type order
   let best=null;
@@ -985,7 +986,6 @@ function renderVerdict(){
     html+="</div></div>";
   }
   v.innerHTML=html;
-  const nx=$("#suiteNext"); if(nx) nx.hidden=!best;
   const fp=$("#finePrint"); if(fp) fp.addEventListener("click",()=>{ onlyPicked=true;
     const cover=k=>picked.filter(p=>COND[p.i][k]!=null).length; const bestTab=["wl","term","iul"].sort((a,b)=>cover(b)-cover(a)||["iul","wl","term"].indexOf(a)-["iul","wl","term"].indexOf(b))[0];
     if(cover(bestTab)>cover(tab)){ tab=bestTab; document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x.dataset.tab===tab?"true":"false")); } $("#onlyPicked").setAttribute("aria-pressed","true"); renderGrid(); const g=$("#gridtitle"); if(g&&g.scrollIntoView) g.scrollIntoView({behavior:"smooth",block:"start"}); });
@@ -1105,11 +1105,6 @@ function SUITE_LIVE(t){ return !!(t && t.url && t.url.indexOf('REPLACE-ME') < 0)
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
 })();
-</script>
-<script>
-(function(){var v=document.getElementById('verdict'),n=document.getElementById('suiteNext');if(!v||!n)return;
- function t(){n.hidden=!(v.textContent&&v.textContent.trim().length);}
- new MutationObserver(t).observe(v,{childList:true,subtree:true,characterData:true});t();})();
 </script>
 <!-- ===== /OPTIMUM SUITE ===== -->
 
