@@ -44,8 +44,13 @@ full underwriting grids (browseable, tabbed) and product snapshots per carrier.
   Transamerica, Foresters, Accendo (last; "only 6-month advance").
 - Term with living benefits: NLG, Transamerica, Foresters SF, InstaBrain Term, Americo, MoO TLA, MoO TLE, AmAm.
   Term without: InstaBrain Pure Term, Transamerica, Foresters (rest trail).
-- IUL: MoO IUL Express, NLG RapidProtect, TA FFIUL II Express, NLG FlexLife, Foresters SMART UL, TA FFIUL.
+- IUL: MoO IUL Express, NLG RapidProtect, TA FFIUL II Express, NLG FlexLife, Foresters SMART UL, TA FFIUL,
+  Americo Instant Decision IUL (appended last — Jesse has not given it a priority position yet).
 - Status beats priority: green > amber (by score) > gray. Priority only breaks ties.
+
+## Adding carriers / guides
+See `docs/ADDING-A-CARRIER.md`. Source PDFs go in `docs/guides/`; `tools/pdftext.py` extracts
+their text (no pdftotext on this Mac). There is no database — all data is hand-curated arrays here.
 
 ## Conventions
 - Never invent underwriting language. Every cell traces to a carrier guide (see SOURCES.md).
@@ -73,5 +78,7 @@ Also verify every row has one cell per carrier: `DATA[k].rows.filter(r=>r.cells.
 - Americo term column uses 2020 HMS grid language; Instant Decision Term Series guide has no condition list.
 - Corebridge SIWL: guide not yet received.
 - Royal Neighbors SIWL/GDB: snapshot only; need the application's health questions.
-- IUL focus tags (protection / cash / both) per carrier.
+- IUL focus tags: MoO IUL Express is `focus:"protection"` (hidden when Cash accumulation is picked).
+  Americo Instant Decision IUL is `focus:"cash"` (hidden when Protection is picked). Remaining
+  IUL carriers stay untagged, which means they always show.
 - Planning Tools URL in SUITE config is still a placeholder.

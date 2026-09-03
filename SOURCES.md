@@ -24,8 +24,13 @@
 | IUL | NLG FlexLife/PeakLife | NLG Underwriting Guide (Sep 2025) | |
 | IUL | Foresters SMART UL | Foresters UW guide (2020) — SF rules + SMART UL exceptions | |
 | IUL | Transamerica FFIUL | Transamerica Field Guide (2021) | |
-| snapshot only | Americo Instant Decision IUL | Agent guide (2025) | No condition list published |
+| IUL | Americo Instant Decision IUL | Instant Decision IUL Agent Guide 23-084-1 (10/25) — `docs/guides/` | Ages/face/build only; guide publishes no condition list, so every cell is "not addressed" |
 | snapshot only | Royal Neighbors SIWL/GDB | Agent guide (2020) | Health questions not in guide |
+
+The source PDFs live in Jesse's Google Drive "wizard" folder, and are readable through the Drive
+connector — search by carrier name and read the file directly to check a cell against the guide
+before changing it. Verified this way so far: Transamerica FFIUL II Express diabetes
+("diagnosed prior to age 60 ... Ever / Decline", adult single condition decision chart, p.27).
 
 The source PDFs live in Jesse's Google Drive "wizard" folder. Consider copying them into `docs/guides/` in this repo
 so future updates can be diffed against the exact document that fed each column.
