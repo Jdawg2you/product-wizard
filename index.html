@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Insurance Product Wizard — what can this client buy?</title>
+<meta name="description" content="Enter a client's age and conditions and see which IUL, whole life, or term products they can actually buy — ranked best fit first. Free, no sign-up, works on your phone.">
+<link rel="canonical" href="https://wizard.ffloptimum.com/">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#16203C">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Optimum tools">
+<meta property="og:title" content="Insurance Product Wizard">
+<meta property="og:description" content="Enter the client's age and conditions. See which IUL, whole life, or term they can actually buy.">
+<meta property="og:url" content="https://wizard.ffloptimum.com/">
+<meta property="og:image" content="https://wizard.ffloptimum.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Insurance Product Wizard">
+<meta name="twitter:description" content="Enter the client's age and conditions. See which IUL, whole life, or term they can actually buy.">
+<meta name="twitter:image" content="https://wizard.ffloptimum.com/og.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Optimum shared tokens — same values as optimum-theme.css */
+  :root{
+    --cream:#F5F1E8; --card:#FFFFFF; --fill:#FAF8F2; --rule:#E3DFD4; --rule-soft:#EDE9DF;
+    --ink:#1B1B1B; --slate:#4A4A44; --muted:#8B8A82;
+    --navy:#16203C; --navy-deep:#101832; --blue:#2C4A7C; --bluesoft:#EDF1F8;
+    --gold:#C9A24E; --golddk:#A8853A; --goldsoft:#F4EBD5; --goldline:#E6D6AE;
+    --green:#3F7A56; --greensoft:#EDF4EF; --rust:#A8452F; --rustsoft:#F8EEEB;
+    --serif:'Source Serif 4',Georgia,'Times New Roman',serif;
+    --sans:'Inter',-apple-system,'Segoe UI',Roboto,sans-serif;
+    --mono:ui-monospace,Menlo,Consolas,monospace;
+    --radius:12px; --radius-sm:8px; --radius-pill:999px;
+    --shadow:0 1px 2px rgba(22,32,60,.06); --shadow-lift:0 10px 24px rgba(22,32,60,.12);
+    /* status aliases used throughout this tool */
+    --ok:var(--green); --ok-bg:var(--greensoft); --tier:var(--golddk); --tier-bg:var(--goldsoft);
+    --no:var(--rust); --no-bg:var(--rustsoft); --na:var(--muted); --na-bg:var(--fill);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--cream);color:var(--ink);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+  h1,h2,h3{font-family:var(--serif);color:var(--navy);font-weight:700;letter-spacing:-.015em;line-height:1.15}
+  a{color:var(--blue)}
+  button,input,select{font:inherit}
+  :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+  /* ---- Brand band ---- */
+  .o-header{background:var(--navy);color:#fff;padding:13px 20px;display:flex;align-items:center;gap:14px}
+  .o-title{font-family:var(--serif);font-weight:700;font-size:20px;color:#fff;letter-spacing:-.01em;white-space:nowrap}
+  .o-sub{font-size:12px;font-weight:500;color:rgba(255,255,255,.62);margin-top:3px}
+  .o-sub .o-sep{color:rgba(255,255,255,.35);margin:0 4px}
+  .o-sub a{color:var(--gold);font-family:var(--serif);font-weight:700;font-size:13.5px;text-decoration:none}
+  .o-sub a:hover{color:#fff}
+  .o-pill{margin-left:auto;font-family:var(--sans);background:var(--gold);color:var(--navy);border:1px solid var(--gold);border-radius:var(--radius-pill);font-weight:700;font-size:12.5px;padding:8px 16px;text-decoration:none;cursor:pointer;white-space:nowrap}
+  .o-pill:hover{background:var(--blue);border-color:var(--blue);color:#fff}
+  .gear{font-family:var(--sans);font-size:12px;font-weight:600;color:#fff;border:1px solid rgba(255,255,255,.3);background:transparent;border-radius:var(--radius-pill);padding:7px 14px;cursor:pointer;white-space:nowrap}
+  .gear:hover,.gear.set{background:transparent;border-color:var(--gold);color:var(--gold)}
+  @media(max-width:640px){.o-header{flex-wrap:wrap} .o-pill{width:100%;justify-content:center;text-align:center;margin:6px 0 0} .gear{margin:6px 0 0}}
+
+  main{max-width:1400px;margin:0 auto;padding:22px 20px 40px}
+
+  /* ---- Client panel ---- */
+  .picker{background:var(--card);border:1px solid var(--rule);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 20px}
+  .client{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px 14px;margin-bottom:14px}
+  .client label{font-weight:600;font-size:13px;color:var(--slate);display:flex;flex-direction:column;gap:5px}
+  .client input,.client select,.searchwrap input{font-weight:400;padding:10px 12px;border:1px solid var(--rule);border-radius:var(--radius-sm);background:var(--card);width:100%;color:var(--ink)}
+  .client input:focus,.client select:focus,.searchwrap input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px var(--goldsoft)}
+  .client .hw{display:flex;gap:6px}
+  .uwpick{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin:4px 0 14px;font-size:13.5px}
+  .uwpick>span{font-weight:600;color:var(--slate)}
+  .uwpick>span.gap{margin-left:10px}
+  .seg{display:inline-flex;border:1px solid var(--rule);border-radius:var(--radius-pill);background:var(--card);padding:3px}
+  .seg button{border:0;background:transparent;padding:6px 14px;border-radius:var(--radius-pill);font-weight:600;font-size:13px;color:var(--slate);cursor:pointer}
+  .seg button[aria-pressed="true"]{background:var(--navy);color:#fff}
+  .qlabel{display:block;font-weight:600;font-size:13px;color:var(--slate);margin:6px 0}
+  .searchwrap{position:relative;max-width:560px}
+  .sugg{position:absolute;left:0;right:0;top:calc(100% + 4px);background:var(--card);border:1px solid var(--rule);border-radius:var(--radius-sm);box-shadow:var(--shadow-lift);max-height:280px;overflow:auto;z-index:20;display:none}
+  .sugg.open{display:block}
+  .sugg button{display:block;width:100%;text-align:left;padding:9px 14px;border:0;background:var(--card);cursor:pointer}
+  .sugg button:hover,.sugg button.active{background:var(--bluesoft)}
+  .sugg .none{padding:10px 14px;color:var(--muted)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;min-height:34px;align-items:center}
+  .chips .hint{color:var(--muted);font-size:14px}
+  .chip{display:inline-flex;align-items:center;gap:8px;background:var(--navy);color:#fff;border-radius:var(--radius-pill);padding:6px 8px 6px 14px;font-size:13.5px;font-weight:600}
+  .chip select{border:0;border-radius:var(--radius-pill);padding:3px 6px;font-size:12px;background:rgba(255,255,255,.16);color:#fff;cursor:pointer}
+  .chip select option{color:var(--ink)}
+  .chip button{background:rgba(255,255,255,.16);color:#fff;border:0;border-radius:var(--radius-pill);width:22px;height:22px;line-height:22px;cursor:pointer;font-size:14px}
+  .chip button:hover{background:var(--gold);color:var(--navy)}
+  .clear{margin-left:auto;background:none;border:0;color:var(--blue);cursor:pointer;font-weight:600}
+
+  /* ---- Legend ---- */
+  .legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--slate);margin:14px 0 4px}
+  .legend span{display:inline-flex;align-items:center}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:1px}
+  .dot.ok{background:var(--ok)} .dot.tier{background:var(--gold)} .dot.no{background:var(--no)} .dot.na{background:var(--na)}
+
+  /* ---- Results ---- */
+  .best{background:var(--navy);color:#fff;border-radius:var(--radius);padding:18px 20px;margin:18px 0 6px}
+  .best .k{font-size:12px;color:var(--gold);font-weight:600;margin-bottom:4px}
+  .best .v{font-family:var(--serif);font-size:22px;font-weight:700;line-height:1.2}
+  .best .why{font-size:13px;color:rgba(255,255,255,.8);margin-top:5px}
+  .fine-link{background:none;border:0;padding:0;cursor:pointer;font:inherit;font-size:13px;color:var(--gold);font-weight:600;border-bottom:1px solid rgba(201,162,78,.5)}
+  .fine-link:hover{color:#fff;border-bottom-color:#fff}
+  .ptype{margin-top:20px}
+  .ptype h3{font-size:18px;margin:0 0 10px;display:flex;align-items:baseline;gap:10px}
+  .ptype h3 small{font-family:var(--sans);font-weight:500;color:var(--muted);font-size:12.5px}
+  .lane{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+  .card{background:var(--card);border:1px solid var(--rule);border-left:4px solid var(--na);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 16px}
+  .card.ok{border-left-color:var(--ok)} .card.tier{border-left-color:var(--gold)} .card.no{border-left-color:var(--no)} .card.na{border-left-color:var(--na)}
+  .card .name{font-family:var(--serif);font-weight:700;font-size:16px;color:var(--navy);line-height:1.25}
+  .card .prod{color:var(--muted);font-size:12.5px;margin-bottom:8px}
+  .card .prod b{color:var(--slate)}
+  .card .reason{font-size:12.5px;color:var(--no);font-weight:600;margin:2px 0 6px}
+  .card .reason.tier{color:var(--golddk)}
+  .card ul{list-style:none;margin:0;padding:0;font-size:13px}
+  .card li{padding:6px 0;border-top:1px solid var(--rule-soft);display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start}
+  .card li b{font-weight:600;white-space:nowrap;color:var(--slate)}
+  .card li span{color:var(--ink)}
+  .card td b,.card li span b{color:var(--no)}
+
+  /* ---- Browse grids ---- */
+  .gridhead{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin:34px 0 10px}
+  .gridhead h2{font-size:20px;margin:0}
+  .gridhead .cnt{color:var(--muted);font-size:12.5px;margin-top:2px}
+  .tabs{display:flex;gap:2px;border-bottom:1px solid var(--rule)}
+  .tabs button{appearance:none;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;background:transparent;color:var(--slate);font-size:13px;font-weight:600;padding:9px 14px 11px;cursor:pointer}
+  .tabs button:hover{color:var(--navy)}
+  .tabs button[aria-selected="true"]{color:var(--navy);border-bottom-color:var(--gold)}
+  .toggle{background:var(--card);border:1px solid var(--rule);border-radius:var(--radius-sm);padding:8px 12px;cursor:pointer;font-weight:600;font-size:13px;color:var(--navy)}
+  .toggle:hover{border-color:var(--gold)}
+  .toggle[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .gridwrap{overflow:auto;border:1px solid var(--rule);border-radius:var(--radius);background:var(--card);max-height:78vh;box-shadow:var(--shadow)}
+  table{border-collapse:separate;border-spacing:0;min-width:900px;width:100%}
+  th,td{padding:9px 10px;border-bottom:1px solid var(--rule-soft);border-right:1px solid var(--rule-soft);vertical-align:top;font-size:13px;text-align:left}
+  thead th{position:sticky;top:0;background:var(--navy);color:#fff;z-index:5;font-weight:600;line-height:1.25}
+  thead th small{display:block;font-weight:400;opacity:.72;font-size:11.5px}
+  thead th .tag{display:inline-block;margin-top:4px;padding:1px 8px;border-radius:var(--radius-pill);background:var(--gold);color:var(--navy);font-weight:700;font-size:11px}
+  tbody th{position:sticky;left:0;background:var(--card);z-index:4;font-weight:600;color:var(--navy);width:190px;min-width:190px;box-shadow:2px 0 0 var(--rule)}
+  thead th:first-child{left:0;z-index:6}
+  tr.picked th{background:var(--goldsoft)}
+  td.ok{background:var(--ok-bg)} td.tier{background:var(--tier-bg)} td.no{background:var(--no-bg);color:#7A2E20} td.na{background:var(--na-bg);color:var(--slate)}
+  td.no b{color:var(--no)}
+
+  /* ---- Product snapshots ---- */
+  .products{margin-top:34px}
+  .products h2{font-size:20px;margin:0 0 6px}
+  .ptitle{font-size:16px;margin:16px 0 8px}
+  .plist{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+  .pcard{background:var(--card);border:1px solid var(--rule);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 16px;font-size:13.5px}
+  .pcard .name{font-family:var(--serif);font-weight:700;font-size:15.5px;color:var(--navy);margin-bottom:6px}
+  .pcard ul{margin:0;padding-left:18px;color:var(--slate)}
+  .foot{margin-top:28px;color:var(--muted);font-size:12.5px;max-width:800px}
+  .o-footer{font-size:12px;color:var(--muted);text-align:center;padding:24px 16px;line-height:1.7}
+  .o-footer a{color:var(--golddk);font-weight:600;text-decoration:none}
+  .o-footer a:hover{text-decoration:underline}
+
+  /* ---- GOAT pop-out ---- */
+  dialog{border:0;border-radius:var(--radius);padding:0;max-width:520px;width:calc(100% - 32px);box-shadow:var(--shadow-lift)}
+  dialog::backdrop{background:rgba(22,32,60,.55)}
+  .dlg{padding:24px 26px 22px;position:relative;color:var(--ink);background:var(--card);border-radius:var(--radius)}
+  .dlg .x{position:absolute;top:10px;right:12px;background:none;border:0;font-size:22px;cursor:pointer;color:var(--muted)}
+  .dlg .k{font-size:12px;font-weight:600;color:var(--golddk)}
+  .dlg h2{margin:4px 0 14px;font-size:22px}
+  .perk{display:grid;gap:2px;padding:10px 0;border-top:1px solid var(--rule-soft);font-size:14px}
+  .perk b{font-size:15px;color:var(--navy)}
+  .perk span{color:var(--slate)}
+  .fine{font-size:13px;color:var(--muted);margin:12px 0 14px}
+  .cta{display:block;text-align:center;background:var(--navy);color:#fff;text-decoration:none;font-weight:600;padding:12px;border-radius:var(--radius-sm)}
+  .cta:hover{background:var(--blue)}
+
+  /* ---- My carriers drawer ---- */
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:min(420px,100%);background:var(--card);box-shadow:-12px 0 40px rgba(22,32,60,.25);transform:translateX(100%);transition:transform .22s ease;z-index:50;display:flex;flex-direction:column;padding:20px 22px}
+  .drawer.open{transform:none}
+  .drawer-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .drawer-head h2{margin:4px 0 0;font-size:19px}
+  .drawer .k{font-size:12px;font-weight:600;color:var(--golddk)}
+  .drawer .x{background:none;border:0;font-size:24px;cursor:pointer;color:var(--muted)}
+  #drawerList{overflow:auto;flex:1;margin:6px 0}
+  .drow{display:flex;align-items:center;gap:10px;padding:9px 6px;border-top:1px solid var(--rule-soft);font-size:14px;cursor:pointer}
+  .drow input{accent-color:var(--navy);width:18px;height:18px}
+  .drawer-foot{display:flex;gap:8px;padding-top:12px;border-top:1px solid var(--rule)}
+  .cta-sm{margin-left:auto;background:var(--navy);color:#fff;border:0;border-radius:var(--radius-sm);padding:9px 16px;font-weight:600;cursor:pointer}
+  .cta-sm:hover{background:var(--blue)}
+  .scrim{position:fixed;inset:0;background:rgba(22,32,60,.45);z-index:40}
+  .sr{position:absolute;left:-9999px}
+  @media (max-width:640px){ main{padding:14px 12px 40px} tbody th{width:130px;min-width:130px} }
+  @media (prefers-reduced-motion:reduce){.drawer{transition:none}}
+</style>
+</head>
+<body>
+<header class="o-header">
+  <div>
+    <div class="o-title">Insurance Product Wizard</div>
+    <div class="o-sub">Tools built for agents, by agents <span class="o-sep">&middot;</span>
+      Brought to you by <a href="https://optimumprotects.com/" target="_blank" rel="noopener">Optimum</a></div>
+  </div>
+  <a class="o-pill" id="goatBtn" href="https://goatleads.com/registration/new?affiliate_id=66c4aa379e0123651ad2f0e6"
+     target="_blank" rel="noopener">&#9733; FREE Agent Website, Digital Business Card &amp; Booking Calendar</a>
+  <div class="o-suite"><button type="button">More free tools &#9662;</button><div class="o-suite-menu"></div></div>
+  <button type="button" class="gear" id="gearBtn" aria-label="My carriers">&#9881; My carriers</button>
+</header>
+<dialog id="goatDlg" aria-labelledby="goatTitle">
+  <form method="dialog" class="dlg">
+    <button type="button" class="x" id="goatClose" aria-label="Close">×</button>
+    <div class="k">Free with GOAT</div>
+    <h2 id="goatTitle">Three things every agent should have on day one</h2>
+    <div class="perk"><b>A verified agent website</b><span>Your own page with your photo, bio, carriers and state licenses pulled from NIPR — so a client can check you out before they buy.</span></div>
+    <div class="perk"><b>A digital business card</b><span>One tap saves your name, direct line and NPN to the client's phone, links to your website, and shows you're a verified, licensed agent.</span></div>
+    <div class="perk"><b>A booking calendar</b><span>A booking link clients use to grab a time with you — no back-and-forth texting.</span></div>
+    <p class="fine">All three are free when you sign up with GOAT through Optimum. Setup takes about 5 minutes.</p>
+    <a class="cta" href="https://goatleads.com/registration/new?affiliate_id=66c4aa379e0123651ad2f0e6" target="_blank" rel="noopener noreferrer">Sign up free with GOAT</a>
+  </form>
+</dialog>
+<div id="drawer" class="drawer" aria-hidden="true">
+  <div class="drawer-head"><div><div class="k">My carriers</div><h2>Which carriers are you appointed with?</h2></div><button type="button" class="x" id="drawerClose" aria-label="Close">×</button></div>
+  <p class="fine">Untick the ones you're not appointed with. Results only show your carriers; the browse grids still show everything. Saved on this device only.</p>
+  <div id="drawerList"></div>
+  <div class="drawer-foot"><button type="button" class="toggle" id="drawerAll">Select all</button><button type="button" class="toggle" id="drawerNone">Clear all</button><button type="button" class="cta-sm" id="drawerDone">Done</button></div>
+</div>
+<div id="scrim" class="scrim" hidden></div>
+
+<main>
+  <section class="picker">
+    <div class="client">
+      <label>Age <input id="age" type="number" min="0" max="99" inputmode="numeric" placeholder="e.g. 58"></label>
+      <label>or date of birth <input id="dob" type="date"></label>
+      <label>Height <span class="hw"><select id="hft"><option value="">ft</option><option>4</option><option>5</option><option>6</option></select><select id="hin"><option value="">in</option><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option></select></span></label>
+      <label>Weight <input id="wt" type="number" min="50" max="600" inputmode="numeric" placeholder="lbs"></label>
+      <label>Sex <select id="sex"><option value="">—</option><option value="m">Male</option><option value="f">Female</option></select></label>
+      <label>Coverage wanted <input id="face" type="number" min="1000" step="1000" inputmode="numeric" placeholder="$"></label>
+      <label>Living benefits <select id="lb"><option value="lb">Wants them</option><option value="nolb">Doesn't need them</option></select></label>
+    </div>
+    <div class="uwpick" role="radiogroup" aria-label="Underwriting type"><span>Show</span>
+      <div class="seg" id="uwSeg">
+        <button type="button" data-uw="si" aria-pressed="true">Simplified issue</button>
+        <button type="button" data-uw="both" aria-pressed="false">Both</button>
+        <button type="button" data-uw="fu" aria-pressed="false">Fully underwritten</button>
+      </div>
+      <span class="gap">IUL focus</span>
+      <div class="seg" id="focusSeg">
+        <button type="button" data-focus="protection" aria-pressed="false">Protection</button>
+        <button type="button" data-focus="both" aria-pressed="true">Both</button>
+        <button type="button" data-focus="cash" aria-pressed="false">Cash accumulation</button>
+      </div>
+    </div>
+    <label for="q" class="qlabel">Conditions</label>
+    <div class="searchwrap">
+      <input id="q" type="search" autocomplete="off" placeholder="Type a condition — diabetes, COPD, DUI, stent…" aria-label="Search conditions" aria-expanded="false" aria-controls="sugg">
+      <div id="sugg" class="sugg" role="listbox"></div>
+    </div>
+    <div class="chips" id="chips"><span class="hint">Add age and any conditions. Results update as you go.</span></div>
+  </section>
+
+  <div class="legend">
+    <span><i class="dot ok"></i> Allowed / best tier available</span>
+    <span><i class="dot tier"></i> Takes it, but lower tier, rating or time window applies</span>
+    <span><i class="dot no"></i> Not eligible (hidden from results; shown in the grids)</span>
+    <span><i class="dot na"></i> Not addressed — check meds / call underwriting</span>
+  </div>
+
+  <section class="verdict" id="verdict"></section>
+  <section class="o-next" id="suiteNext" hidden style="margin:14px 0 0">
+    <div class="k">Next step</div>
+    <a data-suite="navigator" href="#"><span class="n">&rarr;</span><div><b>Run the call</b><span>You know what they qualify for. Open the matching script in the Script Navigator.</span></div></a>
+    <a data-suite="planning" href="#"><span class="n">$</span><div><b>See what this pays you</b><span>Drop the premium into the Commission Calculator for your contract level.</span></div></a>
+  </section>
+
+
+
+  <div class="gridhead">
+    <div><h2 id="gridtitle">Browse the full grids</h2><div class="cnt" id="cnt"></div></div>
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" data-tab="wl">Whole Life</button>
+      <button role="tab" aria-selected="false" data-tab="term">Term</button>
+      <button role="tab" aria-selected="false" data-tab="iul">IUL</button>
+    </div>
+    <button class="toggle" id="onlyPicked" aria-pressed="false" title="Trim the grid below to just the conditions you picked above, so you can see every carrier's exact wording side by side — including the ones hidden from the results">Just the conditions I picked</button>
+  </div>
+  <div class="gridwrap"><table id="grid"><thead></thead><tbody></tbody></table></div>
+
+  <section class="products">
+    <h2>Product snapshots</h2>
+    <div id="plist"></div>
+  </section>
+
+  <p class="foot">Grid language is transcribed from the FFL 2020 term and 2022 final expense grid sheets, plus the Chubb/Combined Generational Life underwriting guide, the Fidelity Life RAPIDecision Final Expense &amp; GI producer guide (May 2026), and the Fidelity Life InstaBrain Term / Pure Term producer guides (May 2026), the Mutual of Omaha Accelerated Underwriting flyer (2023), Simplified Issue guide (April 2026) and Fully Underwritten guide (Sept 2025), the National Life Group Life Underwriting Guide (2020), the Foresters Advantage Plus II / Strong Foundation / Your Term / SMART UL Underwriting Guide (2020), the Americo Instant Decision IUL agent guide (2025) the Royal Neighbors SIWL/GDB agent guide (2020), the Transamerica Field Guide to Underwriting (2021), the Transamerica FFIUL II Express vs FE Express comparison flyer (July 2026), the Transamerica FFIUL II Express agent guide (Sept 2026), the Transamerica FE Express Solution agent guide (July 2026), the Transamerica Trendsetter Term Life guide (Dec 2025), the National Life Group Underwriting Guide (Sept 2025) and the Americo Instant Decision Term Series agent guide (Sept 2025) / eApp underwriting reference (April 2026). Color coding is an agent-facing shortcut, not a carrier decision — underwriting rules change; confirm current guidelines before quoting.</p>
+  <p class="o-footer">Built for insurance agents by
+    <a href="https://optimumprotects.com/" target="_blank" rel="noopener">Optimum</a>.</p>
+</main>
+
+<script>
+/* ---------- DATA ----------
+   Cell text is transcribed from the source grids/guides. Status is auto-derived from the wording,
+   or forced with a prefix:  "R|" decline  "A|" tier/window  "G|" allowed  "N|" not addressed.
+*/
+const DATA = {
+wl: {
+  carriers: [
+    {id:"americo", name:"Americo", prod:"Eagle Select Series", src:"grid cells from the 2022 Eagle Premier sheet"},
+    {id:"moo",     name:"Mutual of Omaha", prod:"Living Promise"},
+    {id:"chubb",   name:"Chubb / Combined", prod:"Generational Life", tag:"Instant decision"},
+    {id:"fidelity", name:"InstaBrain", prod:"Fidelity Life — RAPIDecision FE / GI", tag:"Instant decision"},
+    {id:"amam",    name:"American Amicable", prod:"Senior Choice"},
+    {id:"fex", name:"Transamerica", prod:"FE Express Solution", tag:"Instant decision"},
+    {id:"foresters", name:"Foresters", prod:"PlanRight"},
+    {id:"accendo", name:"Accendo (Aetna/CVS)", prod:"Final Expense (only 6-month advance)"}
+  ],
+  products: [
+    {name:"Americo — Eagle Select Series (replaces Eagle Premier)", pts:["April 2026 eApp reference: Eagle Select Series is now the final expense line, non-medical $5,000-$50,000, accept/reject via instant-decision eApp; build chart 4'8\" 79-189 through 6'7\" 156-377", "Tier structure (Jesse notes 3 levels) and health questions are not in the guides loaded — grid cells still use the 2022 Eagle Premier language", "Premier: ages 50-85 NS / 50-80 smoker, $2,000-$30,000, full benefit day one, simplified issue", "Guaranteed: ages 50-80, $2,000-$10,000, 3-yr graded (ROP+5%, ROP+10%, 75%, then 100%)", "Quit Smoking Advantage — smokers get NS rates first 3 yrs", "Accidental death rider included; e-App or tele-app instant decision"]},
+    {name:"Accendo (Aetna / CVS Health) — Final Expense", pts:["Ages 40-89, $2,000-$50,000 depending on age", "Preferred = all app questions No; Standard = one Yes in Part C, still immediate", "Modified = ROP if death in first 2 yrs", "No height/weight chart"]},
+    {name:"American Amicable — Senior Choice", pts:["Immediate: 100% all years — ages 0-49 to $35K; 50-75 to $35K; 76-85 to $20K", "Graded: 30% yr 1, 70% yr 2, 100% after — ages 50-85 to $20K", "ROP: return of premium +10% (≤3 yrs ages 0-64; ≤2 yrs ages 65-85) — 18-49 and 50-85 to $20K", "100% accidental death all years; min $10K under 50, $2,500 over 50 ($5K WA)"]},
+    {name:"Foresters — PlanRight", pts:["Preferred / Standard: ages 50-85, 100% face; Basic: ages 50-80, ROP+10% yrs 1-2 then 100%", "Max face: Preferred $35K (81-85: $15K); Standard $20K (81-85: $10K); Basic $15K", "Min face $5,000; premiums level to age 121", "Accelerated death (terminal) included on Preferred/Standard; common carrier & family health riders included"]},
+    {name:"Mutual of Omaha — Living Promise", pts:["Level: ages 45-85, $2,000-$50,000; Graded: ages 45-80, $2,000-$20,000 (not in AR, MT, NC) — per April 2026 guide", "Any Yes in Part One - not eligible; any Yes in Part Two - Graded only; all No - Level", "Rx exclusion list applies (asterisked drugs may still qualify for Graded); random phone interview"]},
+    {name:"Chubb / Combined — Generational Life", pts:["Ages 0-80; Preferred & Standard $5K-$50K; Non-standard $5K-$25K", "Graded (Class 4): $5K-$25K, ROP + 3.75% for first 2 yrs, full benefit after; full benefit for accidental death", "All-digital app with instant decision; MIB + Rx + labs check; monthly ACH or card incl. Direct Express; $50 policy fee", "Rule of thumb: any Yes to a modification question = Graded. Pending tests, biopsy or surgery = postpone. Cancer/stroke/heart attack diagnosed within 6 months = do not submit. On disability = Graded."]},
+    {name:"InstaBrain (Fidelity Life) — RAPIDecision Final Expense / Guaranteed Issue", pts:["FE: ages 50-85; $5K-$50K (81-85: $5K-$40K); full benefit day one; 12 knockout questions, mostly 2-yr lookbacks", "GI: ages 50-85, $5K-$25K, no underwriting; yrs 1-3 pay ROP + 5% (accidental death pays full), 100% from yr 4", "Any Yes on the FE app routes the client to GI automatically", "Also GI-routed: hospitalized 2+ times in 6 mos, pending tests/appointments, life expectancy ≤24 mos; $85 policy fee; monthly card/EFT"]}
+,
+    {name:"Royal Neighbors — Simplified Issue Whole Life / Graded Death Benefit", pts:["Ages 50-75; SIWL $7,000-$30,000 full benefit day one; GDB $7,000-$10,000 (30% yr 1, 70% yr 2, 100% accidental) — GDB currently CT, FL and ND only", "Simple yes/no app: SIWL needs questions 2-9 all No; GDB allows Yes on 8 and 9; Rx Lookup on the agent portal knocks out automatic-decline meds regardless of answers", "Phone / voice-signature app through MRS (866-281-9228), EFT only, no debit or credit cards; $30 certificate fee", "No grid column yet — the training guide does not print the health questions; send the application and I will map it"]}
+,
+    {name:"Transamerica — FE Express Solution / Graded FE Express Solution (instant decision)", pts:["FE Express: ages 18-85, $5,000-$100,000 (76-85: $25K max); classes Premier (min $10K, not in CA), Select Nontobacco, Select Tobacco; first-day full coverage; 100% instant decision, never referred to an underwriter, issued in about 10 minutes", "Graded FE Express: ages 18-80, $5K-$25K; 110% of premiums if non-accidental death in first 2 yrs, full face after; routed automatically when a condition rates Graded", "BMI: Premier 18.5-42; Select 16.5-18.5 or 42-46; Graded 15-16.5 or 46-48; outside that - no coverage. Conditions do not stack unless they are true comorbidities (e.g. tobacco + oxygen)", "Non-medical knockouts: currently incarcerated / probation / parole, felony charges within 2 yrs or pending, hospitalized 2+ times in 1 yr, pending tests within 6 mos, bedridden, hospice / home health / adult day care. Rx list also knocks out (transplant, HIV, dementia, Suboxone-class, many cancer drugs)", "Monthly or annual by ACH, credit / debit card or Direct Express; $42 policy fee; concierge funeral-planning rider at no cost; no conversions. Cells use the July 2026 adult single-condition and cancer decision charts"]}
+  ],
+  rows: [
+    ["AIDS / HIV / ARC", "DECLINE", "DECLINE", "A|AIDS/ARC - Graded; HIV positive - Sub-Std or Graded", "A|Ever diagnosed - GI", "DECLINE* (see state application)", "R|Ever - Decline", "DECLINE", "DECLINE"],
+    ["AFib / irregular heartbeat", "Not asked - Allowed", "Within 2 yrs - Graded", "A|Arrhythmia / AFib - Graded", "A|Heart disorder within 2 yrs - GI", "Not asked - Allowed", "G|Arrhythmia / AFib within 5 yrs - Premier", "Not asked - Allowed", "Not asked - Allowed"],
+    ["Alcohol / drug abuse", "Within 2 yrs - Guaranteed Issue", "Within 2 yrs - Graded", "A|Alcoholism / dependency - Graded", "A|Counseled or treated within 2 yrs - GI", "Treated within 2 yrs - ROP", "A|Alcohol treatment or drug use within 2 yrs - Decline; 2-5 yrs - Select; over 5 yrs - Premier", "Treatment within past 2 yrs - Basic", "Treatment within past 2 yrs - Modified"],
+    ["ALS (Lou Gehrig's)", "Guaranteed Issue", "DECLINE", "A|Graded", "A|Within 2 yrs - GI", "DECLINE", "R|Ever - Decline", "DECLINE", "DECLINE"],
+    ["Alzheimer's / dementia / memory loss / cognitive", "Guaranteed Issue", "DECLINE", "A|Graded", "A|Within 2 yrs - GI", "DECLINE", "R|Alzheimer's, dementia, cognitive disorder - Decline; memory loss within 2 yrs - Decline, after 2 yrs - Premier", "DECLINE", "DECLINE"],
+    ["Amputation", "Due to Diabetes - DECLINE", "Due to Diabetes - DECLINE", "A|Within 3 mos, due to disease, complications or assistive device - Graded; otherwise all ratings", "A|Diabetic amputation within 2 yrs - GI; injury - allowed", "Caused by disease - DECLINE", "R|Not due to trauma - Decline", "DECLINE", "Modified; due to any disease or diabetes - DECLINE"],
+    ["Aneurysm", "Not asked - Allowed", "R|Not allowed", "A|Graded", "A|Blood vessel disorder within 2 yrs - GI", "Within 2 yrs - ROP", "A|Aortic aneurysm - Select; brain aneurysm within 5 yrs - Select, after 5 yrs - Premier", "Within 2 yrs - Basic", "Within 1 yr - Modified"],
+    ["Angina (chest pain)", "Within 1 yr - Guaranteed Issue", "Within 1 yr - DECLINE; within 2 yrs - Graded", "A|Graded", "A|Within 2 yrs - GI", "Within 2 yrs - ROP", "G|Within 5 yrs - Premier", "Treated within 1 yr - Basic; within 2 yrs - Standard", "Treated within 1 yr - Modified; 1-2 yrs - Standard; > 2 yrs - Preferred"],
+    ["Angioplasty", "Within 1 yr - Guaranteed Issue", "Within 1 yr - DECLINE; within 2 yrs - Graded", "A|Graded (coronary artery disease)", "A|Within 2 yrs - GI", "Not asked - Allowed", "A|Cardiac surgery (stent, bypass, angioplasty, valve, pacemaker) within 1 yr - Select; over 1 yr - Premier", "See Heart Surgery", "See Heart Surgery"],
+    ["Arthritis", "Not asked - Allowed", "Not asked - Allowed", "A|All ratings; walker/wheelchair or joint replacement recommended - Graded", "Not asked - Allowed", "Not asked - Allowed", "G|Rheumatoid or psoriatic arthritis - Premier", "Not asked - Allowed", "Not asked - Allowed"],
+    ["Assisted living / long-term care facility", "Within 6 mos - Guaranteed Issue", "Current - DECLINE", "N|Not addressed in guide - on disability is Graded", "A|Currently confined - GI", "DECLINE", "R|Currently in a nursing home, assisted living, LTC, hospice or adult day care - Decline; hospitalized 2+ times in 1 yr - Decline", "DECLINE", "DECLINE"],
+    ["Asthma (chronic)", "Not asked - Allowed", "Not asked - Allowed", "A|>10 mg steroid daily, oxygen, or ER/hospital within 6 mos - Graded; otherwise Std / Sub-Std / Graded", "Not asked - Allowed", "Not asked - Allowed", "N|Not on the decision chart (severe asthma shown as Accept on the comparison flyer)", "Not asked - Allowed", "Standard"],
+    ["Autism", "Not asked - Allowed", "DECLINE", "A|Graded", "Not asked - Allowed", "Not asked", "A|Select", "Not asked", "See Mental Incapacity"],
+    ["Bipolar", "Not asked - Allowed", "Within 4 yrs - Graded", "A|Graded", "A|Hospitalized for mental disorder within 2 yrs - GI; otherwise allowed", "Not asked - Allowed", "A|Within 5 yrs - Select; over 5 yrs - Premier", "Preferred", "Preferred"],
+    ["Black lung", "Not asked - Allowed", "Not asked - Allowed", "N|Not listed - see COPD / oxygen", "A|Respiratory disorder within 2 yrs - GI", "Not asked - Allowed", "A|Select", "Not asked - Allowed", "Not asked - Allowed"],
+    ["Blood clots", "See Stent and check med list", "See Stent", "A|DVT / thrombophlebitis - Graded; pulmonary embolism - Std / Sub-Std / Graded", "A|Blood vessel disorder within 2 yrs - GI", "Surgical procedure within 2 yrs - ROP; within 3 yrs - Graded", "G|DVT with no complications - Premier; pulmonary embolism - Premier", "See Stent", "Not asked - ask about stents or heart surgery"],
+    ["Blood disorder (polycythemia, thrombocytopenia, hemophilia, coagulation)", "Not asked - Allowed", "Not asked - Allowed", "A|Graded", "Not asked - Allowed", "See Blood Clots", "A|Hemophilia or bleeding disorder - Select; myeloproliferative disorder - Select", "Not asked", "Not asked"],
+    ["Bone marrow transplant", "Not asked - Allowed", "DECLINE", "A|Graded", "A|Within 2 yrs - GI", "Not asked - Allowed", "R|Transplant recipient or recommended - Decline", "DECLINE", "DECLINE"],
+    ["Bronchitis (chronic)", "Not asked - check inhalers / meds", "Graded", "A|Chronic bronchitis - Graded; acute with steroids, oxygen, >3 episodes in 6 mos or hospitalized in 12 mos - Graded; otherwise Std / Sub-Std / Graded", "A|Respiratory disorder within 2 yrs - GI", "Treated within 2 yrs - ROP; within 3 yrs - Graded", "A|Chronic bronchitis - Select", "Not asked - check inhalers / meds", "Standard"],
+    ["Cancer (other than basal cell)", "Metastatic / recurrent - DECLINE; within 2 yrs - Guaranteed Issue; > 2 yrs - allowed", "< 2 yrs, metastatic or recurring - DECLINE; 2-4 yrs - Graded; > 4 yrs - allowed", "A|Under treatment or diagnosed within 6 mos - do not submit; otherwise Graded. Basal cell - all ratings; squamous - Std / Sub-Std / Graded", "A|Within 2 yrs - GI", "Current - DECLINE; recurring or within 2 yrs - ROP; within 3 yrs - Graded", "A|Within 2 yrs of last treatment, or any spread / recurrence / multiple sites - Decline. Breast or testicular: 2-4 yrs Select, 4+ Premier. Cervical, prostate, melanoma (surgery only): 2-5 yrs Select, 5+ Premier. Thyroid: 2+ yrs Premier. Bladder, kidney, colorectal: 2-4 yrs Graded, 4-10 Select, 10+ Premier. All other types: 2-4 yrs Graded, 4+ Select", "Current - DECLINE; diagnosed or treated within 3 yrs - Basic", "Current, treated within 2 yrs or recurring - DECLINE; basal / squamous - Preferred; > 2 yrs - Preferred"],
+    ["Cerebral palsy", "Not asked - Allowed", "Not asked - Allowed", "A|Graded", "Not asked - Allowed", "Diagnosed or treated within 3 yrs - Graded", "R|Ever - Decline", "Not asked - Allowed", "DECLINE"],
+    ["Chronic pain (6+ narcotic fills)", "Check med list", "Check med list", "N|Chronic pain syndrome - all ratings; check med list", "N|Not asked; Rx drug counseling within 2 yrs - GI", "Check med list - see Neuropathy", "G|Pain over 6 mos, within 5 yrs - Premier", "Check meds", "Check meds"],
+    ["Cirrhosis", "Guaranteed Issue", "DECLINE", "A|Graded", "A|Liver disorder within 2 yrs - GI", "Treated within 2 yrs - ROP; within 3 yrs - Graded", "A|Graded", "Standard", "Treated within 2 yrs - Modified"],
+    ["Congestive heart failure", "Guaranteed Issue", "DECLINE", "A|Graded", "A|Within 2 yrs - GI", "DECLINE", "A|Select", "DECLINE", "DECLINE"],
+    ["Coronary artery disease", "Within 1 yr - Guaranteed Issue", "Within 1 yr - DECLINE; within 2 yrs - Graded", "A|Graded", "A|Within 2 yrs - GI", "ROP", "G|No heart attack, no surgery, within 5 yrs - Premier", "See Heart Disease", "See Heart Disease"],
+    ["COPD", "Guaranteed Issue", "Graded", "A|Graded", "A|Within 2 yrs - GI", "Treated within 2 yrs - ROP; within 3 yrs - Graded; > 3 yrs - Immediate", "A|Select", "Standard", "Standard"],
+    ["Crohn's disease", "Allowed", "Not asked - Allowed", "A|Diagnosed within 12 mos, 2+ surgeries, steroids, pending tests or hospitalized within 12 mos - Graded; otherwise all ratings", "Not asked - Allowed", "Not asked - Allowed", "G|Premier", "Not asked - Allowed", "Not asked"],
+    ["Cystic fibrosis", "Guaranteed Issue", "Graded", "A|Graded", "A|Respiratory disorder within 2 yrs - GI", "Not asked - Allowed", "R|Ever - Decline", "Not asked", "DECLINE"],
+    ["Depression", "Not asked - Allowed", "Bipolar within 4 yrs - Graded", "A|Diagnosed within 3 mos, hospitalized within 2 yrs, on SSDI or can't do daily activities - Graded; otherwise all ratings", "A|Hospitalized within 2 yrs - GI; otherwise allowed", "Not asked - Allowed", "A|Major depression within 5 yrs - Select; over 5 yrs - Premier; inpatient mental-health treatment within 2 yrs - Graded, 2-5 yrs - Select", "Not asked", "Not asked"],
+    ["Diabetes", "Allowed - see Diabetic Complications", "Diagnosed / treated prior to age 50 - Graded (see complications)", "A|Insulin, diagnosed before 40 or within 6 mos, A1c > 7, sugars > 200, tobacco or kidney disease - Graded; otherwise Std / Sub-Std / Graded", "Not asked - Allowed (see complications)", "Insulin prior to age 50 - ROP; otherwise Immediate (see complications)", "A|Insulin in last 12 mos - Select; diagnosed before 40 - Select; diagnosed after 40, no insulin, no complications or comorbidities - Premier", "Allowed - see Diabetic Complications", "Allowed - see Diabetic Complications"],
+    ["Diabetic complications (insulin shock, coma, retinopathy, nephropathy, neuropathy)", "Within 2 yrs - Guaranteed Issue", "Insulin shock, coma - DECLINE; retinopathy, nephropathy, neuropathy - Graded", "A|Ulcers, amputation, neuropathy, retinopathy - Graded", "A|Amputation, coma or blindness within 2 yrs - GI; neuropathy / retinopathy not asked", "Diagnosed / treated for complications - ROP", "A|Eye, kidney, nerve complications - Select", "Insulin shock, coma or amputation - DECLINE; neuropathy, PVD/PAD, retinopathy - Basic", "Amputation - DECLINE; coma, insulin shock, neuropathy, nephropathy, retinopathy - Modified"],
+    ["Dialysis", "Kidney dialysis - Guaranteed Issue", "DECLINE", "A|Graded", "A|Kidney disorder within 2 yrs - GI", "DECLINE", "A|Within 1 yr - Graded; 1-5 yrs - Select; over 5 yrs - Premier", "Within 1 yr - DECLINE", "Within 1 yr - DECLINE"],
+    ["Down's syndrome", "Not asked - Allowed", "DECLINE", "A|Graded", "Not asked - Allowed", "See Mental Incapacity", "R|Ever - Decline", "Not asked", "See Mental Incapacity"],
+    ["DUI", "Not asked - Allowed", "Not asked - Allowed", "Not asked", "A|Within 5 yrs - GI", "Not asked - Allowed", "A|Within 2 yrs - Graded; over 2 yrs - Premier", "A|Within 2 yrs", "Within 2 yrs - Modified"],
+    ["Emphysema (chronic)", "Guaranteed Issue", "Graded", "A|Graded", "A|Within 2 yrs - GI", "Treated within 2 yrs - ROP; within 3 yrs - Graded", "A|Select", "Standard", "Standard"],
+    ["Epilepsy / seizures", "Not asked - Allowed", "Not asked - Allowed", "A|Brain tumor, surgery within 12 mos or > 1 attack per yr - Graded; otherwise Sub-Std / Graded", "Not asked - Allowed", "Within 3 yrs - Graded", "A|Within 1 yr - Select; over 1 yr - Premier", "Not asked", "Not asked"],
+    ["Felony", "Within 6 mos - Guaranteed Issue", "Convicted within 2 yrs or awaiting trial - Graded", "Not asked", "A|Convicted within 5 yrs - GI", "Not asked - Allowed", "A|Felony charges within 2 yrs or pending - Decline; over 2 yrs - Premier", "Not asked", "Not asked"],
+    ["Heart attack", "Within 1 yr - Guaranteed Issue", "Within 1 yr - DECLINE; within 2 yrs - Graded", "A|Within 6 mos - do not submit; otherwise Graded", "A|Within 2 yrs - GI", "Within 2 yrs - ROP; within 3 yrs - Graded", "A|Single within 1 yr - Select; over 1 yr - Premier; multiple heart attacks - Select", "Within 1 yr - Basic; within 2 yrs - Standard", "Within 1 yr - Modified; 1-2 yrs - Standard; > 2 yrs - Preferred"],
+    ["Heart surgery", "Within 1 yr - Guaranteed Issue", "Within 1 yr - DECLINE; within 2 yrs - Graded", "A|Graded", "A|Within 2 yrs - GI", "Within 2 yrs - ROP; within 3 yrs - Graded", "A|Within 1 yr - Select; over 1 yr - Premier", "Within 1 yr - Basic; within 2 yrs - Standard", "Within 1 yr - Modified; 1-2 yrs - Standard; > 2 yrs - Preferred"],
+    ["Heart valve replacement", "Within 1 yr - Guaranteed Issue", "Within 1 yr - DECLINE; within 2 yrs - Graded", "A|Graded", "A|Within 2 yrs - GI", "Within 2 yrs - ROP; within 3 yrs - Graded", "A|Valve surgery within 1 yr - Select; over 1 yr - Premier", "Within 1 yr - Basic; within 2 yrs - Standard", "Within 1 yr - Modified; 1-2 yrs - Standard; > 2 yrs - Preferred"],
+    ["Hepatitis A", "Allowed", "Not asked - Allowed", "A|Std / Sub-Std / Graded; cirrhosis - Graded", "A|Liver disorder within 2 yrs - GI", "Chronic or treated within 2 yrs - ROP", "N|Not on the decision chart", "Not asked", "Within 2 yrs - Modified"],
+    ["Hepatitis B", "Guaranteed Issue", "Not asked - Allowed", "A|Std / Sub-Std / Graded; cirrhosis - Graded", "A|Liver disorder within 2 yrs - GI", "Chronic or treated within 2 yrs - ROP", "A|Within 2 yrs - Select; over 2 yrs - Premier", "Standard", "Within 2 yrs - Modified"],
+    ["Hepatitis C", "Guaranteed Issue", "Graded", "A|Std / Sub-Std / Graded; cirrhosis - Graded", "A|Liver disorder within 2 yrs - GI", "Chronic or treated within 2 yrs - ROP; within 3 yrs - Graded", "A|Within 2 yrs - Select; over 2 yrs - Premier", "Standard", "Within 2 yrs - Modified"],
+    ["Huntington's disease", "Not asked - Allowed", "DECLINE", "A|Graded", "Not asked - Allowed", "Not asked - Allowed", "R|Ever - Decline", "Not asked", "DECLINE"],
+    ["Illegal drugs", "Within 2 yrs - Guaranteed Issue", "Within 2 yrs - Graded", "A|Drug / chemical dependency - Graded", "A|Within 2 yrs - GI", "Used within 2 yrs - ROP", "A|Within 2 yrs - Decline; 2-5 yrs - Select; over 5 yrs - Premier (marijuana - Premier)", "Within 2 yrs - Basic", "Treatment within past 2 yrs - Modified"],
+    ["Jail / incarcerated", "DECLINE", "DECLINE", "Not asked", "N|Not asked (felony within 5 yrs - GI)", "DECLINE", "R|Currently incarcerated, on probation or parole - Decline", "Not asked", "Not asked"],
+    ["Kidney disease / failure (see Dialysis)", "Chronic - Guaranteed Issue", "DECLINE", "A|Failure, dialysis or transplant - Graded; nephritis with steroids or abnormal renal tests - Std / Sub-Std / Graded", "A|Within 2 yrs - GI", "Dialysis - DECLINE; failure or disease - ROP", "A|Chronic kidney failure within 1 yr - Graded, 1-5 yrs - Select, over 5 yrs - Premier; mild-moderate insufficiency - Premier; polycystic - Select", "Standard (also ask about dialysis)", "Graded (also see dialysis)"],
+    ["Liver disease", "Guaranteed Issue", "Cirrhosis - DECLINE", "A|Cirrhosis / liver failure - Graded", "A|Within 2 yrs - GI", "Liver failure - DECLINE; liver disease within 3 yrs - Graded", "A|Within 2 yrs - Select; over 2 yrs - Premier (excl. fatty liver); liver failure - Graded", "Standard", "Graded"],
+    ["Lupus (systemic)", "Not asked - Allowed", "Within 4 yrs + systemic - Graded", "A|Systemic - Graded; otherwise Std / Sub-Std / Graded", "Not asked - Allowed", "Treated / diagnosed within 2 yrs - ROP", "A|Systemic lupus - Select", "Standard", "Graded"],
+    ["Melanoma", "Malignant - DECLINE", "Within 2 yrs - DECLINE; within 4 yrs - Graded", "A|Graded (see Cancer)", "A|Within 2 yrs - GI", "See Cancer", "A|Within 2 yrs - Decline; 2-5 yrs - Select; over 5 yrs - Premier (surgery-only treatment)", "Basal cell - Preferred; otherwise see Cancer", "Within 3 yrs - Modified (excludes basal / squamous)"],
+    ["Mental incapacity / retardation", "Not asked - Allowed", "Not asked - Allowed", "A|Graded", "A|Cognitive impairment within 2 yrs - GI", "DECLINE", "A|Mild intellectual disability - Select; moderate-severe - Decline; developmental disability employed - Select, unemployed / disabled - Decline", "Not asked", "Graded"],
+    ["Multiple sclerosis", "Not asked - Allowed", "Within 4 yrs - Graded", "A|Graded", "Not asked - Allowed", "Diagnosed / treated within 3 yrs - Graded", "A|Select", "Preferred", "Not asked"],
+    ["Neuropathy", "Due to diabetes / treated within 2 yrs - Guaranteed Issue; not diabetic - see med list", "Due to diabetes prior to age 50 - Graded; not due to diabetes - allowed", "A|Diabetic, on steroids, foot/leg ulcers within 24 mos or limits daily activities - Graded; otherwise Std / Sub-Std / Graded", "Not asked - Allowed", "Due to diabetes prior to age 50 - ROP; not due to diabetes - Immediate", "A|Diabetic nerve complications - Select", "Due to diabetes - Basic; otherwise OK", "Due to diabetes - Modified; otherwise OK"],
+    ["Oxygen use", "Within 6 mos - Guaranteed Issue", "DECLINE", "A|Graded", "A|Currently on oxygen - GI", "DECLINE", "A|Within 1 yr - Graded; over 1 yr - Premier (temporary use up to 3 mos excepted)", "Within 1 yr - DECLINE", "Within 1 yr - DECLINE (CPAP OK)"],
+    ["Pacemaker / defibrillator", "Within 1 yr - Guaranteed Issue", "Not specifically asked; check meds / heart conditions - could be Graded", "A|Graded", "A|Heart disorder within 2 yrs - GI", "Received within 2 yrs - ROP; within 3 yrs - Graded", "A|Defibrillator - Decline; pacemaker within 1 yr - Select, over 1 yr - Premier", "Implanted within 1 yr - Basic; within 2 yrs - Standard; > 2 yrs - Preferred", "Within 1 yr - Modified; 1-2 yrs - Standard; > 2 yrs - Preferred"],
+    ["Pancreatitis", "Not asked - Allowed", "Not asked - Allowed", "A|All ratings; pancreatic insufficiency - Graded", "Not asked - Allowed", "Chronic / treated within 2 yrs - ROP", "A|Chronic - Select", "Not asked", "Not asked"],
+    ["Parkinson's disease", "Allowed", "Within 4 yrs - Graded", "A|Graded", "Not asked - Allowed", "Treated / diagnosed within 3 yrs - Graded", "A|Select", "Standard if able to perform all ADLs; otherwise DECLINE", "Standard"],
+    ["Parole / probation (currently)", "Within 6 mos - Guaranteed Issue", "2 yrs convicted or awaiting trial - Graded", "Not asked", "Not asked", "Not asked", "R|Currently - Decline", "Not asked", "Not asked"],
+    ["PAD / PVD", "Not asked - Allowed", "Graded", "A|Graded", "A|Peripheral vascular disorder within 2 yrs - GI", "Not asked - Allowed", "A|No amputation - Select; with amputation - Decline", "See Diabetic Complications", "Not asked"],
+    ["PTSD", "Allowed", "Not asked - Allowed", "A|Anxiety rules: diagnosed within 3 mos or hospitalized within 24 mos - Graded; otherwise all ratings", "A|Hospitalized for mental disorder within 2 yrs - GI; otherwise allowed", "Not asked - Allowed", "G|Within 2 yrs - Premier", "Not asked", "Not asked"],
+    ["Pulmonary fibrosis", "Ask about oxygen", "Ask about oxygen", "A|Graded", "A|Respiratory disorder within 2 yrs - GI", "Ask about oxygen", "R|Ever - Decline", "Ask about oxygen", "DECLINE"],
+    ["Rheumatoid arthritis", "Not asked - Allowed", "Not asked - Allowed", "A|Std / Sub-Std / Graded; biologics (Humira, Enbrel, Remicade) - Graded", "Not asked - Allowed", "Not asked - Allowed", "G|Premier", "Not asked", "Not asked"],
+    ["Sarcoidosis", "Not asked - Allowed", "Graded", "A|Graded", "A|Respiratory disorder within 2 yrs - GI", "Not asked - Allowed", "G|Premier", "Not asked", "Not asked"],
+    ["Schizophrenia", "Allowed", "Treated / diagnosed within 4 yrs - Graded", "A|Graded", "A|Hospitalized for mental disorder within 2 yrs - GI; otherwise allowed", "Not asked - Allowed", "A|Within 5 yrs - Select; over 5 yrs - Premier", "Preferred", "Preferred"],
+    ["Sickle cell anemia", "Allowed", "DECLINE", "A|Graded", "Not asked - Allowed", "Not asked - Allowed", "R|Ever - Decline", "Not asked", "DECLINE"],
+    ["Sleep apnea", "Not asked - Allowed", "Graded", "A|All ratings; supplemental oxygen with CPAP - Graded", "N|Not asked (ventilator / oxygen - GI)", "See Oxygen", "G|CPAP / concentrator without supplemental oxygen - Premier", "Not asked", "Not asked"],
+    ["Stent", "Within 1 yr - Guaranteed Issue", "Within 1 yr - DECLINE; within 2 yrs - Graded", "A|Graded (coronary artery disease)", "A|Within 2 yrs - GI", "Within 2 yrs - ROP; within 3 yrs - Graded", "A|Within 1 yr - Select; over 1 yr - Premier", "Within 1 yr - Basic; within 2 yrs - Standard", "Not asked - see Heart Surgery"],
+    ["Stroke / TIA", "Stroke within 1 yr - Guaranteed Issue; TIA not asked - allowed", "Within 2 yrs - Graded", "A|Stroke within 6 mos - do not submit; otherwise Graded", "A|Within 2 yrs - GI", "Stroke or TIA within 2 yrs - ROP; stroke within 3 yrs - Graded", "A|Stroke or single TIA within 5 yrs - Select; over 5 yrs - Premier", "Within 1 yr - Basic; within 2 yrs - Standard", "Within 1 yr - Modified; 1-2 yrs - Standard; > 2 yrs - Preferred"],
+    ["Terminal illness", "R|Death within 2 yrs - DECLINE", "R|Death in next 12 mos - DECLINE", "N|Not addressed - contact underwriting", "A|Life expectancy ≤ 24 mos - GI", "R|Death in next 12 mos - DECLINE", "R|Currently - Decline", "DECLINE", "DECLINE"],
+    ["Organ transplant", "Guaranteed Issue", "DECLINE", "A|Graded", "A|Within 2 yrs - GI", "DECLINE", "R|Recipient or recommended - Decline", "DECLINE", "DECLINE"],
+    ["Tuberculosis", "Not asked - Allowed", "Not asked - Allowed", "A|Currently treated or diagnosed within 12 mos - Graded; recovered - all ratings", "A|Respiratory disorder within 2 yrs - GI", "Not asked - Allowed", "A|Within 1 yr - Select; over 1 yr - Premier", "Not asked", "Not asked"],
+    ["Ulcerative colitis", "Not asked - Allowed", "Not asked - Allowed", "A|Surgery within 12 mos, multiple surgeries, steroids ≥ 10 mg or hospitalized within 6 mos - Std / Sub-Std / Graded; otherwise all ratings", "Not asked - Allowed", "Within 3 yrs - Graded", "G|Premier", "Not asked", "Not asked"],
+    ["Walker", "Within 6 mos - Guaranteed Issue", "Not asked", "A|Assistive device - Graded (asked under arthritis, osteoporosis, etc.)", "Not asked", "Not asked", "N|Not on the decision chart (electric scooter / cart within 1 yr - Select)", "Not asked", "Not asked"],
+    ["Wheelchair / scooter / electric cart", "Within 6 mos - Guaranteed Issue", "R|Due to illness or disease - DECLINE", "A|Graded", "Not asked", "R|Due to illness or disease - DECLINE", "A|Wheelchair confinement within 1 yr - Graded; electric scooter or cart within 1 yr - Select (temporary use up to 3 mos excepted)", "R|Confined or due to diabetes - DECLINE", "R|Uses wheelchair or scooter - DECLINE"]
+  ]
+},
+term: {
+  orders: {
+    lb:  {label:"With living benefits", ids:["nlg","ta","foresters","ibt","americo","mooau","moo","amam"]},
+    nolb:{label:"No living benefits",   ids:["ibpt","ta","foresters"]}
+  },
+  carriers: [
+    {id:"americo", name:"Americo", prod:"Instant Decision Term Series", src:"grid cells from the 2020 HMS sheet"},
+    {id:"moo", name:"Mutual of Omaha", prod:"Term Life Express", tag:"Simplified issue"},
+    {id:"amam", name:"American Amicable", prod:"Easy Term / Home Protector"},
+    {id:"foresters", name:"Foresters", prod:"Strong Foundation"},
+    {id:"ibt", name:"InstaBrain", prod:"Fidelity Life — Term", tag:"Instant decision"},
+    {id:"ibpt", name:"InstaBrain", prod:"Fidelity Life — Pure Term", tag:"Instant decision"},
+    {id:"mooau", name:"Mutual of Omaha", prod:"Term Life Answers", tag:"Fully underwritten"},
+    {id:"nlg", name:"National Life Group", prod:"Term LSW / NL", tag:"Fully underwritten"},
+    {id:"ta", name:"Transamerica", prod:"Trendsetter Super / LB", tag:"Fully underwritten"}
+  ],
+  products: [
+    {name:"Americo — Instant Decision Term Series (replaces HMS)", pts:["Sept 2025 guide: CBO 100 / CBO 50 (UL with 100% or 50% cash back, ages 20-55/60), Term 125 / Term 100 (ages 20-75 by term), Continuation 10 / 25 (decreasing WL), Payment Protector and PP Continuation 10 (monthly-income death benefit), ADB ($1,000 base + $100K-$250K accidental)", "All non-med $25K-$450K, no saliva; Standard non-nicotine (24 mos nicotine-free) or nicotine only; 100% instant-decision eApp with MIB + Rx; $90 policy fee", "Living benefits (critical, chronic, terminal) included on CBO, Term 125/100 and Continuation; partial accelerations on Term only", "Every app health question is a knockout and the guide does not publish the list — grid cells below are still the 2020 HMS language; treat as directional", "15 / 20 / 25 / 30-yr level term; simplified issue $25K-$400K (saliva $250,001+)", "Plus CBO: ages 20-60, 100% cash back of base premiums at end of term, +50% accidental death", "Plus 125 & 100: ages 20-75; 125 adds 25% accidental death", "Plus Continuation: ages 20-65, benefit drops to 10% after level period", "Payment Protector: decreasing term, ages 20-75, no living benefits, no saliva", "Living benefit riders (critical, chronic, terminal) on CBO / 125 / 100 / Continuation"]},
+    {name:"Mutual of Omaha — Term Life Express (simplified issue)", pts:["Ages 18-75; simplified issue $25K-$550K (18-50), $450K (51-60), $350K (61-75) — combined limit across all Express products", "TLE: 10 / 15 / 20 / 30-yr level; ROP option on 30-yr (critical illness rider drops off ROP)", "IUL Express: indexed UL, flexible premium, guaranteed to age 80-120", "Knockouts: no nicotine 12 mos (no cigar exception), no alcohol/drug use or treatment 10 yrs, no DUI/reckless 5 yrs, no felony 10 yrs, no aviation or hazardous sports; multiple impairments over Table 4 - decline; MVR mandatory ages 18-35", "Living benefits + accidental death, waiver of premium, DI, children's riders; Rx exclusion list applies (updated April 2026)"]},
+    {name:"American Amicable — Easy Term / Home Protector", pts:["Easy Term: 10 / 20 / 30-yr level, $25K-$300K, ROP option", "Home Protector: 15 / 20 / 25 / 30-yr, must have a mortgage, $25K-$300K, ROP option", "Living benefit riders (critical, chronic, terminal); accidental death, waiver, DI, children's riders"]},
+    {name:"Foresters — Strong Foundation", pts:["Ages 18-80; 10 / 15 / 20 / 25 / 30-yr level", "Simplified issue $20K-$400K", "Chronic, critical and terminal illness riders"]},
+    {name:"InstaBrain (Fidelity Life) — Term with living benefits", pts:["Ages 18-60; $50K-$1M (56-60 grades down to $500K at 60); 10 / 15 / 20-yr; 30-yr to age 50 NT / 45 T", "Classes: Preferred Plus, Preferred, Standard, Standard Extra (tobacco: Preferred, Standard Extra) — no table ratings", "Chronic illness: up to 50% over 36 mos, no waiting period; terminal: up to 90% lump sum (max $250K); premiums waived on acceleration", "No conversion; $95 commissionable policy fee; approvals in as little as 10 minutes; US citizen / green card + SSN + driver's license required"]},
+    {name:"InstaBrain (Fidelity Life) — Pure Term (no living benefits)", pts:["Same ages, faces and terms as InstaBrain Term; $1M combined limit across both", "Adds Rated Table C and Table D classes — the reason Type II diabetes, depression, RA, DVT, grand mal seizures and frequent marijuana can be placed here when InstaBrain Term says no", "Terminal illness accelerated benefit only (50%, max $100K); optional child and accidental death riders", "Converts to Fidelity Conversion Whole Life through yr 5 (10-yr) or yr 10 (15-yr+); $95 non-commissionable fee"]}
+,
+    {name:"Mutual of Omaha — Term Life Answers (fully underwritten)", pts:["Cell text shows AU eligibility first, then the full-underwriting probable action (Sept 2025 guide) — AU-declined clients are not carrier-declined, they get a paramed", "Ages 18-60; $100K-$2M; 10 / 15 / 20 / 30-yr Term Life Answers; drop ticket + ExamOne phone interview, no paramed", "AU reviews app, MVR, MIB and Rx history; approved cases issue with nothing else, declined-for-AU cases roll into full traditional underwriting (they are not a carrier decline)", "Must be owner and US citizen / permanent resident; age 50+ needs evidence of regular medical care; any prior United of Omaha policy must have been Standard or better", "Knockouts: build chart, no DUI/reckless within 5 yrs, no felony within 10 yrs, never rated or declined, no private pilot / crew, no hazardous activities within 2 yrs, no more than one parent heart death before 60", "ExamOne: 1-844-486-8452"]}
+,
+    {name:"Transamerica — Trendsetter Super / Trendsetter LB", pts:["Super (no living benefits): $25K+, bands to $10M+; 10-yr issue 18-80; 15-yr to 75/78; 20-yr to 65/70; 25-yr to 60/65; 30-yr to 50/58 (under vs over $100K); Preferred Plus / Preferred / Standard Plus need $100K+; tables to H (Standard classes only)", "LB (chronic, critical, terminal benefits built in): $25K-$2M; Band 1 ($25K-$99K) Standard NS/S only, ages 23-60; Bands 2-4 open Preferred classes; tables A-D only — anyone rated higher goes to Super; living benefits excluded for Parkinson's, MS, ratable cancer history, chemo/radiation cancers", "Nonmed point-of-sale decision via iGO: Super to $99K (ages 18-60), LB to $249K (18-60), Standard classes only; paramed above that", "Cells show the Field Guide impairment table (probable fully-underwritten offer); guide dated Dec 2025"]}
+,
+    {name:"National Life Group — Term LSW / Term NL", pts:["ART, 10/15/20/30-yr; EZ Underwriting (no fluids) up to $2M ages 18-50, $1M 51-60, $250K 61-65; ages 60+ need a physical within 24 mos or NLG declines", "Term classes: Elite and Preferred need 60 mos nicotine-free, Select 36 mos; Express Standard NT 1 (to Table 4) and NT 2 (Tables 5-8) up to $2M total face; Preferred/Standard Tobacco", "Cells show the Sept 2025 probable-action table and uninsurable list; use XRAE for a tentative quote before submitting anything borderline"]},
+    {name:"National Life Group — RapidProtect IUL (see IUL tab)", pts:["Simplified-issue IUL with instant decision; ages 0-60, $50K-$500K; Standard NT / Standard Tobacco plus substandard Express NT 1 and Express Tobacco; no table ratings or flat extras; no ABRs on Express classes", "Hard knockouts beyond the medical list: any felony, pending charges, violent crime, license suspended, single DUI within 1 yr, multiple DUIs within 5 yrs, SSDI/DI, hospital admission in past 12 mos, diagnostic testing in past 3 mos", "XRAE quick-quote tool cannot be used for RapidProtect; cells show the guide's qualifying / non-qualifying lists (Sept 2025)"]}
+  ],
+  rows: [
+    ["AIDS / HIV / ARC", "Diagnosed within 10 yrs - DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "R|AU: not eligible · Full UW: AIDS - Decline; HIV positive - individual consideration", "A|AIDS - Decline; HIV - moderate rating to Decline (2025 guide)", "R|Decline"],
+    ["Alcohol / drug abuse or treatment", "Within 10 yrs - DECLINE (check med list if treated with medication)", "Treatment within last 10 yrs - DECLINE", "Within 4 yrs - DECLINE", "Within 5 yrs - DECLINE", "Within 10 yrs - DECLINE", "Within 10 yrs - DECLINE", "A|AU: not eligible · Full UW: current excessive use - Decline; treatment with no current use, postponed 2 yrs - Standard to Table 8", "A|Alcohol treatment within 2 yrs - Decline; total abstinence over 2 yrs - moderate rating to Standard; excludes Preferred for 10 yrs", "A|Alcohol abuse - T2 to decline; alcoholism under 3 yrs sober - decline; 3-5 yrs - T2-T6; over 5 yrs - Standard to T4"],
+    ["ALS (Lou Gehrig's)", "DECLINE", "DECLINE", "DECLINE", "Not asked", "DECLINE", "DECLINE", "N|Not on AU list; not in full UW table - expect decline, call underwriting", "R|Decline", "R|Decline"],
+    ["Alzheimer's / dementia", "Ever had - DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE (incl. cognitive impairment)", "DECLINE (incl. cognitive impairment)", "R|Full UW: Decline", "R|Decline", "R|Decline"],
+    ["Amputation", "Ever had - DECLINE", "See Diabetic Complications", "Caused by injury - OK; caused by disease - DECLINE", "Caused by injury - OK; caused by disease - DECLINE", "N|Not asked (diabetic complications / paraplegia - DECLINE)", "N|Not asked (diabetic complications / paraplegia - DECLINE)", "N|Not listed - full UW rates for cause", "A|Not due to peripheral vascular disease - rate for cause", "A|Limited traumatic injury - Standard; otherwise rated for the cause"],
+    ["Aneurysm", "Ever had - DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE (aortic or brain)", "DECLINE (aortic or brain)", "A|AU: not eligible · Full UW: aortic aneurysm unoperated - Table 6 to Decline; surgery stable 6 mos - Table 2-6; cerebral AV malformation unoperated - Decline", "A|Abdominal aortic present or corrected within 6 mos - Decline; abdominal - Table 4 to Decline; cerebral, stable after recovery - no rating to moderate rating", "A|Abdominal: under 60 or unoperated over 5 cm - decline; under 5 cm stable with surveillance - Standard to T5; surgery over 6 mos - T2-T4. Cerebral: single small, stable over 5 yrs - Standard; surgery over 6 mos - T2-T6"],
+    ["Angina (chest pain)", "DECLINE", "Not asked - see meds", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "A|AU: not eligible · Full UW: stable angina over 40 - Table 4-8 (cath dependent); unstable under 40 - Decline", "A|Current or stable - Table 6 to Decline; cardiac event within 6 mos - Decline", "A|CAD rules: under 40 - decline; 40-45 - T6 to decline; 46-59 - T4 to decline; 60+ - T2 to decline"],
+    ["Angioplasty / bypass", "Ever had - DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE (bypass or stent)", "DECLINE (bypass or stent)", "A|AU: not eligible · Full UW: coronary disease - Table 4 to Decline; postponed 6 mos", "A|Within 6 mos, or with diabetes, stroke or continued tobacco - Decline; otherwise no rating to Decline by age/severity", "A|Under 3 mos post bypass or 6 mos post angioplasty - decline; then CAD rules by age (under 40 - decline; 60+ - T2 to decline)"],
+    ["Anxiety", "Mild or situational diagnosed within 6 mos or hospitalized - DECLINE", "Not asked", "1 medication and situational - OK; major depression - DECLINE", "Mild, onset after 25, diagnosed > 1 yr ago, no hospitalization - OK", "G|Stable on treatment, not new, mild, no suicide attempts, no marijuana - all classes", "G|Stable on treatment, not new, mild, no suicide attempts, no marijuana - all classes", "G|AU: OK · Full UW: mild or well-controlled - Standard; others Standard to Table 4", "G|Mild - no rating", "A|Mild, single low-dose med, no time off work - Standard (Preferred possible); moderate - T2-T4; severe or hospitalized - decline"],
+    ["Arthritis", "Rheumatoid, debilitating or disabling - DECLINE; psoriatic / inflammatory within 6 mos - DECLINE; infusion therapy or daily oral steroids - DECLINE; hospitalized / ER within 12 mos - DECLINE", "Moderate / severe rheumatoid on medication - DECLINE", "Rheumatoid minimal impairment - OK; all other rheumatoid - DECLINE", "Osteoarthritis, mild rheumatoid with no limitations - OK; moderate-severe rheumatoid - DECLINE (Humira, Enbrel, prednisone)", "Osteoarthritis - all classes; psoriatic arthritis - DECLINE; rheumatoid - see RA", "Osteoarthritis - all classes; psoriatic arthritis - DECLINE; rheumatoid - see RA", "A|AU: RA not eligible · Full UW: osteoarthritis - Standard; RA not disabled, over 18 - Standard to Table 6; juvenile RA - Decline", "A|Osteoarthritis - no rating; rheumatoid - no rating to Decline by severity", "A|Osteo mild - Standard; moderate - T2; severe - T3-T4. Rheumatoid mild - Standard to T2; moderate - T3-T4; severe - T6-T8"],
+    ["Arrhythmia / AFib", "Ever had - DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "A|AU: not eligible · Full UW: AFib / flutter - Standard to Decline; infrequent PVCs - Standard; multiple PVCs - Standard to Table 8", "A|AFib - no rating to moderate rating depending on frequency and cause", "A|Non-chronic, no heart disease, under 4 episodes/yr - Standard to T2; chronic without heart disease - T2-T4"],
+    ["Assisted living / LTC facility", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "N|Not asked (current disability - DECLINE)", "N|Not asked (current disability - DECLINE)", "N|Not listed - call underwriting", "N|Not listed - contact underwriting", "N|Not listed - call home office (ADL dependence excludes living benefits)"],
+    ["Asthma (chronic)", "Chronic or daily oral meds - DECLINE", "Severe or chronic - DECLINE; any asthma + tobacco - DECLINE", "OK - check meds", "Mild or moderate - OK; severe or hospitalization - DECLINE", "G|Mild, ≤ 3 episodes past yr, no tobacco, occasional treatment - all classes", "G|Mild, ≤ 3 episodes past yr, no tobacco, occasional treatment - all classes", "A|AU: OK · Full UW: mild intermittent - Standard (mild may be Preferred); persistent - Table 2 to Decline", "A|No rating to Decline depending on age, attacks and medications", "A|Non-smoker: mild - Standard to T2; moderate - T3-T8; severe - decline. Smoker: mild - T2-T4; moderate - T8; severe - decline"],
+    ["Autoimmune disorder", "DECLINE", "Not asked", "Not asked", "Not asked", "DECLINE (Sjogren's, Raynaud's, Guillain-Barre, myasthenia gravis, lupus)", "DECLINE (Sjogren's, Raynaud's, Guillain-Barre, myasthenia gravis, lupus)", "A|AU: lupus, RA, MS not eligible · Full UW: Sjogren's - Standard; Guillain-Barre - Standard to Table 3; myasthenia gravis mild - Standard to Table 5, others Decline", "A|Systemic lupus - Table 4 to Decline; myasthenia gravis - call for quote; autoimmune meds exclude Preferred", "A|Systemic lupus under 1 yr - decline, then T2 to decline; myasthenia gravis under 3 yrs - decline, then Standard to T4; Raynaud's - Standard to T4"],
+    ["Autism", "DECLINE", "DECLINE", "See Mental Incapacity", "See Mental Incapacity", "DECLINE", "DECLINE", "N|Not listed - call underwriting", "R|Decline (uninsurable list, 2025 guide)", "N|Not listed - call home office"],
+    ["Bipolar", "Ever had or treated - DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "A|AU: not eligible · Full UW: stable - Table 2-8 (APS required)", "A|Hospitalization or disability in last yr - Decline; otherwise no rating to Decline; mood-disorder meds exclude Preferred", "A|Mild - T2-T4; moderate - T4-T6; severe (inpatient, disabled) - T8 to decline"],
+    ["Black lung", "Ever had - DECLINE", "Not asked - see treatment", "Not asked - see treatment", "Not asked - see treatment", "N|Not listed - COPD is DECLINE; call underwriting", "N|Not listed - COPD is DECLINE; call underwriting", "A|AU: COPD not eligible · Full UW: asbestosis mild impairment - Standard to Table 4; severe - Decline", "A|Not listed - COPD rules apply: Table 2 to Decline", "A|Pneumoconiosis - T2 to decline"],
+    ["Blood clots / DVT", "DECLINE", "See meds / Stent", "See meds / Stent", "Check meds / Stent", "A|DVT > 5 yrs since symptoms - Standard or Standard Extra; otherwise DECLINE", "A|DVT > 5 yrs since symptoms, no treatment - Standard Extra / Table C / Table D; otherwise DECLINE", "A|AU: PVD not eligible · Full UW: phlebitis single episode recovered - Standard; pulmonary embolism over 6 mos - Standard to Table 4", "A|Phlebitis, full recovery - no rating; multiple episodes - Table 2 to Decline", "A|Single episode, fully recovered - Standard; multiple - Standard to T4"],
+    ["Blood / clotting disorder", "DECLINE", "Not asked - check for stents and other treatment", "Not asked - check for stents and other treatment", "Not asked - check for stents and other treatment", "Anemia other than iron deficiency - DECLINE", "Anemia other than iron deficiency - DECLINE", "A|Full UW: hemophilia - Table 2 to Decline; polycythemia controlled 1 yr - Table 2-4; sickle cell trait - Standard; sickle cell anemia - Decline", "A|Anemia - rate for cause", "A|Iron-deficiency anemia mild - Standard; moderate - T2-T5; severe - decline"],
+    ["Bone disease or disorder", "Surgery within 12 mos + no release from doctor - DECLINE", "Not asked - check meds", "Not asked - check meds", "Not asked - check meds", "N|Not asked (pending surgery - DECLINE)", "N|Not asked (pending surgery - DECLINE)", "G|AU: OK · Full UW: osteoporosis - Standard; chronic osteomyelitis - Standard to Table 4", "A|Bone or joint disorder - rate for cause (usually no rating)", "G|Broken bone, bursitis, carpal tunnel - Standard"],
+    ["Bone marrow transplant", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "N|Not listed - organ transplant requires APS; individual consideration", "R|Organ transplant recipient - Decline", "N|Not listed - call home office"],
+    ["Bronchitis", "Ever had - DECLINE", "Severe or chronic - DECLINE", "Acute and recovered - OK; chronic - DECLINE", "Acute - OK; chronic - DECLINE", "Chronic (COPD) - DECLINE; acute not asked", "Chronic (COPD) - DECLINE; acute not asked", "A|AU: chronic not eligible · Full UW: chronic mild-moderate - Standard to Table 3; severe - Table 4 to Decline", "A|Acute - no rating; chronic - no rating to Decline", "A|Acute - Standard; chronic (COPD) mild - T2-T4; moderate - T5-T8; severe, current tobacco or oxygen - decline"],
+    ["Cancer", "Ever had - DECLINE", "Basal / squamous skin - OK; otherwise DECLINE", "Basal / squamous skin - OK; 8 yrs since diagnosis or treatment with no recurrence - OK; all others - DECLINE", "Basal cell - OK; no treatment or recurrence within 10 yrs - OK; all others - DECLINE", "Basal / squamous skin only (not under treatment) - all classes; any other cancer within 10 yrs - DECLINE", "Basal / squamous skin only (not under treatment) - all classes; any other cancer within 10 yrs - DECLINE", "A|AU: basal/squamous OK, all others not eligible · Full UW: most malignancies postponed 2-5 yrs then individual consideration; basal cell (≤4 excisions) - Standard", "A|Current treatment - Decline; internal cancer within 3-5 yrs - contact underwriting, otherwise no rating to Decline; basal cell - Standard; excludes Preferred (except skin cancer in situ)", "A|Non-melanoma skin - Standard; internal organ cancer - call home office; melanoma - Standard to decline"],
+    ["Cardiomyopathy", "Ever had - DECLINE", "Ever had - DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "A|AU: not eligible · Full UW: Table 4 to Decline", "A|Present or chronic - Decline; resolved over 3 yrs - Table 4 to Decline", "A|Dilated or restrictive - decline; hypertrophic under 35 - decline, 35+ - T6 to decline; peripartum over 12 mos - T4 to decline"],
+    ["Cellulitis", "DECLINE", "Not asked", "Not asked", "Not asked", "Not asked", "Not asked", "G|Not listed - generally Standard", "G|Not listed - no rating", "G|Not listed - Standard"],
+    ["Cerebral palsy", "DECLINE", "Not asked", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "A|Full UW: mild-moderate - Standard to Table 3; severe - Decline", "A|Table 4 to Decline", "A|Age 8+, IQ over 50, mild physical impairment - Standard to T4; with epilepsy - T4 to decline; others usually decline"],
+    ["Chronic pain (narcotic prescriptions)", "Prescribed narcotics for chronic condition > 6 mos - DECLINE", "Not asked - see diagnosis, check meds", "Not asked - see treatment", "Not asked - see diagnosis, check meds", "A|No disability, mild medication use - Standard or Standard Extra only", "A|No disability, mild medication use - Standard through Table D", "N|AU: OK · Full UW: rated for cause; CBD allowed if no chronic-pain debits", "R|Chronic opioid / narcotic use - Decline (APS required)", "A|Mild - Standard to T3; moderate - T4-T8; severe - decline"],
+    ["Cirrhosis", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "R|Full UW: confirmed cirrhosis - Decline", "R|Decline", "R|Decline"],
+    ["Congestive heart failure", "Ever had - DECLINE", "Ever had - DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "R|AU: not eligible · Full UW: chronic heart failure - Decline", "A|Table 6 to Decline", "R|Under 2 yrs - decline; over 2 yrs - usually decline"],
+    ["Coronary artery disease", "Ever had - DECLINE", "Ever had - DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "A|AU: not eligible · Full UW: Table 4 to Decline; postponed 6 mos; Fit credits not available if CAD before 50", "A|No rating to Decline; MI, bypass or angioplasty within 6 mos, or with diabetes, stroke or tobacco - Decline; excludes Preferred", "A|Under 40 - decline; 40-45 - T6 to decline; 46-59 - T4 to decline; 60+ - T2 to decline; under 3 mos post bypass / 6 mos post angioplasty - decline"],
+    ["COPD", "Ever had - DECLINE", "Ever had - DECLINE", "DECLINE", "Smoker - DECLINE; non-smoker with mild COPD, no oxygen, no steroids or serious meds - ACCEPTED", "DECLINE", "DECLINE", "A|AU: not eligible · Full UW: Standard to Table 8; chronic cor pulmonale - Decline", "A|Table 2 to Decline; severe (on oxygen or disabling) or with current tobacco - Decline", "A|Mild - T2-T4; moderate - T4-T6; severe - T6 to decline; current tobacco or oxygen use - decline"],
+    ["Crohn's disease", "DECLINE", "Not asked", "Diagnosed within 12 mos or prior to age 10 - DECLINE", "More than 5 yrs in remission - OK", "DECLINE", "DECLINE", "A|AU: not eligible · Full UW: Standard to Table 8", "A|Table 2 to Decline (APS required)", "A|Onset before 25 - decline; very mild over 6 mos - Standard to T4; moderate over 2 yrs - T2 to decline; severe over 4 yrs - T6 to decline"],
+    ["Cystic fibrosis", "Ever had - DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "R|Full UW: Decline", "R|Decline", "R|Decline"],
+    ["Defibrillator / pacemaker", "Ever had - DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "A|AU: not eligible · Full UW: pacemaker, no other heart disease after 3 mos over 40 - Table 2-4; otherwise Standard to Decline", "A|Defibrillator / ventricular tachycardia - Decline; pacemaker - Table 3 to Decline", "A|Pacemaker - T2 to decline (age, years since implant, reason); defibrillator - call home office"],
+    ["Depression", "Major, chronic or bipolar - DECLINE; mild or situational diagnosed within 6 mos or hospitalized - DECLINE", "Bipolar - DECLINE; otherwise not asked", "Bipolar - DECLINE; otherwise not asked", "Mild, onset after 25, diagnosed > 1 yr ago, no hospitalization - OK; severe, major, bipolar or schizophrenic - DECLINE", "A|Mild, stable on treatment, not new, no suicide attempts, no marijuana - Standard Extra only; major depression - DECLINE", "A|Mild, stable on treatment, not new, no suicide attempts, no marijuana - Standard Extra / Table C / Table D; major depression - DECLINE", "A|AU: OK · Full UW: controlled with medication - Standard to Table 3; major depression requires APS", "A|Hospitalization or disability in last yr - Decline; otherwise no rating to Decline; depression meds exclude Preferred", "A|Mild, minimal meds, no time off work - Standard (Preferred possible); moderate - Standard to T4; severe (inpatient) - T6 to decline"],
+    ["Disabled / on disability", "Received disability in last 12 mos - case by case", "Received disability in last 12 mos for back, neck, hips - ACCEPTED; any other reason - case by case", "Receiving SSDI and/or unemployed for medical reasons - DECLINE", "Permanently disabled (receiving benefits) - DECLINE; otherwise individual case", "Current disability - DECLINE", "Current disability - DECLINE", "A|AU: not eligible if ever rated or declined · Full UW: individual consideration", "R|Disabled for non-musculoskeletal impairments (SSDI/DI for depression, PTSD, etc.) - Decline; SSI/SSDI as only income - no coverage", "N|Not listed - call home office; disability riders not available"],
+    ["Dialysis", "Ever had - DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "R|Full UW: renal failure / dialysis - Decline", "R|Decline", "R|Kidney failure / dialysis - decline"],
+    ["Disc disease", "Chronic joint or disc disease - DECLINE", "Not asked", "Not asked", "Not asked", "N|Not asked (pending surgery - DECLINE)", "N|Not asked (pending surgery - DECLINE)", "G|AU: OK · Full UW: generally Standard", "G|Herniated disc / back disorder - no rating", "A|Herniated disc - Standard to T2; back pain mild-moderate - Standard; severe - T2-T4"],
+    ["Diabetes", "Diagnosed within 6 mos - DECLINE; diagnosed before 35 - DECLINE; insulin - DECLINE; more than 2 oral meds - DECLINE", "Diagnosed before age 50 - DECLINE; any complications - DECLINE", "Oral meds, controlled - OK; diagnosed before 35 - DECLINE; diabetic + tobacco - DECLINE; insulin - DECLINE; with overweight, gout, retinopathy or protein in urine - DECLINE", "Type 2 oral meds, controlled, non-smoker - ACCEPTED (age 20-29: < 5 yrs since diagnosis); Type 1 insulin, controlled, non-smoker - ACCEPTED (40-59: < 5 yrs since dx; 60+: < 25 yrs)", "R|Type I - DECLINE; Type II - DECLINE. Pre-diabetes diagnosed after 40 - Standard Extra; gestational (12 mos post-delivery, normal glucose) - Standard Extra", "A|Type I - DECLINE; Type II diagnosed after 35, A1c ≤ 7.0, no tobacco, no complications - Standard Extra / Table C / Table D; pre-diabetes after 40 - Standard Extra+; gestational (12 mos post) - Standard Extra+", "A|AU: not eligible · Full UW: Type II over 20 - Standard to Table 8; Type I over 20 - Table 2-8; gestational history - Standard to Table 2 (no Preferred classes with diabetes)", "A|No rating to Decline by onset and control; A1c 10.0+ or juvenile onset (before 20) - Decline; excludes Preferred / Elite", "A|Under 20 - decline. Type 1 controlled, no complications, no tobacco: 20-29 - T8 to decline; 30+ - T6-T8. Type 2: 20-29 - T6 to decline; 30-49 - T3-T6; 50+ - Standard to T4"],
+    ["Diabetic complications", "Cellulitis, neuropathy or amputation - DECLINE", "Any complications - DECLINE", "With overweight, gout, retinopathy or protein in urine - DECLINE", "Any complications - DECLINE", "Any complications - DECLINE", "Any complications (retinopathy, nephropathy, neuropathy, vascular) - DECLINE", "A|AU: not eligible · Full UW: rated for cause; with CAD, stroke or morbid obesity - Decline", "R|Amputation, retinopathy, kidney or vascular disease, or diabetes combined with cardiac, stroke or morbid obesity - Decline", "N|Rated for cause; insulin use excludes living benefit riders"],
+    ["Down's syndrome", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "R|Full UW: Decline", "R|Decline (uninsurable list, 2025 guide)", "R|Decline"],
+    ["DUI", "Within 2 yrs - DECLINE; 3+ moving violations within 2 yrs - DECLINE", "Within 5 yrs - DECLINE; 4+ moving violations within 5 yrs - DECLINE", "Within 3 yrs - DECLINE; 2+ moving violations - DECLINE; license revoked - DECLINE", "Single DUI within 12 mos or 2 within 5 yrs - DECLINE; more than 2 - call risk assessment", "A|Within 5 yrs - DECLINE; 5-10 yrs - Standard Extra; multiple DUIs or suspensions within 10 yrs - DECLINE", "A|Within 2 yrs - DECLINE; 2-5 yrs - Table D; 5-10 yrs - Standard Extra; multiple within 10 yrs - DECLINE", "A|AU: DUI/reckless within 5 yrs not eligible · Full UW: no Preferred classes with DUI within 5 yrs; individual consideration", "A|Single DUI within 1 yr, or multiple with any within 5 yrs - Decline; alcohol-related violation within 5 yrs excludes Preferred; license currently suspended - Decline", "A|Under 1 yr - decline; 1-2 yrs - $2.50-$3.50/M flat extra; 2-4 yrs - Standard to $2.50/M; over 4 yrs - Standard; multiple within 4 yrs - decline; under 21 at violation - decline for 4 yrs"],
+    ["Drug use or treatment", "Within 10 yrs - DECLINE", "Within 10 yrs - DECLINE", "Within 4 yrs - DECLINE; treatment > 4 yrs ago with no use since - OK", "Other than marijuana - DECLINE; recreational marijuana up to 6 days/wk - ACCEPTED; medical marijuana - case by case", "Illegal drug use within 10 yrs - DECLINE (marijuana - see Marijuana)", "Illegal drug use within 10 yrs - DECLINE (marijuana - see Marijuana)", "A|AU: not eligible · Full UW: drug addiction or cocaine - postponed 3 yrs, then Standard to Table 8", "A|Use within 3 yrs or daily marijuana - Decline; total abstinence 5 yrs - no rating to Decline", "A|Marijuana - Standard to decline by frequency and method; other drugs: any use in 3 yrs - decline; 3-7 yrs - T2-T8; over 7 yrs - Standard; relapses - usually decline"],
+    ["Emphysema", "Ever had - DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "A|AU: not eligible · Full UW: Standard to Table 8", "A|Table 4 to Decline", "A|Mild - T2-T4; moderate - T4-T6; severe - T6 to decline; current tobacco or oxygen use - decline"],
+    ["Epilepsy / seizures", "Diagnosed within 6 mos, hospitalized within 12 mos or driving restrictions - DECLINE", "Not asked", "Petit mal - OK; all others - DECLINE", "Controlled with meds, no seizures for 2 yrs, no complications - OK", "A|Petit mal / absence, none in 6 mos, no hospitalization - Standard or Standard Extra; grand mal / epilepsy - DECLINE", "A|Petit mal / absence, none in 6 mos - Standard+; grand mal / epilepsy, none in 2 yrs, ongoing treatment - Table C / Table D", "A|AU: not eligible · Full UW: epilepsy / convulsions - Table 2-8", "A|Diagnosed within 1 yr - Decline; petit mal, no attack in 1 yr - no rating; grand mal, no attack in 1 yr - no rating to moderate rating", "A|Under 6 mos since diagnosis - decline; controlled, no seizures 2 yrs - Standard to T2; under 7/yr - petit mal T2-T4, grand mal T3-T5; poor control - T4/T6 to decline"],
+    ["Felony", "Within 10 yrs - DECLINE", "Within 10 yrs - DECLINE", "Misdemeanor or felony within 5 yrs - DECLINE", "Currently on parole or probation - DECLINE; after 5 yrs from jail time - OK", "Felony, pending charges or probation - DECLINE", "Felony, pending charges or probation - DECLINE; misdemeanor > 5 yrs - Standard Extra+ (flat extra possible)", "A|AU: felony within 10 yrs not eligible · Full UW: no Preferred classes with felony within 10 yrs; individual consideration", "R|Any history of felony charges - Decline; misdemeanor - Decline until 1 yr off probation/parole", "A|Charges pending or on probation/parole - decline (reconsider 1 yr after); otherwise call home office"],
+    ["Fibromyalgia", "Not asked", "Not asked", "Not asked", "ACCEPTED", "G|No disability, mild medication - all classes", "G|No disability, mild medication - all classes", "G|AU: OK · Full UW: generally Standard", "A|No rating to moderate rating", "A|Standard to decline"],
+    ["Gout", "Not asked", "Not asked", "With diabetes, kidney stones or protein in urine - DECLINE", "ACCEPTED", "G|No alcohol / liver problem, well controlled - all classes", "G|No alcohol / liver problem, well controlled - all classes", "G|AU: OK · Full UW: Standard", "G|No rating", "G|Standard (chronic severe cases may be rated)"],
+    ["Heart attack", "Ever had - DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "A|AU: not eligible · Full UW: MI over 40 - Table 4 to Decline; postponed 6 mos", "A|Within 6 mos, or with diabetes, stroke or continued tobacco - Decline; otherwise no rating to Decline by age/severity", "A|CAD rules: under 40 - decline; 40-45 - T6 to decline; 46-59 - T4 to decline; 60+ - T2 to decline; credits possible for good cholesterol and recent negative cardiac testing"],
+    ["Irregular heartbeat / murmur", "Ever had - DECLINE", "DECLINE", "DECLINE", "Arrhythmia - DECLINE; heart murmur with no symptoms or treatment - OK", "A|Arrhythmia - DECLINE; innocent murmur grade I-II - Preferred and below", "A|Arrhythmia - DECLINE; innocent murmur grade I-II - Preferred and below", "A|AU: AFib not eligible · Full UW: AFib - Standard to Decline; functional murmur - Standard; other mitral murmurs - Standard to Table 8; tachycardia with no heart disease - Standard to Table 2", "A|AFib - no rating to moderate; mitral murmur - moderate rating to Decline; MVP - no rating to Decline; bundle branch block - no rating to Table 4", "A|AFib non-chronic - Standard to T2; chronic - T2-T4; MVP mild - Standard to T2, moderate - T4-T6, severe - decline; right bundle branch block - Standard; left - T3 to decline"],
+    ["Heart disease / disorder", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "A|AU: not eligible · Full UW: Standard to Decline depending on condition", "A|Rate for cause - no rating to Decline; heart surgery within 6 mos - Decline", "A|Rated for cause - Standard to decline"],
+    ["Heart surgery", "Ever had - DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "A|AU: not eligible · Full UW: Table 4 to Decline; postponed 6 mos", "A|Within 6 mos or with diabetes / stroke history - Decline; otherwise no rating to Decline", "A|Bypass under 3 mos - postpone, then CAD rules by age; valve surgery under 1 yr - decline, then T2 to decline"],
+    ["Heart valve replacement / MVP", "Ever had - DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE (mitral valve prolapse included)", "DECLINE (mitral valve prolapse included)", "A|AU: not eligible · Full UW: aortic murmur / insufficiency - Standard to Table 8; bicuspid aortic valve - Standard to Table 8; MVP (Barlow's) - Standard to Table 3", "A|Valve surgery within 1 yr - Decline; replacement - Table 4 to Decline; aortic insufficiency - Standard to Decline; MVP - no rating to Decline", "A|Valve surgery under 1 yr - decline; over 1 yr - T2 to decline; MVP mild - Standard to T2; moderate - T4-T6; severe - decline"],
+    ["Hepatitis A", "Fully recovered - ACCEPTED", "Not asked", "Not asked", "Recovered - ACCEPTED", "DECLINE", "DECLINE", "G|AU: not eligible (any hepatitis) · Full UW: recovered acute hepatitis - Standard", "G|Recovered - generally no rating", "G|Fully recovered - Standard"],
+    ["Hepatitis B", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "A|AU: not eligible · Full UW: chronic hepatitis - Standard to Decline (APS required)", "A|Chronic, treated and resolved - Table 4 to Decline; excludes Preferred", "A|One episode, fully recovered - Standard; chronic - Standard to decline"],
+    ["Hepatitis C", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "A|AU: not eligible · Full UW: chronic hepatitis - Standard to Decline (APS required)", "A|Chronic, treated and resolved - Table 4 to Decline; excludes Preferred", "A|Standard to decline"],
+    ["High blood pressure", "Diagnosed within 4 mos - DECLINE; diagnosed before 30 - DECLINE; 3+ medications - DECLINE; abnormal EKG / echo within 12 mos - DECLINE", "Hospitalized within 10 yrs - DECLINE; otherwise OK but check meds", "Controlled with ≤ 2 medications (provide current reading) - OK; 3+ meds or uncontrolled - DECLINE", "Controlled - ACCEPTED", "G|Diagnosed after 18, sees physician, stable, no new med or dosage change in 12 mos - all classes", "G|Diagnosed after 18, sees physician, stable, no new med or dosage change in 12 mos - all classes", "G|AU: OK · Full UW: controlled - Standard; treated BP allowed in all Preferred classes", "G|Well controlled - no rating (one BP medication allowed for Preferred)", "G|Controlled - usually Standard; Preferred allowed with treatment ages 50-80 if readings fit"],
+    ["Hodgkin's disease", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE (lymphoma)", "DECLINE (lymphoma)", "N|AU: not eligible · Full UW: individual consideration", "N|Call for quote", "A|T2 to decline"],
+    ["Hospice", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "R|Decline", "R|Decline", "R|Decline"],
+    ["Huntington's disease", "DECLINE", "DECLINE", "Not asked", "DECLINE", "N|Not listed as own condition; family history in parent/sibling before 65 - no Preferred Plus", "N|Not listed as own condition; family history in parent/sibling before 65 - no Preferred Plus", "R|Full UW: Huntington's chorea - Decline", "N|Not listed - neurological disease; call for quote", "A|Present - decline; family history with negative genetic test - Standard; untested and 55 or under - T4 to decline; over 55 - usually Standard"],
+    ["Illegal drugs", "Within 10 yrs - DECLINE", "Within 10 yrs - DECLINE", "Use or treatment within 4 yrs - DECLINE", "Other than marijuana - DECLINE; recreational marijuana up to 6 days/wk - ACCEPTED; medical - case by case", "Within 10 yrs - DECLINE", "Within 10 yrs - DECLINE", "A|AU: not eligible · Full UW: postponed 3 yrs from last use, then Standard to Table 8", "A|Use within 3 yrs - Decline; abstinent 5 yrs - no rating to Decline", "A|Any use in 3 yrs - decline; 3-7 yrs - T2-T8; over 7 yrs - Standard"],
+    ["Jail / incarcerated", "Within 10 yrs - DECLINE", "Within 10 yrs - DECLINE", "Misdemeanor or felony within 5 yrs - DECLINE; parole / probation within 6 mos - DECLINE", "Currently on parole or probation - DECLINE; after 5 yrs from jail time - OK", "Felony, pending charges or probation - DECLINE", "Felony, pending charges or probation - DECLINE", "A|AU: felony within 10 yrs not eligible · Full UW: individual consideration", "R|Felony charge history - Decline; misdemeanor until 1 yr off parole/probation - Decline; incarceration requires APS", "A|On probation/parole or charges pending - decline; otherwise call home office"],
+    ["Kidney disease / failure", "DECLINE", "DECLINE", "Dialysis, insufficiency, failure, nephrectomy, polycystic kidney or transplant - DECLINE", "DECLINE", "DECLINE", "DECLINE", "A|AU: not eligible · Full UW: chronic nephritis with good function - Standard to Table 4; poor function - Decline; polycystic kidney with normal function - Table 2-8; renal failure - Decline", "A|Nephritis single episode - no rating; others moderate rating to Decline; chronic renal failure, dialysis or polycystic kidney - Decline", "A|Chronic glomerulonephritis - T6 to decline; acute in remission - Standard to T6; kidney failure - decline; transplant over 1 yr - T6 to decline"],
+    ["Liver disease", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE (incl. hemochromatosis)", "DECLINE (incl. hemochromatosis)", "A|Full UW: chronic hepatitis - Standard to Decline; cirrhosis - Decline; hemochromatosis - Table 2 to Decline", "A|Cirrhosis - Decline; hepatitis - Table 4 to Decline; others call for quote", "A|Cirrhosis - decline; hepatitis B / C - Standard to decline"],
+    ["Lupus", "Systemic - DECLINE", "DECLINE", "Systemic (SLE) - DECLINE", "Discoid - ACCEPTED; systemic - DECLINE", "DECLINE (SLE or discoid)", "DECLINE (SLE or discoid)", "A|AU: not eligible · Full UW: discoid, no systemic signs 6 mos - Standard; systemic 1 yr without complications, over 20 - Table 2-8", "A|Systemic - Table 4 to Decline; discoid (skin only, remission, no steroids) - no rating", "A|Discoid - Standard to T2; systemic under 1 yr - decline, then T2 to decline"],
+    ["Marijuana use", "Recreational within 24 mos - DECLINE", "Not asked", "Not asked", "Recreational up to 6 days/wk - ACCEPTED; medical - case by case", "A|< 4x/month (or last use > 3 yrs) - Preferred and below; > 4x/month, not daily - Standard Extra; vaping or synthetic - DECLINE", "A|< 4x/month (or last use > 3 yrs) - Preferred and below; > 4x/month, not daily - Standard Extra / Table C / D; vaping, synthetic or marijuana-industry job - DECLINE", "A|AU: current nicotine/drug guidelines apply · Full UW: over 18 - Preferred to Decline; occasional use allowed for Preferred and Standard Plus", "A|Daily use - Decline; occasional use - not ratable for Select", "A|Recreational - Standard to decline by frequency and method (Preferred possible); medicinal - T2 to decline; tobacco vs non-tobacco class set by frequency and method"],
+    ["Melanoma", "DECLINE", "See Cancer", "See Cancer", "See Cancer", "DECLINE", "DECLINE", "A|AU: not eligible · Full UW: surgery with confirmed pathology - Standard to Decline", "A|Possible Standard depending on pathology; excludes Preferred / Elite", "A|Standard to decline"],
+    ["Mental incapacity / retardation", "DECLINE", "DECLINE", "Mild to moderate - OK; severe - DECLINE", "Not asked", "DECLINE", "DECLINE", "A|Full UW: mild, no complications, over 8 - Standard to Table 2; severe - Decline", "A|Moderate rating to Decline by severity", "A|Age 13 or under - decline; over 13 with IQ 70+ and able to care for self - Standard; IQ under 70 - T6 to decline"],
+    ["Military", "Active duty - OK; currently deployed - DECLINE", "Not asked", "Not asked", "Accepted as long as not currently deployed", "A|Serving in or alerted for a conflict area - DECLINE; enlisted max $200K, officers $500K-$1M by grade", "A|Serving in or alerted for a conflict area - DECLINE; enlisted max $200K, officers $500K-$1M by grade", "A|AU: no planned travel to hazardous locations · Full UW: aircrew, diving, explosives or hazmat duty - Decline; others individual consideration", "N|Individual consideration; military questionnaire required", "A|Active duty acceptable unless serving in or ordered to a hazardous area"],
+    ["Multiple sclerosis", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "A|AU: not eligible · Full UW: Table 2 to Decline", "A|Not progressive or disabling - Table 2 to Decline; disabling or progressive - Decline", "A|Under 2 yrs - decline; over 2 yrs mild - T4-T6; moderate - T6-T8; severe or primary progressive - decline"],
+    ["Muscular dystrophy", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "A|Full UW: Standard to Decline", "R|Decline", "A|Becker - T8 to decline; facioscapulohumeral - T2 to decline; oculopharyngeal - Standard to decline; other types - decline"],
+    ["Muscle disease or disorder", "Surgery within 12 mos + no release from doctor - DECLINE", "Not asked", "Not asked", "Not asked", "Not asked", "Not asked", "A|Full UW: myositis / polymyositis - Standard to Decline", "A|Fibrositis / myositis - no rating; others rate for cause", "N|Rated for cause - call home office"],
+    ["Neuropathy", "With diabetes - DECLINE", "With diabetes - DECLINE", "See Diabetes", "With diabetes - DECLINE", "Diabetic - DECLINE; otherwise not asked", "Diabetic - DECLINE; otherwise not asked", "A|AU: diabetic not eligible · Full UW: neuritis - Standard to Table 2; diabetic neuropathy rated for cause", "A|Neurological-disease meds exclude Preferred; diabetic neuropathy - see diabetic complications", "N|Rated for cause; peripheral neuropathy excludes living benefit riders"],
+    ["Oxygen / ventilator", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "Ventilator use - DECLINE", "Ventilator use - DECLINE", "R|Full UW: chronic cor pulmonale / pulmonary hypertension - Decline", "R|Severe COPD on oxygen - Decline", "R|Current oxygen use - decline"],
+    ["Pain medication", "Prescribed narcotics for chronic condition > 6 mos - DECLINE", "Not asked - check med list", "Not asked - check med list", "Check med list", "A|Mild use, no disability - Standard or Standard Extra (see Chronic Pain)", "A|Mild use, no disability - Standard through Table D (see Chronic Pain)", "N|AU: OK · Full UW: chronic narcotic use rated for cause", "R|Chronic opioid / narcotic use - Decline", "A|Chronic pain rules: mild - Standard to T3; moderate - T4-T8; severe - decline"],
+    ["Pancreatitis", "Not asked", "Chronic or alcohol related - DECLINE", "Chronic or multiple episodes - DECLINE", "Single attack, non-alcohol, no complications - OK; alcohol related or chronic - DECLINE", "DECLINE", "DECLINE", "A|Full UW: acute, recovered - Standard; chronic - Decline", "A|Rate for cause", "A|Acute under 6 mos - decline; single episode - Standard to T2; multiple - T4; chronic - decline"],
+    ["Paraplegia / quadriplegia", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "A|Full UW: paraplegia - individual consideration; complete quadriplegia - Decline", "A|Paraplegic - Table 6 to Decline; quadriplegic - highly rated to Decline", "A|Incomplete paralysis, not in wheelchair, over 1 yr - T2-T8; complete paraplegia under 2 yrs - decline, then T4-T8; complete quadriplegia - decline"],
+    ["Parkinson's disease", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "A|AU: not eligible · Full UW: mild - Table 2-4; marked or severe - Table 4 to Decline", "A|Table 3 to Decline; disabling - Decline", "A|T3 to decline"],
+    ["Parole / probation (currently)", "Within 10 yrs - DECLINE", "Within 10 yrs - DECLINE", "Misdemeanor or felony within 5 yrs - DECLINE; parole / probation within 6 mos - DECLINE", "Currently on parole or probation - DECLINE; after 5 yrs from jail time - OK", "DECLINE", "DECLINE", "A|AU: felony within 10 yrs not eligible · Full UW: individual consideration", "R|Currently on parole or probation - Decline", "R|Currently on probation or parole - decline; reconsider 1 yr after end"],
+    ["PAD / PVD", "Not asked", "With diabetes - DECLINE", "DECLINE", "DECLINE", "A|Vascular disease > 5 yrs since symptoms - Standard or Standard Extra; otherwise DECLINE", "A|Vascular disease > 5 yrs since symptoms, no treatment - Standard Extra / Table C / D; otherwise DECLINE", "A|AU: not eligible · Full UW: non-smoker - Standard to Table 4; smoker - Decline; intermittent claudication - Table 2 to Decline", "A|Not severe - Table 2 at best; excludes Preferred", "A|Non-smoker, no surgery - T2-T6; with surgery - T4-T6; smoker or severe - decline"],
+    ["Pilot or student pilot", "Within 2 yrs - DECLINE", "Not asked", "Personal pilot < 100 hrs - DECLINE; student pilot - DECLINE", "No flying as a student pilot", "A|Air transport pilot - all classes; private pilot - Preferred with exclusion or Standard+; flat extra may apply", "A|Air transport pilot - all classes; private pilot - Preferred with exclusion or Standard+; flat extra may apply", "A|AU: private pilot / crew not eligible · Full UW: student or under 100 hrs solo - $2.50/M flat extra; experienced private pilots Standard to $5/M; scheduled airline pilots Standard; aviation exclusion rider available", "A|Private aviation excludes Preferred / Elite; commercial pilots for major US carriers OK; aviation questionnaire required", "A|Student or under 75 solo hrs - $3.00/M flat extra; qualified private pilot - Standard to $3.00/M; airline / corporate pilot - Standard; Preferred only with aviation exclusion rider"],
+    ["Pregnant", "Gestational diabetes, HBP, multiple fetus or bed rest - DECLINE", "Not asked - ask about gestational diabetes", "Current with no complications - OK", "Not asked", "N|Not asked; gestational diabetes - see Diabetes", "N|Not asked; gestational diabetes - see Diabetes", "A|Full UW: currently pregnant with gestational diabetes - postpone; eclampsia recovered - Standard", "A|Current gestational diabetes, toxemia or pre-eclampsia - Decline (reconsider 6 wks postpartum); uncomplicated - no rating", "G|No current or past complications - Standard"],
+    ["PTSD", "Not asked", "Not asked", "Not asked (check meds)", "Not asked", "N|Not listed - underwritten like anxiety; major mental health disorder - DECLINE", "N|Not listed - underwritten like anxiety; major mental health disorder - DECLINE", "A|AU: OK · Full UW: single mild episode - Standard; others Table 2-6", "A|Hospitalization or disability in last yr - Decline; otherwise depression rules; APS required", "A|Underwritten as anxiety: mild - Standard; moderate - T2-T4; severe - decline"],
+    ["Pulmonary fibrosis", "Ever had - DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE (ARDS / pulmonary)", "DECLINE (ARDS / pulmonary)", "N|AU: COPD not eligible · Full UW: individual consideration; pulmonary hypertension - Decline", "A|Lung disease - call for quote; severe or on oxygen - Decline", "A|Not listed - lung disease rated for cause; oxygen use - decline"],
+    ["Renal disease", "End-stage or renal insufficiency - DECLINE", "End stage with dialysis - DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "R|AU: not eligible · Full UW: renal failure - Decline", "R|Chronic renal failure - Decline", "R|Kidney failure - decline"],
+    ["Restless leg syndrome", "Not asked - see if meds treat Parkinson's; potential decline", "Not asked - see if meds treat Parkinson's (explain in agent notes)", "Not asked - see if meds treat Parkinson's (explain in agent notes)", "Not asked - see if meds treat Parkinson's (explain in agent notes)", "Not asked", "Not asked", "G|Not listed - generally Standard; check meds for Parkinson's", "G|Not listed - generally no rating; check meds", "G|Not listed - Standard"],
+    ["Rheumatoid arthritis", "See Arthritis", "See Arthritis", "Minimal or slight impairment - OK; all others - DECLINE", "See Arthritis", "R|Not eligible on InstaBrain Term - use Pure Term", "A|< 20 joints, no significant anemia, occasional steroids - Standard Extra / Table C / Table D", "A|AU: not eligible · Full UW: not disabled, over 18 - Standard to Table 6 (psoriatic arthritis same)", "A|No rating to Decline by severity; RA meds exclude Preferred", "A|Mild - Standard to T2; moderate - T3-T4; severe - T6-T8"],
+    ["Sarcoidosis", "Ever had - DECLINE", "DECLINE", "Pulmonary - DECLINE", "Localized non-pulmonary - ACCEPTED; pulmonary - DECLINE", "Pulmonary - DECLINE", "Pulmonary - DECLINE", "A|Full UW: confined to lungs or skin, remission 6 mos - Standard; other organs - Decline", "A|Moderate rating to Decline depending on organs involved", "A|Standard to decline"],
+    ["Schizophrenia / psychosis", "Ever had or treated - DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "N|Full UW: APS required; individual consideration", "A|Psychosis - Table 6 to Decline; hospitalization in last yr - Decline", "A|0-2 yrs since last episode - decline; 2-5 yrs - T4 to decline; 5-10 yrs - Standard to T6; over 10 yrs - Standard to T4"],
+    ["Sickle cell anemia", "DECLINE", "DECLINE", "DECLINE", "Not asked", "DECLINE (anemia other than iron deficiency)", "DECLINE (anemia other than iron deficiency)", "R|Full UW: sickle cell anemia - Decline; trait - Standard", "A|Anemia - rate for cause", "N|Not in impairment table (declined on Express products) - call home office"],
+    ["Sleep apnea", "Diagnosed within 6 mos - DECLINE; using CPAP / BiPAP - OK; not using - DECLINE", "Not asked", "With overweight, HBP, COPD or arrhythmia - DECLINE", "Treated and controlled - ACCEPTED", "A|Sleep study completed, on CPAP / BiPAP regularly, no symptoms - Standard or Standard Extra", "G|Sleep study completed, on CPAP / BiPAP regularly, no symptoms - all classes", "A|AU: not eligible · Full UW: successfully treated - Standard to Table 3 (mild with verified CPAP may be Preferred)", "A|Consistent CPAP use - possible Standard", "A|Mild - Standard; moderate - Standard to T3; severe - T2 to decline"],
+    ["Smoker / nicotine use", "Cigars, pipes, chew, snuff, gum, patches, vaping or e-cigs within 2 yrs - SMOKER RATE", "Any tobacco or nicotine replacement - SMOKER RATE", "Cigarettes, e-cigs, chew, pipes, snuff, patch / gum / inhaler within 12 mos - SMOKER RATE; occasional cigar or pipe excluded", "Cigarettes within 12 mos - SMOKER RATE; cigar, pipe, chew, patches and substitutes - NON-SMOKER", "A|Any nicotine within 12 mos - tobacco rates (Preferred or Standard Extra); cigars > 12/yr = tobacco; Preferred Plus needs 36 mos nicotine-free", "A|Any nicotine within 12 mos - tobacco rates (Preferred, Standard Extra, Table C, D); cigars > 12/yr = tobacco; Preferred Plus needs 36 mos nicotine-free", "A|Any nicotine within 12 mos - tobacco rates (Preferred Tobacco available); up to 24 cigars/yr with negative urine keeps non-tobacco; Preferred Plus needs 36 mos, Preferred 24 mos nicotine-free", "A|Any nicotine within 12 mos - tobacco rates (Preferred Tobacco available); Select needs 12 mos, Preferred 36 mos, Elite 60 mos nicotine-free", "A|Any tobacco or nicotine product incl. vaping - tobacco rates; Preferred Plus needs 5 yrs, Preferred 2 yrs, Standard Plus 1-2 yrs tobacco-free; 1 cigar per month allowed with negative cotinine"],
+    ["Spina bifida", "Not asked", "Not asked", "Asymptomatic - OK; otherwise DECLINE", "DECLINE", "N|Not listed - call underwriting", "N|Not listed - call underwriting", "A|Full UW: minimal deformity - Standard to Table 4", "N|Not listed - call for quote", "N|Not listed - call home office"],
+    ["Stent", "Ever had - DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "A|AU: not eligible · Full UW: coronary disease - Table 4 to Decline; postponed 6 mos", "A|Angioplasty within 6 mos, or with diabetes, stroke or tobacco - Decline; otherwise no rating to Decline", "A|Under 6 mos post angioplasty - decline; then CAD rules by age"],
+    ["Stroke / TIA", "DECLINE", "DECLINE", "TIA after 6 mos - OK; otherwise DECLINE", "DECLINE", "DECLINE", "DECLINE", "A|AU: not eligible · Full UW: stroke 1 yr after event - Table 4 plus flat extra to Decline; single TIA over 6 mos - Table 2-4; multiple TIAs over 1 yr - Table 4-8", "A|CVA within 1 yr, or with diabetes or cardiac history - Decline; after 1 yr full recovery - Table 4 at best; TIA no residuals - no rating to moderate rating", "A|Stroke under 6 mos - decline; over 6 mos with mild residuals: age 50 and under - decline, over 50 - T2-T5; multiple - decline. TIA under 6 mos - decline; single over 6 mos - Standard to T3; multiple - T2-T5"],
+    ["Suicide attempt / ideation", "See Depression", "N|Not addressed on grid", "See Depression", "See Depression", "DECLINE", "DECLINE", "A|Full UW: single attempt over 1 yr - $5/M flat extra; over 5 yrs - Standard; multiple attempts - Decline", "A|Within 1 yr, or more than one within 2 yrs - Decline; after 2 yrs - flat extra to Decline", "A|Under 1 yr - decline; 1-5 yrs - $5/M flat extra to decline; over 5 yrs - Standard to decline"],
+    ["Terminal illness", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "R|Decline", "R|Decline", "R|Decline"],
+    ["Transplant", "DECLINE", "DECLINE", "DECLINE", "DECLINE", "DECLINE (other than cornea)", "DECLINE (other than cornea)", "A|Full UW: renal transplant, no complications after 1 yr, over 20 - Table 6 to Decline; other organs - individual consideration", "R|Awaiting or recipient - Decline", "A|Kidney transplant under 1 yr - decline; over 1 yr - T6 to decline; other organs - call home office"],
+    ["Tuberculosis", "Not asked", "Not asked", "Over 2 yrs - OK; within 2 yrs of treatment or diagnosis - DECLINE", "Treatment completed - ACCEPTED", "N|Not listed - call underwriting", "N|Not listed - call underwriting", "G|Full UW: treated and recovered - generally Standard", "G|Full recovery, no residuals - no rating", "G|Fully recovered - usually Standard"],
+    ["Tumor", "Any in brain - DECLINE", "Not asked (check treatment)", "Not asked (check treatment)", "See Cancer", "Malignant - DECLINE; benign not listed", "Malignant - DECLINE; benign not listed", "A|Full UW: benign, excised - Standard; malignant - individual consideration (postponed 2-5 yrs)", "N|Call for quote", "A|Benign - usually Standard; malignant - call home office"],
+    ["Ulcerative colitis", "DECLINE", "Not asked", "Diagnosed before 20 or within 12 mos - DECLINE", "Mild to moderate - ACCEPTED", "DECLINE", "DECLINE", "A|AU: not eligible · Full UW: controlled with medication - Table 2-8", "A|No rating to Decline (APS required)", "A|Under 1 yr - decline; over 1 yr mild - Standard to T4; moderate - T4-T6; severe - decline"],
+    ["Wheelchair / electric scooter", "DECLINE", "DECLINE", "Not asked", "Due to chronic illness or disease - DECLINE", "Paraplegia, quadriplegia or current disability - DECLINE", "Paraplegia, quadriplegia or current disability - DECLINE", "N|Full UW: rated for the underlying cause", "N|Rated for underlying cause", "N|Rated for cause; excludes living benefit riders"],
+    ["Pending surgery / tests", "N|Not addressed on grid", "N|Not addressed on grid", "N|Not addressed on grid", "N|Not addressed on grid", "DECLINE until results / surgery complete", "DECLINE until results / surgery complete", "N|Full UW: postpone until results / surgery complete", "R|Major surgery pending - Decline (postpone until complete)", "N|Postpone until complete"],
+    ["Medically declined in past 5 yrs", "N|Not addressed on grid", "N|Not addressed on grid", "N|Not addressed on grid", "N|Not addressed on grid", "DECLINE", "DECLINE", "A|AU: not eligible if ever rated or declined for life, health or DI · Full UW: individual consideration", "A|Declined by another carrier within last yr - run it through XRAE first (not available for RapidProtect)", "N|Disclose on application - individual consideration"],
+    ["Barrett's esophagus", "N|Not addressed on grid", "N|Not addressed on grid", "N|Not addressed on grid", "N|Not addressed on grid", "N|Not listed", "N|Not listed", "N|AU: not eligible · Full UW: individual consideration (APS)", "N|Not listed - call for quote", "A|Standard to decline"],
+    ["Gastric bypass / lap band", "N|Not addressed on grid", "N|Not addressed on grid", "N|Not addressed on grid", "N|Not addressed on grid", "A|Postpone 6 mos, no complications - Standard / Standard Extra", "A|Postpone 6 mos, no complications - Standard through Table D", "A|AU: not eligible · Full UW: postpone 1 yr, then Table 2-4", "A|Within 6 mos - Decline; after - individual consideration", "A|Under 6 mos - decline; over 6 mos - contact home office (based on weight loss and current weight)"],
+    ["Family history (parent heart death before 60)", "N|Not addressed on grid", "N|Not addressed on grid", "N|Not addressed on grid", "N|Not addressed on grid", "A|CAD/cancer/diabetes in parent or sibling before 65 - no Preferred Plus", "A|CAD/cancer/diabetes in parent or sibling before 65 - no Preferred Plus", "A|AU: more than one parent heart death before 60 not eligible · Full UW: Preferred Plus needs no parent death before 60 from cancer or heart disease; Preferred allows one cardiac death with good workup; Standard Plus allows one; not applied at age 60+", "A|Parent or sibling death from heart disease or cancer before 60 excludes Preferred (before 65 excludes Elite); Select allows one", "A|Preferred Plus: no parent or sibling cardiovascular / cancer death before 65; Preferred and Standard Plus: no parent death before 60; disregarded once the client is 60 / 65"]
+  ]
+},
+iul: {
+  carriers: [
+    {id:"iule", name:"Mutual of Omaha", prod:"IUL Express", tag:"Simplified issue"},
+    {id:"rapid", name:"National Life Group", prod:"RapidProtect IUL", tag:"Instant decision"},
+    {id:"ffiulx", name:"Transamerica", prod:"FFIUL II Express", tag:"Instant decision"},
+    {id:"nlgiul", name:"National Life Group", prod:"FlexLife / PeakLife IUL", tag:"Fully underwritten"},
+    {id:"smartul", name:"Foresters", prod:"SMART UL", tag:"Non-medical"},
+    {id:"ffiul", name:"Transamerica", prod:"Financial Foundation IUL", tag:"Fully underwritten"}
+  ],
+  products: [
+    {name:"Mutual of Omaha — Indexed Universal Life Express", pts:["Ages 18-75; simplified issue $25K-$550K (18-50), $450K (51-60), $350K (61-75); death benefit guaranteed to age 80-120", "Same simplified-issue knockouts and Rx exclusion list as Term Life Express; multiple impairments over Table 4 - decline; prior United of Omaha offer worse than Table 4 - not eligible", "Living benefit riders (critical, chronic, terminal) plus accidental death, waiver, DI and children's riders; signed illustration required"]},
+    {name:"Foresters — SMART UL (non-medical)", pts:["Non-medical limits: ages 0-15 $150K; 16-55 $400K; 56-75 $150K; above that it is fully underwritten (paramed/blood)", "Same non-medical impairment guide as Strong Foundation, except COPD and insulin-treated / Type 1 diabetes are declines on SMART UL", "Non-tobacco = no nicotine product in 12 months (cigars count here); build must be within the non-medical chart; ratable over Table D - do not submit non-medical", "Risk Assessment Line 1-877-622-4249"]},
+    {name:"National Life Group — FlexLife / PeakLife / SummitLife IUL", pts:["FlexLife: ages 0-85; EZ Underwriting (no fluids) up to $3M ages 18-50, $1M ages 51-60, $250K ages 61-65 (Sept 2025 guide); PeakLife and SummitLife minimum face $1M", "Quick quotes now run through the XRAE tool instead of the quotes mailbox", "Classes: Elite (60 mos nicotine-free), Preferred (36), Select (12), Standard, Express Standard 1 (up to Table 4), Express Standard 2 (Tables 5-8), Preferred Tobacco, Standard Tobacco", "Age 60+ must have had routine care and a physical within 24 months or NLG declines; MVR on every applicant 16+", "Quick quotes: UnderwritingQuotes@NationalLife.com (24-hr turnaround) — use before submitting anything on the uninsurable list"]},
+    {name:"Americo — Instant Decision IUL (Series 336)", pts:["Ages 18-70; $50K-$450K non-medical, no saliva; nicotine / non-nicotine only (no substandard); 24 mos nicotine-free for non-nicotine", "100% instant-decision eApp using app questions, MIB and Rx check; every health question is a knockout — the guide does not publish the list, so no grid column yet", "Living benefit riders (critical, chronic, terminal) included; 5-yr no-lapse guarantee; monthly bank draft only; internal replacements not allowed", "Build chart: 4'8\" 80-188 through 6'7\" 157-376"]},
+    {name:"National Life Group — RapidProtect / RapidProtect NL IUL", pts:["Simplified-issue IUL with instant decision; ages 0-60, $50K-$500K; Standard NT / Standard Tobacco plus substandard Express NT 1 and Express Tobacco; no table ratings or flat extras; no ABRs on Express classes", "Hard knockouts beyond the medical list: any felony, pending charges, violent crime, license suspended, single DUI within 1 yr, multiple DUIs within 5 yrs, SSDI/DI, hospital admission in past 12 mos, diagnostic testing in past 3 mos", "XRAE quick-quote tool cannot be used for RapidProtect; cells show the guide's qualifying / non-qualifying lists (Sept 2025)"]}
+,
+    {name:"Transamerica — Financial Foundation IUL (FFIUL)", pts:["Ages 0-85; nonmed to $250K through age 45 and $99K via iGO point-of-sale (18-50; $75K 51-60); paramed above; classes Preferred Elite, Preferred Plus, Preferred, Nontobacco, Preferred Tobacco, Tobacco", "Chronic and critical illness riders must be applied for and pass separate screening (see term snapshot for exclusions); LTC rider available to citizens / green card holders", "Same impairment table as Trendsetter — cell text shows the probable fully-underwritten offer"]},
+    {name:"Transamerica — FFIUL II Express (instant decision)", pts:["Ages 18-70 adults (Select Nontobacco / Select Tobacco), 0-17 juvenile; $50K min; max $500K to 60, $300K 61-70, $250K juveniles; 100% instant decision, never referred to an underwriter, coverage in as fast as 15 minutes", "BMI 16.0-39.0 (18.0-39.0 at 60+); build, personal history and Milliman Rx/diagnostic data drive the decision — no exams, no APS", "Hard declines beyond the medical chart: bankruptcy not discharged, felony within 10 yrs, current probation/parole, hospitalization 2+ nights within 1 yr, pending tests within 6 mos, high-risk foreign travel, marijuana-industry / casino / oil-gas-coal-nuclear / arms employment", "Chronic and critical illness riders included unless declined separately (RA, UC/Crohn's, neuropathy, mobility aids, ADL help, Medicaid, handicap placard all block the riders, not the base); terminal illness rider on every policy; no term conversions", "Cells now use the Sept 2026 adult single-condition decision chart — conditions marked * on that chart may still be placed through Transamerica's traditional underwriting (see Financial Foundation IUL column)"]}
+  ],
+  rows: [
+    ["AIDS / HIV / ARC", "DECLINE", "R|HIV / AIDS - not eligible", "R|Ever - Decline", "A|AIDS - Decline; HIV - moderate rating to Decline (2025 guide)", "DECLINE", "R|Decline"],
+    ["Alcohol / drug abuse or treatment", "Treatment within last 10 yrs - DECLINE", "R|Alcoholism - not eligible", "A|Alcohol abuse or treatment within 5 yrs - Decline; after 5 yrs - Select", "A|Alcohol treatment within 2 yrs - Decline; total abstinence over 2 yrs - moderate rating to Standard; excludes Preferred for 10 yrs", "Within 5 yrs - DECLINE", "A|Alcohol abuse - T2 to decline; alcoholism under 3 yrs sober - decline; 3-5 yrs - T2-T6; over 5 yrs - Standard to T4"],
+    ["ALS (Lou Gehrig's)", "DECLINE", "R|Not eligible", "R|Ever - Decline", "R|Decline", "Not asked", "R|Decline"],
+    ["Alzheimer's / dementia", "DECLINE", "R|Not eligible", "R|Ever - Decline", "R|Decline", "DECLINE", "R|Decline"],
+    ["Amputation", "See Diabetic Complications", "N|Not on either RapidProtect list - XRAE quotes cannot be used for RapidProtect; ask underwriting", "R|Not due to trauma - Decline", "A|Not due to peripheral vascular disease - rate for cause", "Caused by injury - OK; caused by disease - DECLINE", "A|Limited traumatic injury - Standard; otherwise rated for the cause"],
+    ["Aneurysm", "DECLINE", "N|Not on either RapidProtect list - XRAE quotes cannot be used for RapidProtect; ask underwriting", "R|Ever - Decline", "A|Abdominal aortic present or corrected within 6 mos - Decline; abdominal - Table 4 to Decline; cerebral, stable after recovery - no rating to moderate rating", "DECLINE", "A|Abdominal: under 60 or unoperated over 5 cm - decline; under 5 cm stable with surveillance - Standard to T5; surgery over 6 mos - T2-T4. Cerebral: single small, stable over 5 yrs - Standard; surgery over 6 mos - T2-T6"],
+    ["Angina (chest pain)", "Not asked - see meds", "R|Coronary artery disease - not eligible", "A|Within 5 yrs - Decline; after 5 yrs - Select", "A|Current or stable - Table 6 to Decline; cardiac event within 6 mos - Decline", "DECLINE", "A|CAD rules: under 40 - decline; 40-45 - T6 to decline; 46-59 - T4 to decline; 60+ - T2 to decline"],
+    ["Angioplasty / bypass", "DECLINE", "R|Coronary artery disease - not eligible", "A|Cardiac surgery within 10 yrs - Decline; after 10 yrs - Select", "A|Within 6 mos, or with diabetes, stroke or continued tobacco - Decline; otherwise no rating to Decline by age/severity", "DECLINE", "A|Under 3 mos post bypass or 6 mos post angioplasty - decline; then CAD rules by age (under 40 - decline; 60+ - T2 to decline)"],
+    ["Anxiety", "Not asked", "A|Mild, stable and well controlled 6+ mos - may qualify (age dependent)", "N|Not on the decision chart (inpatient mental-health treatment within 5 yrs - Decline)", "G|Mild - no rating", "Mild, onset after 25, diagnosed > 1 yr ago, no hospitalization - OK", "A|Mild, single low-dose med, no time off work - Standard (Preferred possible); moderate - T2-T4; severe or hospitalized - decline"],
+    ["Arthritis", "Moderate / severe rheumatoid on medication - DECLINE", "A|Mild osteoarthritis (non-disabling, no opioids) - may qualify; RA without disability - may qualify", "N|Not a base knockout; rheumatoid or psoriatic arthritis blocks the living benefit riders only", "A|Osteoarthritis - no rating; rheumatoid - no rating to Decline by severity", "Osteoarthritis, mild rheumatoid with no limitations - OK; moderate-severe rheumatoid - DECLINE (Humira, Enbrel, prednisone)", "A|Osteo mild - Standard; moderate - T2; severe - T3-T4. Rheumatoid mild - Standard to T2; moderate - T3-T4; severe - T6-T8"],
+    ["Arrhythmia / AFib", "DECLINE", "R|Cardiac arrhythmias - not eligible", "A|Within 5 yrs - Decline; after 5 yrs - Select", "A|AFib - no rating to moderate rating depending on frequency and cause", "DECLINE", "A|Non-chronic, no heart disease, under 4 episodes/yr - Standard to T2; chronic without heart disease - T2-T4"],
+    ["Assisted living / LTC facility", "DECLINE", "N|Not listed; hospital admission in past 12 mos (except childbirth) - not eligible", "R|Currently in a nursing home, assisted living or LTC facility - Decline; hospitalization of 2+ nights within 1 yr - Decline", "N|Not listed - contact underwriting", "DECLINE", "N|Not listed - call home office (ADL dependence excludes living benefits)"],
+    ["Asthma (chronic)", "Severe or chronic - DECLINE; any asthma + tobacco - DECLINE", "A|Mild - may qualify (depends on age, attacks, meds)", "A|Severe - Decline; otherwise not on chart", "A|No rating to Decline depending on age, attacks and medications", "Mild or moderate - OK; severe or hospitalization - DECLINE", "A|Non-smoker: mild - Standard to T2; moderate - T3-T8; severe - decline. Smoker: mild - T2-T4; moderate - T8; severe - decline"],
+    ["Autoimmune disorder", "Not asked", "A|Systemic lupus mild, no complications - may qualify; others not listed", "A|Systemic lupus, immune deficiency, scleroderma - Decline; myasthenia gravis within 5 yrs - Decline, after - Select", "A|Systemic lupus - Table 4 to Decline; myasthenia gravis - call for quote; autoimmune meds exclude Preferred", "Not asked", "A|Systemic lupus under 1 yr - decline, then T2 to decline; myasthenia gravis under 3 yrs - decline, then Standard to T4; Raynaud's - Standard to T4"],
+    ["Autism", "DECLINE", "R|Not eligible", "R|Ever - Decline", "R|Decline (uninsurable list, 2025 guide)", "See Mental Incapacity", "N|Not listed - call home office"],
+    ["Bipolar", "DECLINE", "N|Not listed - only mild depression/anxiety appear on the qualifying list", "R|Ever - Decline", "A|Hospitalization or disability in last yr - Decline; otherwise no rating to Decline; mood-disorder meds exclude Preferred", "DECLINE", "A|Mild - T2-T4; moderate - T4-T6; severe (inpatient, disabled) - T8 to decline"],
+    ["Black lung", "Not asked - see treatment", "N|Not on either RapidProtect list - XRAE quotes cannot be used for RapidProtect; ask underwriting", "N|Not on chart - COPD/pulmonary fibrosis are declines", "A|Not listed - COPD rules apply: Table 2 to Decline", "N|Not listed - respiratory questionnaire; COPD is DECLINE", "A|Pneumoconiosis - T2 to decline"],
+    ["Blood clots / DVT", "See meds / Stent", "N|Not on either RapidProtect list - XRAE quotes cannot be used for RapidProtect; ask underwriting", "A|Blood clots (no complications) within 1 yr - Decline; after 1 yr - Select", "A|Phlebitis, full recovery - no rating; multiple episodes - Table 2 to Decline", "Check meds / Stent", "A|Single episode, fully recovered - Standard; multiple - Standard to T4"],
+    ["Blood / clotting disorder", "Not asked - check for stents and other treatment", "A|Mild iron-deficiency anemia, investigated and resolved - may qualify", "R|Blood disorder or clotting disorder - Decline; polycythemia vera - Decline", "A|Anemia - rate for cause", "Not asked - check for stents and other treatment", "A|Iron-deficiency anemia mild - Standard; moderate - T2-T5; severe - decline"],
+    ["Bone disease or disorder", "Not asked - check meds", "A|Joint replacement over 3 mos, fully recovered - may qualify", "N|Not on chart", "A|Bone or joint disorder - rate for cause (usually no rating)", "Not asked - check meds", "G|Broken bone, bursitis, carpal tunnel - Standard"],
+    ["Bone marrow transplant", "DECLINE", "R|Organ transplant - not eligible", "R|Transplant recipient or recommendation - Decline", "R|Organ transplant recipient - Decline", "DECLINE", "N|Not listed - call home office"],
+    ["Bronchitis", "Severe or chronic - DECLINE", "A|Mild bronchiectasis - may qualify; COPD - not eligible", "R|Chronic bronchitis - Decline; acute not on chart", "A|Acute - no rating; chronic - no rating to Decline", "Acute - OK; chronic (COPD) - DECLINE", "A|Acute - Standard; chronic (COPD) mild - T2-T4; moderate - T5-T8; severe, current tobacco or oxygen - decline"],
+    ["Cancer", "Basal / squamous skin - OK; otherwise DECLINE", "A|Basal cell - may qualify; any other cancer - not eligible", "A|Metastatic, recurrent or multi-site - Decline; basal cell - OK; thyroid after 1 yr - Select; breast (dx after 50) or testicular after 4 yrs - Select; cervical, prostate (dx after 50), melanoma (surgery only) after 5 yrs - Select; bladder, colon/rectal, kidney after 10 yrs - Select (bladder/kidney non-tobacco only); all other types - Decline", "A|Current treatment - Decline; internal cancer within 3-5 yrs - contact underwriting, otherwise no rating to Decline; basal cell - Standard; excludes Preferred (except skin cancer in situ)", "Basal cell - OK; no treatment or recurrence within 10 yrs - OK; all others - DECLINE", "A|Non-melanoma skin - Standard; internal organ cancer - call home office; melanoma - Standard to decline"],
+    ["Cardiomyopathy", "Ever had - DECLINE", "N|Not listed - heart conditions generally not eligible", "R|Ever - Decline", "A|Present or chronic - Decline; resolved over 3 yrs - Table 4 to Decline", "DECLINE", "A|Dilated or restrictive - decline; hypertrophic under 35 - decline, 35+ - T6 to decline; peripartum over 12 mos - T4 to decline"],
+    ["Cellulitis", "Not asked", "N|Not on either RapidProtect list - XRAE quotes cannot be used for RapidProtect; ask underwriting", "N|Not on chart", "G|Not listed - no rating", "Not asked", "G|Not listed - Standard"],
+    ["Cerebral palsy", "Not asked", "A|Over age 8, no epilepsy or intellectual disability - may qualify", "R|Ever - Decline", "A|Table 4 to Decline", "DECLINE", "A|Age 8+, IQ over 50, mild physical impairment - Standard to T4; with epilepsy - T4 to decline; others usually decline"],
+    ["Chronic pain (narcotic prescriptions)", "Not asked - see diagnosis, check meds", "N|Not listed; current narcotic use blocks the back-pain and fibromyalgia qualifications", "A|Chronic pain with frequent or high-dose opioids within 3 yrs - Decline; after 3 yrs - Select", "R|Chronic opioid / narcotic use - Decline (APS required)", "Not asked - see diagnosis, check meds", "A|Mild - Standard to T3; moderate - T4-T8; severe - decline"],
+    ["Cirrhosis", "DECLINE", "R|Not eligible", "R|Ever - Decline", "R|Decline", "DECLINE", "R|Decline"],
+    ["Congestive heart failure", "Ever had - DECLINE", "R|Not eligible", "R|Ever - Decline", "A|Table 6 to Decline", "DECLINE", "R|Under 2 yrs - decline; over 2 yrs - usually decline"],
+    ["Coronary artery disease", "Ever had - DECLINE", "R|Not eligible", "A|Within 5 yrs - Decline; after 5 yrs - Select", "A|No rating to Decline; MI, bypass or angioplasty within 6 mos, or with diabetes, stroke or tobacco - Decline; excludes Preferred", "DECLINE", "A|Under 40 - decline; 40-45 - T6 to decline; 46-59 - T4 to decline; 60+ - T2 to decline; under 3 mos post bypass / 6 mos post angioplasty - decline"],
+    ["COPD", "Ever had - DECLINE", "R|Not eligible", "R|Ever - Decline (incl. emphysema and chronic bronchitis)", "A|Table 2 to Decline; severe (on oxygen or disabling) or with current tobacco - Decline", "DECLINE", "A|Mild - T2-T4; moderate - T4-T6; severe - T6 to decline; current tobacco or oxygen use - decline"],
+    ["Crohn's disease", "Not asked", "R|Not eligible", "N|Not a base knockout for adults (blocks living benefit riders; juvenile - Decline)", "A|Table 2 to Decline (APS required)", "More than 5 yrs in remission - OK", "A|Onset before 25 - decline; very mild over 6 mos - Standard to T4; moderate over 2 yrs - T2 to decline; severe over 4 yrs - T6 to decline"],
+    ["Cystic fibrosis", "DECLINE", "N|Not on either RapidProtect list - XRAE quotes cannot be used for RapidProtect; ask underwriting", "R|Ever - Decline", "R|Decline", "DECLINE", "R|Decline"],
+    ["Defibrillator / pacemaker", "DECLINE", "R|Not eligible", "A|Defibrillator - Decline; pacemaker within 5 yrs - Decline, after 5 yrs - Select", "A|Defibrillator / ventricular tachycardia - Decline; pacemaker - Table 3 to Decline", "DECLINE", "A|Pacemaker - T2 to decline (age, years since implant, reason); defibrillator - call home office"],
+    ["Depression", "Bipolar - DECLINE; otherwise not asked", "A|Mild, stable and well controlled 6+ mos - may qualify (age dependent)", "A|Major depression within 5 yrs - Decline; after 5 yrs - Select; inpatient treatment within 5 yrs - Decline", "A|Hospitalization or disability in last yr - Decline; otherwise no rating to Decline; depression meds exclude Preferred", "Mild, onset after 25, diagnosed > 1 yr ago, no hospitalization - OK; severe, major, bipolar or schizophrenic - DECLINE", "A|Mild, minimal meds, no time off work - Standard (Preferred possible); moderate - Standard to T4; severe (inpatient) - T6 to decline"],
+    ["Disabled / on disability", "Received disability in last 12 mos for back, neck, hips - ACCEPTED; any other reason - case by case", "R|Receiving SSDI or DI for mental health or medical issues - not eligible", "A|Bedridden - Decline; unable to work due to chronic illness blocks living benefit riders; base policy may still issue", "R|Disabled for non-musculoskeletal impairments (SSDI/DI for depression, PTSD, etc.) - Decline; SSI/SSDI as only income - no coverage", "Permanently disabled (receiving benefits) - DECLINE; otherwise individual case", "N|Not listed - call home office; disability riders not available"],
+    ["Dialysis", "DECLINE", "R|Not eligible", "A|Recurrent dialysis within 10 yrs - Decline; after 10 yrs - Select", "R|Decline", "DECLINE", "R|Kidney failure / dialysis - decline"],
+    ["Disc disease", "Not asked", "A|Mild non-disabling back disorder - may qualify (opioid use matters)", "N|Not on chart", "G|Herniated disc / back disorder - no rating", "Not asked", "A|Herniated disc - Standard to T2; back pain mild-moderate - Standard; severe - T2-T4"],
+    ["Diabetes", "Diagnosed before age 50 - DECLINE; any complications - DECLINE", "A|Type 2 well controlled without complications - may qualify; Type 1 - not eligible; gestational history, not pregnant - may qualify", "A|Diagnosed before age 60, insulin in last 12 mos, tobacco in last 24 mos, or any neuropathy / retinopathy / kidney disease - Decline; otherwise Select; gestational diabetes while pregnant - Decline", "A|No rating to Decline by onset and control; A1c 10.0+ or juvenile onset (before 20) - Decline; excludes Preferred / Elite", "Type 2 on oral meds or diet, controlled, non-smoker or under 1 pack/day - ACCEPTED (age 20-29: under 5 yrs since dx; 30+: any duration); insulin, poor control or complications - DECLINE", "A|Under 20 - decline. Type 1 controlled, no complications, no tobacco: 20-29 - T8 to decline; 30+ - T6-T8. Type 2: 20-29 - T6 to decline; 30-49 - T3-T6; 50+ - Standard to T4"],
+    ["Diabetic complications", "Any complications - DECLINE", "R|Not eligible", "R|Neuropathy, retinopathy, kidney disease or diabetic coma - Decline", "R|Amputation, retinopathy, kidney or vascular disease, or diabetes combined with cardiac, stroke or morbid obesity - Decline", "Any complications - DECLINE", "N|Rated for cause; insulin use excludes living benefit riders"],
+    ["Down's syndrome", "DECLINE", "R|Not eligible", "R|Ever - Decline", "R|Decline (uninsurable list, 2025 guide)", "DECLINE", "R|Decline"],
+    ["DUI", "Within 5 yrs - DECLINE; 4+ moving violations within 5 yrs - DECLINE", "A|Single DUI within past year, or multiple within 5 yrs - not eligible; license suspended - not eligible", "A|DUI / reckless driving within 2 yrs - Decline; after 2 yrs - Select", "A|Single DUI within 1 yr, or multiple with any within 5 yrs - Decline; alcohol-related violation within 5 yrs excludes Preferred; license currently suspended - Decline", "Single DUI within 12 mos or 2 within 5 yrs - DECLINE; more than 2 - call risk assessment", "A|Under 1 yr - decline; 1-2 yrs - $2.50-$3.50/M flat extra; 2-4 yrs - Standard to $2.50/M; over 4 yrs - Standard; multiple within 4 yrs - decline; under 21 at violation - decline for 4 yrs"],
+    ["Drug use or treatment", "Within 10 yrs - DECLINE", "N|Not on either RapidProtect list - XRAE quotes cannot be used for RapidProtect; ask underwriting", "A|Drug use, abuse or treatment (other than marijuana) within 7 yrs - Decline; after 7 yrs - Select", "A|Use within 3 yrs or daily marijuana - Decline; total abstinence 5 yrs - no rating to Decline", "Other than marijuana - DECLINE; recreational marijuana up to 6 days/wk - ACCEPTED; medical marijuana - case by case", "A|Marijuana - Standard to decline by frequency and method; other drugs: any use in 3 yrs - decline; 3-7 yrs - T2-T8; over 7 yrs - Standard; relapses - usually decline"],
+    ["Emphysema", "DECLINE", "R|COPD - not eligible", "R|Ever - Decline", "A|Table 4 to Decline", "DECLINE", "A|Mild - T2-T4; moderate - T4-T6; severe - T6 to decline; current tobacco or oxygen use - decline"],
+    ["Epilepsy / seizures", "Not asked", "A|May qualify depending on age and treatment", "A|Within 2 yrs - Decline; after 2 yrs - Select", "A|Diagnosed within 1 yr - Decline; petit mal, no attack in 1 yr - no rating; grand mal, no attack in 1 yr - no rating to moderate rating", "Controlled with meds, no seizures for 2 yrs, no complications - OK", "A|Under 6 mos since diagnosis - decline; controlled, no seizures 2 yrs - Standard to T2; under 7/yr - petit mal T2-T4, grand mal T3-T5; poor control - T4/T6 to decline"],
+    ["Felony", "Within 10 yrs - DECLINE", "R|Any felony conviction - not eligible", "A|Felony conviction or pending charges within 10 yrs - Decline; after 10 yrs - Select; currently on probation / parole - Decline", "R|Any history of felony charges - Decline; misdemeanor - Decline until 1 yr off probation/parole", "Currently on parole or probation - DECLINE; after 5 yrs from jail time - OK", "A|Charges pending or on probation/parole - decline (reconsider 1 yr after); otherwise call home office"],
+    ["Fibromyalgia", "Not asked", "A|Mild, no current narcotic use - may qualify", "N|Not on chart", "A|No rating to moderate rating", "ACCEPTED", "A|Standard to decline"],
+    ["Gout", "Not asked", "A|Mild, NSAIDs only - may qualify", "N|Not on chart", "G|No rating", "ACCEPTED", "G|Standard (chronic severe cases may be rated)"],
+    ["Heart attack", "DECLINE", "R|Not eligible", "A|Within 10 yrs - Decline; after 10 yrs - Select", "A|Within 6 mos, or with diabetes, stroke or continued tobacco - Decline; otherwise no rating to Decline by age/severity", "DECLINE", "A|CAD rules: under 40 - decline; 40-45 - T6 to decline; 46-59 - T4 to decline; 60+ - T2 to decline; credits possible for good cholesterol and recent negative cardiac testing"],
+    ["Irregular heartbeat / murmur", "DECLINE", "R|Arrhythmias and heart valve disorders - not eligible", "A|Irregular heartbeat within 5 yrs - Decline; after 5 yrs - Select", "A|AFib - no rating to moderate; mitral murmur - moderate rating to Decline; MVP - no rating to Decline; bundle branch block - no rating to Table 4", "Arrhythmia - DECLINE; heart murmur with no symptoms or treatment - OK", "A|AFib non-chronic - Standard to T2; chronic - T2-T4; MVP mild - Standard to T2, moderate - T4-T6, severe - decline; right bundle branch block - Standard; left - T3 to decline"],
+    ["Heart disease / disorder", "DECLINE", "R|Not eligible", "A|Within 5 yrs - Decline; after 5 yrs - Select; congenital heart defects - Decline", "A|Rate for cause - no rating to Decline; heart surgery within 6 mos - Decline", "DECLINE", "A|Rated for cause - Standard to decline"],
+    ["Heart surgery", "DECLINE", "R|Not eligible", "A|Cardiac surgery within 10 yrs - Decline; after 10 yrs - Select", "A|Within 6 mos or with diabetes / stroke history - Decline; otherwise no rating to Decline", "DECLINE", "A|Bypass under 3 mos - postpone, then CAD rules by age; valve surgery under 1 yr - decline, then T2 to decline"],
+    ["Heart valve replacement / MVP", "DECLINE", "R|Heart valve disorders - not eligible", "A|Cardiac surgery within 10 yrs - Decline; after 10 yrs - Select", "A|Valve surgery within 1 yr - Decline; replacement - Table 4 to Decline; aortic insufficiency - Standard to Decline; MVP - no rating to Decline", "DECLINE", "A|Valve surgery under 1 yr - decline; over 1 yr - T2 to decline; MVP mild - Standard to T2; moderate - T4-T6; severe - decline"],
+    ["Hepatitis A", "Not asked", "N|Not on either RapidProtect list - XRAE quotes cannot be used for RapidProtect; ask underwriting", "N|Not on chart", "G|Recovered - generally no rating", "Recovered - ACCEPTED", "G|Fully recovered - Standard"],
+    ["Hepatitis B", "DECLINE", "A|Chronic, treated and resolved - may qualify", "A|Within 5 yrs - Decline; after 5 yrs - Select", "A|Chronic, treated and resolved - Table 4 to Decline; excludes Preferred", "DECLINE", "A|One episode, fully recovered - Standard; chronic - Standard to decline"],
+    ["Hepatitis C", "DECLINE", "A|Chronic, treated and resolved - may qualify", "A|Within 5 yrs - Decline; after 5 yrs - Select", "A|Chronic, treated and resolved - Table 4 to Decline; excludes Preferred", "DECLINE", "A|Standard to decline"],
+    ["High blood pressure", "Hospitalized within 10 yrs - DECLINE; otherwise OK but check meds", "G|Well controlled - may qualify", "N|Not on chart", "G|Well controlled - no rating (one BP medication allowed for Preferred)", "Controlled - ACCEPTED", "G|Controlled - usually Standard; Preferred allowed with treatment ages 50-80 if readings fit"],
+    ["Hodgkin's disease", "DECLINE", "R|Cancer - not eligible", "R|Lymphoma - Decline", "N|Call for quote", "DECLINE", "A|T2 to decline"],
+    ["Hospice", "DECLINE", "N|Not listed; hospital admission in past 12 mos - not eligible", "R|Current hospice, palliative or home healthcare - Decline", "R|Decline", "DECLINE", "R|Decline"],
+    ["Huntington's disease", "DECLINE", "N|Not on either RapidProtect list - XRAE quotes cannot be used for RapidProtect; ask underwriting", "R|Ever - Decline", "N|Not listed - neurological disease; call for quote", "DECLINE", "A|Present - decline; family history with negative genetic test - Standard; untested and 55 or under - T4 to decline; over 55 - usually Standard"],
+    ["Illegal drugs", "Within 10 yrs - DECLINE", "N|Not on either RapidProtect list - XRAE quotes cannot be used for RapidProtect; ask underwriting", "A|Within 7 yrs (other than marijuana) - Decline; after 7 yrs - Select", "A|Use within 3 yrs - Decline; abstinent 5 yrs - no rating to Decline", "Other than marijuana - DECLINE; recreational marijuana up to 6 days/wk - ACCEPTED; medical - case by case", "A|Any use in 3 yrs - decline; 3-7 yrs - T2-T8; over 7 yrs - Standard"],
+    ["Jail / incarcerated", "Within 10 yrs - DECLINE", "R|Any felony - not eligible; misdemeanor within 1 yr of probation ending, or multiple misdemeanors within 7 yrs - not eligible", "A|Currently incarcerated, on probation or parole - Decline; felony within 10 yrs - Decline", "R|Felony charge history - Decline; misdemeanor until 1 yr off parole/probation - Decline; incarceration requires APS", "Currently on parole or probation - DECLINE; after 5 yrs from jail time - OK", "A|On probation/parole or charges pending - decline; otherwise call home office"],
+    ["Kidney disease / failure", "DECLINE", "R|Chronic kidney disease, polycystic kidney, dialysis - not eligible", "A|Chronic kidney failure within 10 yrs - Decline; after 10 yrs - Select; polycystic kidney - Decline", "A|Nephritis single episode - no rating; others moderate rating to Decline; chronic renal failure, dialysis or polycystic kidney - Decline", "DECLINE", "A|Chronic glomerulonephritis - T6 to decline; acute in remission - Standard to T6; kidney failure - decline; transplant over 1 yr - T6 to decline"],
+    ["Liver disease", "DECLINE", "A|Cirrhosis - not eligible; treated and resolved hepatitis - may qualify", "A|Liver disease within 5 yrs (excluding fatty liver) - Decline; after 5 yrs - Select; liver failure or cirrhosis - Decline", "A|Cirrhosis - Decline; hepatitis - Table 4 to Decline; others call for quote", "DECLINE", "A|Cirrhosis - decline; hepatitis B / C - Standard to decline"],
+    ["Lupus", "DECLINE", "A|Systemic mild without complications, or discoid in remission - may qualify", "R|Systemic lupus - Decline", "A|Systemic - Table 4 to Decline; discoid (skin only, remission, no steroids) - no rating", "Discoid - ACCEPTED; systemic - DECLINE", "A|Discoid - Standard to T2; systemic under 1 yr - decline, then T2 to decline"],
+    ["Marijuana use", "Not asked", "N|Not on either RapidProtect list - XRAE quotes cannot be used for RapidProtect; ask underwriting", "G|Not a knockout (drugs other than marijuana have a 7-yr rule); marijuana-industry employment - Decline", "A|Daily use - Decline; occasional use - not ratable for Select", "Recreational up to 6 days/wk - ACCEPTED; medical - case by case", "A|Recreational - Standard to decline by frequency and method (Preferred possible); medicinal - T2 to decline; tobacco vs non-tobacco class set by frequency and method"],
+    ["Melanoma", "See Cancer", "R|Cancer - not eligible", "A|Within 5 yrs - Decline; after 5 yrs with surgery-only treatment - Select", "A|Possible Standard depending on pathology; excludes Preferred / Elite", "See Cancer", "A|Standard to decline"],
+    ["Mental incapacity / retardation", "DECLINE", "R|Intellectual disability - not eligible", "R|Ever - Decline", "A|Moderate rating to Decline by severity", "Not asked", "A|Age 13 or under - decline; over 13 with IQ 70+ and able to care for self - Standard; IQ under 70 - T6 to decline"],
+    ["Military", "Not asked", "N|Not on either RapidProtect list - XRAE quotes cannot be used for RapidProtect; ask underwriting", "A|Active duty on standby or with deployment orders outside the US - Decline", "N|Individual consideration; military questionnaire required", "Accepted as long as not currently deployed", "A|Active duty acceptable unless serving in or ordered to a hazardous area"],
+    ["Multiple sclerosis", "DECLINE", "N|Not on either RapidProtect list - XRAE quotes cannot be used for RapidProtect; ask underwriting", "R|Ever - Decline", "A|Not progressive or disabling - Table 2 to Decline; disabling or progressive - Decline", "DECLINE", "A|Under 2 yrs - decline; over 2 yrs mild - T4-T6; moderate - T6-T8; severe or primary progressive - decline"],
+    ["Muscular dystrophy", "DECLINE", "N|Not on either RapidProtect list - XRAE quotes cannot be used for RapidProtect; ask underwriting", "R|Ever - Decline", "R|Decline", "DECLINE", "A|Becker - T8 to decline; facioscapulohumeral - T2 to decline; oculopharyngeal - Standard to decline; other types - decline"],
+    ["Muscle disease or disorder", "Not asked", "N|Not on either RapidProtect list - XRAE quotes cannot be used for RapidProtect; ask underwriting", "N|Not on chart (motor neuron disease - Decline)", "A|Fibrositis / myositis - no rating; others rate for cause", "Not asked", "N|Rated for cause - call home office"],
+    ["Neuropathy", "With diabetes - DECLINE", "N|Not on either RapidProtect list - XRAE quotes cannot be used for RapidProtect; ask underwriting", "A|Diabetic neuropathy - Decline; peripheral neuropathy blocks living benefit riders", "A|Neurological-disease meds exclude Preferred; diabetic neuropathy - see diabetic complications", "With diabetes - DECLINE", "N|Rated for cause; peripheral neuropathy excludes living benefit riders"],
+    ["Oxygen / ventilator", "DECLINE", "R|Not eligible", "A|Supplemental oxygen within 1 yr - Decline; after 1 yr - Select (temporary use up to 3 mos excepted)", "R|Severe COPD on oxygen - Decline", "DECLINE", "R|Current oxygen use - decline"],
+    ["Pain medication", "Not asked - check med list", "N|Current narcotic use blocks several qualifications", "A|Frequent or high-dose opioids within 3 yrs - Decline; after 3 yrs - Select", "R|Chronic opioid / narcotic use - Decline", "Check med list", "A|Chronic pain rules: mild - Standard to T3; moderate - T4-T8; severe - decline"],
+    ["Pancreatitis", "Chronic or alcohol related - DECLINE", "N|Not on either RapidProtect list - XRAE quotes cannot be used for RapidProtect; ask underwriting", "R|Chronic pancreatitis - Decline", "A|Rate for cause", "Single attack, non-alcohol, no complications - OK; alcohol related or chronic - DECLINE", "A|Acute under 6 mos - decline; single episode - Standard to T2; multiple - T4; chronic - decline"],
+    ["Paraplegia / quadriplegia", "DECLINE", "R|Paralysis - not eligible", "R|Paralysis - Decline", "A|Paraplegic - Table 6 to Decline; quadriplegic - highly rated to Decline", "DECLINE", "A|Incomplete paralysis, not in wheelchair, over 1 yr - T2-T8; complete paraplegia under 2 yrs - decline, then T4-T8; complete quadriplegia - decline"],
+    ["Parkinson's disease", "DECLINE", "R|Not eligible", "R|Ever - Decline", "A|Table 3 to Decline; disabling - Decline", "DECLINE", "A|T3 to decline"],
+    ["Parole / probation (currently)", "Within 10 yrs - DECLINE", "R|Misdemeanor with less than 1 yr since end of probation - not eligible; any felony - not eligible", "R|Current - Decline", "R|Currently on parole or probation - Decline", "Currently on parole or probation - DECLINE; after 5 yrs from jail time - OK", "R|Currently on probation or parole - decline; reconsider 1 yr after end"],
+    ["PAD / PVD", "With diabetes - DECLINE", "R|Not eligible", "R|Ever - Decline", "A|Not severe - Table 2 at best; excludes Preferred", "DECLINE", "A|Non-smoker, no surgery - T2-T6; with surgery - T4-T6; smoker or severe - decline"],
+    ["Pilot or student pilot", "Not asked", "N|Not on either RapidProtect list - XRAE quotes cannot be used for RapidProtect; ask underwriting", "A|Private pilot or flight crew in the next 2 yrs - Decline; after 2 yrs - Select (commercial airline OK)", "A|Private aviation excludes Preferred / Elite; commercial pilots for major US carriers OK; aviation questionnaire required", "No flying as a student pilot", "A|Student or under 75 solo hrs - $3.00/M flat extra; qualified private pilot - Standard to $3.00/M; airline / corporate pilot - Standard; Preferred only with aviation exclusion rider"],
+    ["Pregnant", "Not asked - ask about gestational diabetes", "G|Current pregnancy with no complications - may qualify", "A|Gestational diabetes while pregnant - Decline; otherwise not on chart", "A|Current gestational diabetes, toxemia or pre-eclampsia - Decline (reconsider 6 wks postpartum); uncomplicated - no rating", "Not asked", "G|No current or past complications - Standard"],
+    ["PTSD", "Not asked", "N|Not listed; SSDI for mental health - not eligible", "A|Within 1 yr - Decline; after 1 yr - Select", "A|Hospitalization or disability in last yr - Decline; otherwise depression rules; APS required", "Not asked", "A|Underwritten as anxiety: mild - Standard; moderate - T2-T4; severe - decline"],
+    ["Pulmonary fibrosis", "DECLINE", "N|Not on either RapidProtect list - XRAE quotes cannot be used for RapidProtect; ask underwriting", "R|Ever - Decline", "A|Lung disease - call for quote; severe or on oxygen - Decline", "DECLINE", "A|Not listed - lung disease rated for cause; oxygen use - decline"],
+    ["Renal disease", "End stage with dialysis - DECLINE", "R|Chronic kidney disease / dialysis - not eligible", "A|Chronic kidney failure within 10 yrs - Decline; after 10 yrs - Select", "R|Chronic renal failure - Decline", "DECLINE", "R|Kidney failure - decline"],
+    ["Restless leg syndrome", "Not asked - see if meds treat Parkinson's (explain in agent notes)", "N|Not on either RapidProtect list - XRAE quotes cannot be used for RapidProtect; ask underwriting", "N|Not on chart", "G|Not listed - generally no rating; check meds", "Not asked - see if meds treat Parkinson's (explain in agent notes)", "G|Not listed - Standard"],
+    ["Rheumatoid arthritis", "See Arthritis", "A|No disability - may qualify (age dependent)", "N|Not a base knockout; blocks living benefit riders", "A|No rating to Decline by severity; RA meds exclude Preferred", "See Arthritis", "A|Mild - Standard to T2; moderate - T3-T4; severe - T6-T8"],
+    ["Sarcoidosis", "DECLINE", "R|Not eligible", "N|Not on chart", "A|Moderate rating to Decline depending on organs involved", "Localized non-pulmonary - ACCEPTED; pulmonary - DECLINE", "A|Standard to decline"],
+    ["Schizophrenia / psychosis", "DECLINE", "N|Not on either RapidProtect list - XRAE quotes cannot be used for RapidProtect; ask underwriting", "A|Within 5 yrs - Decline; after 5 yrs - Select", "A|Psychosis - Table 6 to Decline; hospitalization in last yr - Decline", "DECLINE", "A|0-2 yrs since last episode - decline; 2-5 yrs - T4 to decline; 5-10 yrs - Standard to T6; over 10 yrs - Standard to T4"],
+    ["Sickle cell anemia", "DECLINE", "N|Not on either RapidProtect list - XRAE quotes cannot be used for RapidProtect; ask underwriting", "R|Ever - Decline", "A|Anemia - rate for cause", "Not asked", "N|Not in impairment table (declined on Express products) - call home office"],
+    ["Sleep apnea", "Not asked", "A|Consistent CPAP use, no complications - may qualify", "A|With oxygen use or central sleep apnea - Decline; otherwise not on chart", "A|Consistent CPAP use - possible Standard", "Treated and controlled - ACCEPTED", "A|Mild - Standard; moderate - Standard to T3; severe - T2 to decline"],
+    ["Smoker / nicotine use", "Any tobacco or nicotine replacement - SMOKER RATE", "A|Standard Tobacco or Express Standard Tobacco class (ages 18-60); nicotine pouches, vaping, hookah all count", "A|Select Tobacco class (ages 18-70)", "A|Any nicotine within 12 mos - tobacco rates (Preferred Tobacco available); Select needs 12 mos, Preferred 36 mos, Elite 60 mos nicotine-free", "Any nicotine product within 12 mos - tobacco rates (cigars count; unlike Strong Foundation)", "A|Any tobacco or nicotine product incl. vaping - tobacco rates; Preferred Plus needs 5 yrs, Preferred 2 yrs, Standard Plus 1-2 yrs tobacco-free; 1 cigar per month allowed with negative cotinine"],
+    ["Spina bifida", "Not asked", "N|Not on either RapidProtect list - XRAE quotes cannot be used for RapidProtect; ask underwriting", "N|Not on chart", "N|Not listed - call for quote", "DECLINE", "N|Not listed - call home office"],
+    ["Stent", "DECLINE", "R|Coronary artery disease - not eligible", "A|Cardiac surgery within 10 yrs or CAD within 5 yrs - Decline; then Select", "A|Angioplasty within 6 mos, or with diabetes, stroke or tobacco - Decline; otherwise no rating to Decline", "DECLINE", "A|Under 6 mos post angioplasty - decline; then CAD rules by age"],
+    ["Stroke / TIA", "DECLINE", "R|Not eligible", "A|Within 10 yrs - Decline; after 10 yrs - Select", "A|CVA within 1 yr, or with diabetes or cardiac history - Decline; after 1 yr full recovery - Table 4 at best; TIA no residuals - no rating to moderate rating", "DECLINE", "A|Stroke under 6 mos - decline; over 6 mos with mild residuals: age 50 and under - decline, over 50 - T2-T5; multiple - decline. TIA under 6 mos - decline; single over 6 mos - Standard to T3; multiple - T2-T5"],
+    ["Suicide attempt / ideation", "N|Not addressed on grid", "R|Suicide attempt - not eligible", "A|Single attempt within 5 yrs - Decline; after 5 yrs - Select", "A|Within 1 yr, or more than one within 2 yrs - Decline; after 2 yrs - flat extra to Decline", "See Depression", "A|Under 1 yr - decline; 1-5 yrs - $5/M flat extra to decline; over 5 yrs - Standard to decline"],
+    ["Terminal illness", "DECLINE", "N|Not on either RapidProtect list - XRAE quotes cannot be used for RapidProtect; ask underwriting", "R|Decline", "R|Decline", "DECLINE", "R|Decline"],
+    ["Transplant", "DECLINE", "R|Not eligible", "R|Recipient or recommended - Decline", "R|Awaiting or recipient - Decline", "DECLINE", "A|Kidney transplant under 1 yr - decline; over 1 yr - T6 to decline; other organs - call home office"],
+    ["Tuberculosis", "Not asked", "G|Fully investigated, complete recovery - may qualify", "N|Not on chart", "G|Full recovery, no residuals - no rating", "Treatment completed - ACCEPTED", "G|Fully recovered - usually Standard"],
+    ["Tumor", "Not asked (check treatment)", "N|Not on either RapidProtect list - XRAE quotes cannot be used for RapidProtect; ask underwriting", "A|See Cancer - most types Decline; site-specific windows for thyroid, breast, testicular, cervical, prostate, melanoma, bladder, colon, kidney", "N|Call for quote", "See Cancer", "A|Benign - usually Standard; malignant - call home office"],
+    ["Ulcerative colitis", "Not asked", "R|Not eligible", "N|Not a base knockout for adults; blocks living benefit riders", "A|No rating to Decline (APS required)", "Mild to moderate - ACCEPTED", "A|Under 1 yr - decline; over 1 yr mild - Standard to T4; moderate - T4-T6; severe - decline"],
+    ["Wheelchair / electric scooter", "DECLINE", "N|Not on either RapidProtect list - XRAE quotes cannot be used for RapidProtect; ask underwriting", "A|Within 1 yr - Decline; after 1 yr - Select (temporary use up to 3 mos excepted)", "N|Rated for underlying cause", "Due to chronic illness or disease - DECLINE", "N|Rated for cause; excludes living benefit riders"],
+    ["Pending surgery / tests", "N|Not addressed on grid", "R|Diagnostic testing in the last 3 mos (other than colonoscopy, pap smear or mammogram) - not eligible", "A|Pending tests, surgery, hospitalization or results within 6 mos - Decline; after - Select", "R|Major surgery pending - Decline (postpone until complete)", "N|Not addressed on grid", "N|Postpone until complete"],
+    ["Medically declined in past 5 yrs", "N|Not addressed on grid", "N|Not on either RapidProtect list - XRAE quotes cannot be used for RapidProtect; ask underwriting", "N|Not on chart", "A|Declined by another carrier within last yr - run it through XRAE first (not available for RapidProtect)", "N|Not addressed on grid", "N|Disclose on application - individual consideration"],
+    ["Barrett's esophagus", "N|Not addressed on grid", "N|Not on either RapidProtect list - XRAE quotes cannot be used for RapidProtect; ask underwriting", "N|Not on chart (esophageal varices - Decline)", "N|Not listed - call for quote", "N|Not addressed on grid", "A|Standard to decline"],
+    ["Gastric bypass / lap band", "N|Not addressed on grid", "A|Over 6 mos since surgery, no complications - may qualify", "N|Not on chart", "A|Within 6 mos - Decline; after - individual consideration", "N|Not addressed on grid", "A|Under 6 mos - decline; over 6 mos - contact home office (based on weight loss and current weight)"],
+    ["Family history (parent heart death before 60)", "N|Not addressed on grid", "N|Not on either RapidProtect list - XRAE quotes cannot be used for RapidProtect; ask underwriting", "N|Not on chart", "A|Parent or sibling death from heart disease or cancer before 60 excludes Preferred (before 65 excludes Elite); Select allows one", "N|Not addressed on grid", "A|Preferred Plus: no parent or sibling cardiovascular / cancer death before 65; Preferred and Standard Plus: no parent death before 60; disregarded once the client is 60 / 65"]
+  ]
+}
+};
+
+
+/* ---------- ELIGIBILITY (ages, faces, build) ----------
+   Build tables: index 0 = 4'8" ... index 24 = 6'8" ; [min,max] lbs at the loosest class the product issues. null = not published. */
+const H0=56;
+const BUILD={
+ AM_ES:[[79,189],[81,196],[84,203],[87,210],[90,217],[93,224],[96,232],[99,239],[102,247],[106,255],[109,263],[112,271],[116,279],[119,287],[122,296],[126,304],[130,313],[133,322],[137,331],[141,340],[144,349],[148,358],[152,367],[156,377],null],
+ AM:[[80,188],[82,195],[85,202],[88,209],[91,216],[95,223],[97,231],[100,238],[103,246],[107,254],[110,262],[113,270],[117,278],[120,286],[123,295],[127,303],[131,312],[134,321],[138,330],[142,339],[145,348],[149,357],[153,366],[157,376],null],
+ IBT:[[83,179],[86,185],[90,191],[93,198],[96,205],[99,212],[102,219],[106,226],[109,233],[112,240],[116,248],[119,255],[123,263],[127,271],[130,279],[134,287],[138,295],[142,303],[146,312],[150,320],[154,329],[158,337],[162,346],[166,355],[170,364]],
+ IBPT:[[83,202],[86,208],[90,215],[93,223],[96,230],[99,238],[102,246],[106,254],[109,262],[112,270],[116,279],[119,287],[123,296],[127,305],[130,314],[134,323],[138,332],[142,341],[146,351],[150,360],[154,370],[158,380],[162,389],[166,399],[170,410]],
+ FFE:[[74,330],[76,334],[79,337],[82,341],[84,346],[87,351],[90,357],[93,365],[96,372],[99,379],[102,387],[105,396],[109,404],[112,413],[115,420],[118,428],[122,437],[125,445],[129,454],[132,464],[136,473],[139,483],[143,492],[146,500],[150,507]],
+ MOOX:[[74,204],[77,209],[79,214],[82,220],[85,226],[88,233],[91,239],[94,246],[97,252],[100,259],[103,268],[106,275],[109,283],[112,291],[115,300],[119,307],[122,315],[126,322],[129,331],[133,339],[136,348],[140,357],[143,366],[147,375],[151,385]],
+ LP:[[74,221],[77,225],[79,231],[82,237],[85,244],[88,250],[91,257],[94,264],[97,270],[100,277],[103,285],[106,293],[109,300],[112,309],[115,316],[119,325],[122,333],[126,340],[129,349],[133,358],[136,367],[140,376],[143,385],[147,394],[151,405]],
+ MOOFU:[[74,240],[77,244],[79,249],[82,254],[85,262],[88,269],[91,277],[94,284],[97,292],[100,299],[103,308],[106,316],[109,324],[112,331],[115,340],[119,349],[122,356],[126,365],[129,374],[133,383],[136,394],[140,402],[143,413],[147,422],[151,431]],
+ FSF:[[82,185],[85,193],[88,198],[91,207],[94,212],[97,221],[101,225],[104,234],[107,243],[111,250],[114,259],[118,265],[121,274],[125,281],[128,292],[132,298],[136,307],[140,314],[144,325],[147,336],[151,342],[155,353],[160,360],null,null],
+ NLGT:[[83,207],[86,214],[89,222],[92,230],[95,238],[98,246],[102,254],[105,262],[108,270],[112,279],[115,288],[119,296],[122,305],[126,314],[129,324],[133,333],[137,342],[141,352],[145,362],[148,371],[152,381],[156,392],[161,402],[165,412],[169,423]],
+ NLGP1:[[83,189],[86,196],[89,203],[92,210],[95,217],[98,224],[102,232],[105,239],[108,247],[112,255],[115,263],[119,271],[122,279],[126,287],[129,296],[133,304],[137,313],[141,322],[145,330],[148,339],[152,349],[156,358],[161,367],[165,377],[169,386]],
+ AAT:[null,null,[86,199],[88,205],[90,212],[93,220],[95,227],[99,234],[101,242],[104,249],[106,257],[110,265],[113,273],[117,281],[120,289],[125,298],[129,306],[133,315],[136,323],[140,332],[143,341],[146,350],[149,359],[153,368],[157,378]],
+ SC:[[null,214],[null,222],[null,230],[null,238],[null,246],[null,254],[null,262],[null,271],[null,280],[null,288],[null,297],[null,306],[null,316],[null,325],[null,335],[null,344],[null,354],[null,364],[null,374],[null,384],[null,394],[null,404],[null,414],[null,424],[null,434]],
+ PR:[[74,232],[77,239],[80,246],[83,253],[86,262],[89,271],[92,280],[95,288],[98,297],[101,306],[104,315],[107,325],[110,334],[113,343],[117,353],[121,362],[125,372],[129,381],[133,391],[137,399],[142,409],[147,419],[152,434],[159,442],[162,450]],
+ TAM:[[null,166],[null,172],[null,178],[null,184],[null,190],[null,196],[null,202],[null,208],[null,214],[null,220],[null,227],[null,233],[null,239],[null,244],[null,250],[null,256],[null,263],[null,269],[null,276],[null,283],[null,289],[null,296],[null,303],[null,310],[null,317]],
+ TAF:[[null,159],[null,164],[null,169],[null,175],[null,181],[null,187],[null,193],[null,197],[null,202],[null,206],[null,210],[null,215],[null,220],[null,225],[null,230],[null,236],[null,242],[null,248],[null,254],[null,260],[null,267],[null,274],[null,281],[null,287],[null,293]]
+};
+const ELIG={
+ wl:{ americo:{ages:[50,85],face:[5000,50000],build:"AM_ES",note:"ages from 2022 Eagle Premier sheet"}, accendo:{ages:[40,89],face:[2000,50000]}, amam:{ages:[0,85],face:[2500,35000],faceAge:[[75,35000],[85,20000]],build:"SC"},
+      foresters:{ages:[50,85],face:[5000,35000],faceAge:[[80,35000],[85,15000]],build:"PR"}, moo:{ages:[45,85],face:[2000,50000],build:"LP"}, chubb:{ages:[0,80],face:[5000,50000]}, fidelity:{ages:[50,85],face:[5000,50000],faceAge:[[80,50000],[85,40000]],build:"FFE"}, fex:{ages:[18,85],face:[5000,100000],faceAge:[[75,100000],[85,25000]],bmi:48,bmiMin:15} },
+ term:{ americo:{ages:[20,75],face:[25000,450000],build:"AM"}, moo:{ages:[18,75],face:[25000,550000],faceAge:[[50,550000],[60,450000],[75,350000]],build:"MOOX"}, amam:{face:[25000,300000],build:"AAT"}, foresters:{ages:[18,80],face:[20000,400000],faceAge:[[55,400000],[80,150000]],build:"FSF"},
+      ibt:{ages:[18,60],face:[50000,1000000],faceAge:[[55,1000000],[56,900000],[57,800000],[58,700000],[59,600000],[60,500000]],build:"IBT"}, ibpt:{ages:[18,60],face:[50000,1000000],faceAge:[[55,1000000],[56,900000],[57,800000],[58,700000],[59,600000],[60,500000]],build:"IBPT"},
+      mooau:{ages:[18,80],face:[25000,20000000],build:"MOOFU"}, nlg:{ages:[18,85],build:"NLGT"}, ta:{ages:[18,80],face:[25000,20000000],build:"TA"} },
+ iul:{ iule:{ages:[18,75],face:[25000,550000],faceAge:[[50,550000],[60,450000],[75,350000]],build:"MOOX"}, rapid:{ages:[0,60],face:[50000,500000],build:"NLGP1"}, ffiulx:{ages:[0,70],face:[50000,500000],faceAge:[[17,250000],[60,500000],[70,300000]],bmi:39,bmiMin:16}, nlgiul:{ages:[0,85],build:"NLGT"}, smartul:{ages:[0,75],face:[25000,400000],faceAge:[[55,400000],[75,150000]],build:"FSF"}, ffiul:{ages:[0,85],face:[25000,20000000],build:"TA"} }
+};
+const TYPE_ORDER=[["iul","IUL"],["wl","Whole Life"],["term","Term"]];
+/* WL row name -> term/IUL row name, for the unified condition list */
+const WL2T={"AFib / irregular heartbeat":"Arrhythmia / AFib","Alcohol / drug abuse":"Alcohol / drug abuse or treatment","Alzheimer's / dementia / memory loss / cognitive":"Alzheimer's / dementia","Angioplasty":"Angioplasty / bypass","Assisted living / long-term care facility":"Assisted living / LTC facility","Blood clots":"Blood clots / DVT","Blood disorder (polycythemia, thrombocytopenia, hemophilia, coagulation)":"Blood / clotting disorder","Bronchitis (chronic)":"Bronchitis","Cancer (other than basal cell)":"Cancer","Chronic pain (6+ narcotic fills)":"Chronic pain (narcotic prescriptions)","Diabetic complications (insulin shock, coma, retinopathy, nephropathy, neuropathy)":"Diabetic complications","Emphysema (chronic)":"Emphysema","Heart valve replacement":"Heart valve replacement / MVP","Kidney disease / failure (see Dialysis)":"Kidney disease / failure","Lupus (systemic)":"Lupus","Oxygen use":"Oxygen / ventilator","Pacemaker / defibrillator":"Defibrillator / pacemaker","Schizophrenia":"Schizophrenia / psychosis","Organ transplant":"Transplant","Wheelchair / scooter / electric cart":"Wheelchair / electric scooter"};
+
+/* ---------- STATUS DERIVATION ---------- */
+const RX = {
+  decline: /decline|not eligible/i,
+  positive: /\b(graded|modified|rop|standard|preferred|basic|guaranteed|allowed|ok|accepted|immediate|not asked|smoker rate|tobacco rates|case by case|individual case|all classes|all ratings|table [cd]|sub-std|gi|t\d{1,2}|table \d|select|premier|may qualify)\b/i,
+  cond: /\b(within|if|after|over|less than|prior to|more than|single|combined|due to|caused by|diagnosed|treated|controlled|chronic|severe|malignant|current|systemic|pulmonary|stage|only|other than|excluding|recreational|received|active|before|while|w\/|ever had|with)\b/i,
+  lookup: /(check|see |ask about|meds|not listed|not addressed|call underwriting|contact underwriting)/i,
+  ok: /(allowed|not asked|^ok\b|- ok\b|accepted|preferred|all ratings|all classes|immediate|premier)/i
+};
+function parse(cell){
+  let m = /^([RAGN])\|(.*)$/.exec(cell);
+  if(m) return {t:m[2], s:{R:"no",A:"tier",G:"ok",N:"na"}[m[1]]};
+  const t=cell;
+  if(!RX.decline.test(t)){
+    if(/^(allowed|not asked)\b/i.test(t) && !/(graded|modified|\brop\b|\bgi\b|guaranteed issue|\bbasic\b|within)/i.test(t)) return {t, s:"ok"};
+    if(RX.ok.test(t) && !/check|see /i.test(t) && !/(graded|modified|\brop\b|\bgi\b|guaranteed issue|\bbasic\b|sub-std|\bselect\b|table|within|standard extra|prior to)/i.test(t)) return {t, s:"ok"};
+    if(RX.lookup.test(t)) return {t, s:"na"};
+    return {t, s:"tier"};                          // Graded / Modified / ROP / Standard / Basic / windows
+  }
+  if(RX.positive.test(t)) return {t, s:"tier"};    // decline in some cases, taken in others
+  if(/^(ever had|any history)/i.test(t) || /^decline/i.test(t)) return {t, s:"no"};
+  if(RX.cond.test(t)) return {t, s:"tier"};        // decline only inside a window / circumstance
+  return {t, s:"no"};
+}
+for(const k of Object.keys(DATA)){
+  DATA[k].rows = DATA[k].rows.map(r => ({name:r[0], cells:r.slice(1).map(parse)}));
+}
+
+/* ---------- STATE ---------- */
+let tab="wl", picked=[], onlyPicked=false, activeIdx=-1;
+const YOPTS=[["","any time"],["0.5","under 1 yr ago"],["1.5","1–2 yrs ago"],["3","2–5 yrs ago"],["7","5–10 yrs ago"],["12","10+ yrs ago"]];
+const pickedIdx=()=>picked.map(p=>p.i);
+const client={age:null,hin:null,wt:null,sex:"",face:null,lb:"lb",uw:"si",focus:"both"};
+/* ---------- MY CARRIERS (saved in this browser only) ---------- */
+const MC_KEY="ipw.myCarriers.v2";
+let myOff=new Set();   // carrier names the agent has unticked
+function mcLoad(){ try{ const v=localStorage.getItem(MC_KEY); if(v) myOff=new Set(JSON.parse(v)); }catch(e){} }
+function mcSave(){ try{ localStorage.setItem(MC_KEY,JSON.stringify([...myOff])); }catch(e){} }
+const mine=(key,car)=>!myOff.has(car.name);
+const ALL_CARRIERS=[...new Set(TYPE_ORDER.flatMap(([k])=>DATA[k].carriers.map(c=>c.name)))].sort((a,b)=>a.localeCompare(b));
+function renderDrawer(){
+  const list=$("#drawerList");
+  list.innerHTML=ALL_CARRIERS.map(n=>`<label class="drow"><input type="checkbox" data-k="${esc(n)}" ${myOff.has(n)?"":"checked"}><span>${esc(n)}</span></label>`).join("");
+  list.querySelectorAll("input").forEach(cb=>cb.addEventListener("change",()=>{ if(cb.checked) myOff.delete(cb.dataset.k); else myOff.add(cb.dataset.k); mcSave(); render(); }));
+  $("#gearBtn").classList.toggle("set",myOff.size>0);
+  $("#gearBtn").textContent=myOff.size?`⚙ My carriers (${[...myOff].length} off)`:"⚙ My carriers";
+}
+function openDrawer(o){ $("#drawer").classList.toggle("open",o); $("#drawer").setAttribute("aria-hidden",!o); $("#scrim").hidden=!o; if(o) renderDrawer(); }
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const rank={no:0,tier:1,na:2,ok:3,info:3};
+/* finer score for ranking: flat Guaranteed Issue / Graded / Modified / ROP / Basic ranks below
+   conditional windows, which rank below Standard / Select / Premier-type outcomes */
+const LOW=/(guaranteed issue|guaranteed$|\bgraded\b|\bmodified\b|\brop\b|\bgi\b|\bbasic\b|return of premium)/i;
+const BETTER=/(within|after|over \d|>|otherwise|not due|not asked|allowed|immediate|standard|select|preferred|premier|all ratings|all classes|sub-std|elite|no rating|table)/i;
+function score(c){
+  if(c.s==="ok"||c.s==="info") return 3;
+  if(c.s==="na") return 1;
+  if(c.s==="no") return 0;
+  const low=LOW.test(c.t), better=BETTER.test(c.t), gi=/(guaranteed issue|guaranteed$|\bgi\b)/i.test(c.t);
+  if(!low) return /;|within|after|if\b|may qualify|depends|otherwise|unless|call|not listed/i.test(c.t)?2.5:2.8;
+  if(better) return gi?2.2:2.3;
+  return gi?1.8:2.0;
+}
+const strongDecline = t => t.replace(/DECLINE/g,"<b>DECLINE</b>");
+const money=n=>"$"+Number(n).toLocaleString();
+
+/* ---------- UNIFIED CONDITION LIST ---------- */
+const COND=(()=>{
+  const byName={};
+  const add=(name,key,idx)=>{ (byName[name]=byName[name]||{name,wl:null,term:null,iul:null})[key]=idx; };
+  DATA.term.rows.forEach((r,i)=>add(r.name,"term",i));
+  DATA.iul.rows.forEach((r,i)=>add(r.name,"iul",i));
+  DATA.wl.rows.forEach((r,i)=>{ const t=WL2T[r.name]||r.name; if(byName[t]) byName[t].wl=i; else add(r.name,"wl",i); });
+  return Object.values(byName).sort((a,b)=>a.name.localeCompare(b.name));
+})();
+
+/* ---------- SEARCH ---------- */
+const q=$("#q"), sugg=$("#sugg");
+function matches(){
+  const v=q.value.trim().toLowerCase(); if(!v) return [];
+  return COND.map((c,i)=>({c,i})).filter(o=>!pickedIdx().includes(o.i) && o.c.name.toLowerCase().includes(v)).slice(0,12);
+}
+function renderSugg(){
+  const list=matches(); sugg.innerHTML="";
+  if(!q.value.trim()){sugg.classList.remove("open");q.setAttribute("aria-expanded","false");return;}
+  if(!list.length) sugg.innerHTML='<div class="none">No condition matches that — try another word (e.g. "heart", "kidney").</div>';
+  list.forEach((o,k)=>{ const b=document.createElement("button");b.type="button";b.setAttribute("role","option");b.className=k===activeIdx?"active":"";b.textContent=o.c.name;b.addEventListener("mousedown",e=>{e.preventDefault();pick(o.i);});sugg.appendChild(b); });
+  sugg.classList.add("open");q.setAttribute("aria-expanded","true");
+}
+q.addEventListener("input",()=>{activeIdx=-1;renderSugg();});
+q.addEventListener("focus",renderSugg);
+q.addEventListener("blur",()=>setTimeout(()=>sugg.classList.remove("open"),120));
+q.addEventListener("keydown",e=>{ const list=matches();
+  if(e.key==="ArrowDown"){e.preventDefault();activeIdx=Math.min(activeIdx+1,list.length-1);renderSugg();}
+  else if(e.key==="ArrowUp"){e.preventDefault();activeIdx=Math.max(activeIdx-1,0);renderSugg();}
+  else if(e.key==="Enter"){e.preventDefault(); if(list.length) pick(list[Math.max(activeIdx,0)].i);}
+  else if(e.key==="Escape") sugg.classList.remove("open"); });
+function pick(i){ if(!pickedIdx().includes(i)) picked.push({i,y:null}); q.value=""; activeIdx=-1; sugg.classList.remove("open"); render(); q.focus(); }
+function unpick(i){ picked=picked.filter(x=>x.i!==i); render(); }
+
+/* ---------- CLIENT INPUTS ---------- */
+function readClient(){
+  const a=parseInt($("#age").value,10); client.age=isNaN(a)?null:a;
+  const ft=parseInt($("#hft").value,10), inch=parseInt($("#hin").value,10);
+  client.hin=(isNaN(ft)||isNaN(inch))?null:ft*12+inch;
+  const w=parseInt($("#wt").value,10); client.wt=isNaN(w)?null:w;
+  client.sex=$("#sex").value; const f=parseInt($("#face").value,10); client.face=isNaN(f)?null:f; client.lb=$("#lb").value;
+}
+["#age","#hft","#hin","#wt","#sex","#face","#lb"].forEach(sel=>$(sel).addEventListener("input",()=>{readClient();render();}));
+document.querySelectorAll("#focusSeg button").forEach(b=>b.addEventListener("click",()=>{client.focus=b.dataset.focus;document.querySelectorAll("#focusSeg button").forEach(x=>x.setAttribute("aria-pressed",x===b));render();}));
+document.querySelectorAll("#uwSeg button").forEach(b=>b.addEventListener("click",()=>{client.uw=b.dataset.uw;document.querySelectorAll("#focusSeg button").forEach(b=>b.addEventListener("click",()=>{client.focus=b.dataset.focus;document.querySelectorAll("#focusSeg button").forEach(x=>x.setAttribute("aria-pressed",x===b));render();}));
+document.querySelectorAll("#uwSeg button").forEach(x=>x.setAttribute("aria-pressed",x===b));render();}));
+$("#dob").addEventListener("input",()=>{ const v=$("#dob").value; if(!v) return; const d=new Date(v+"T00:00:00"), n=new Date();
+  let a=n.getFullYear()-d.getFullYear(); const m=n.getMonth()-d.getMonth(); if(m<0||(m===0&&n.getDate()<d.getDate())) a--;
+  if(a>=0&&a<120){ $("#age").value=a; readClient(); render(); } });
+$("#age").addEventListener("input",()=>{ $("#dob").value=""; });
+
+/* ---------- ORDERING ---------- */
+function ordered(key){
+  const d=DATA[key]; const idx=d.carriers.map((c,i)=>i);
+  if(!d.orders) return idx;
+  const ids=(d.orders[client.lb]||d.orders.lb).ids; const pos=i=>{const k=ids.indexOf(d.carriers[i].id);return k<0?99+i:k;};
+  return idx.slice().sort((a,b)=>pos(a)-pos(b));
+}
+
+/* ---------- ELIGIBILITY CHECKS ---------- */
+function ftin(h){return Math.floor(h/12)+"'"+(h%12)+'"';}
+function eligChecks(key,car){
+  const e=(ELIG[key]||{})[car.id]||{}; const out=[];
+  if(client.age!=null && e.ages){ if(client.age<e.ages[0]||client.age>e.ages[1]) out.push({s:"no",age:true,t:`Issue ages ${e.ages[0]}–${e.ages[1]}${e.note?" ("+e.note+")":""}`}); else out.push({s:"ok",t:`Issue ages ${e.ages[0]}–${e.ages[1]}`}); }
+  else if(client.age!=null && !e.ages) out.push({s:"na",t:"Issue ages not in the guide loaded"});
+  if(client.face!=null){
+    let max=e.face?e.face[1]:null;
+    if(e.faceAge&&client.age!=null){ const band=e.faceAge.find(b=>client.age<=b[0]); if(band) max=band[1]; }
+    if(e.face && client.face<e.face[0]) out.push({s:"no",t:`Minimum face ${money(e.face[0])}`});
+    else if(max!=null && client.face>max) out.push({s:"no",t:`Max face ${money(max)}${e.faceAge&&client.age!=null?" at age "+client.age:""}`});
+    else if(max!=null) out.push({s:"ok",t:`Face OK (max ${money(max)}${e.faceAge&&client.age!=null?" at age "+client.age:""})`});
+  }
+  if((client.hin==null || client.wt==null) && (e.build||e.bmi)) out.push({s:"info",t:e.bmi?`BMI limit ${e.bmi} — add height/weight to check`:"Build chart applies — add height/weight to check"});
+  if(client.hin!=null && client.wt!=null){
+    const bmi=703*client.wt/(client.hin*client.hin);
+    if(e.bmi){ const lo=e.bmiMin?(e.bmi===39&&client.age!=null&&client.age>=60?18:e.bmiMin):0; out.push(bmi>e.bmi?{s:"no",t:`BMI ${bmi.toFixed(1)} — over ${e.bmi} limit`}:(bmi<=lo?{s:"no",t:`BMI ${bmi.toFixed(1)} — under ${lo} minimum`}:{s:"ok",t:`BMI ${bmi.toFixed(1)} (limit ${e.bmi})`})); }
+    else if(e.build){
+      let key2=e.build; if(key2==="TA") key2=client.sex==="f"?"TAF":"TAM";
+      const i=client.hin-H0; const row=(BUILD[key2]||[])[i];
+      if(row===undefined||row===null) out.push({s:"na",t:`Build chart doesn't cover ${ftin(client.hin)}`});
+      else { const [mn,mx]=row;
+        if(mx!=null && client.wt>mx) out.push({s:"no",t:`Over build limit — max ${mx} lbs at ${ftin(client.hin)}${e.build==="TA"&&!client.sex?" (male chart; pick sex for exact)":""}`});
+        else if(mn!=null && client.wt<mn) out.push({s:"no",t:`Under build minimum — ${mn} lbs at ${ftin(client.hin)}`});
+        else out.push({s:"ok",t:`Build OK (${mn??"—"}–${mx} lbs at ${ftin(client.hin)})`}); }
+    }
+  }
+  return out;
+}
+
+/* ---------- VERDICTS ---------- */
+function verdictsFor(key){
+  const d=DATA[key];
+  const showFU=client.uw!=="si", showSI=client.uw!=="fu";
+  return ordered(key).filter(ci=>{const c=d.carriers[ci]; if(!mine(key,c)) return false; const fu=c.tag==="Fully underwritten"; if(!(fu?showFU:showSI)) return false;
+    if(key==="iul" && client.focus!=="both" && c.focus && c.focus!=="both" && c.focus!==client.focus) return false; return true;}).map((ci,i)=>{ const car=d.carriers[ci];
+    const checks=eligChecks(key,car);
+    const lines=picked.map(p=>{ const c=COND[p.i]; const ri=c[key];
+      return ri==null?{row:c.name,cell:{t:"Not on the "+({wl:"whole life",term:"term",iul:"IUL"}[key])+" grid",s:"na"}}:{row:c.name,cell:resolveWindow(d.rows[ri].cells[ci],p.y,client.age)}; });
+    let worst="ok", sc=3; for(const c of checks){ if(rank[c.s]<rank[worst]) worst=c.s; sc=Math.min(sc,score(c)); } for(const l of lines){ if(rank[l.cell.s]<rank[worst]) worst=l.cell.s; sc=Math.min(sc,score(l.cell)); }
+    return {key,car,checks,lines,worst,sc,i,ageOut:checks.some(c=>c.s==="no"&&c.age)};
+  }).filter(x=>!x.ageOut && x.worst!=="no").sort((a,b)=>b.sc-a.sc || a.i-b.i);
+}
+function renderChips(){
+  const c=$("#chips");
+  if(!picked.length){c.innerHTML='<span class="hint">Add age and any conditions. Results update as you go.</span>';return;}
+  c.innerHTML=picked.map(p=>`<span class="chip">${esc(COND[p.i].name)}<select data-i="${p.i}" aria-label="Time since diagnosis or last treatment">${YOPTS.map(([v,l])=>`<option value="${v}" ${String(p.y??"")===v?"selected":""}>${l}</option>`).join("")}</select><button type="button" aria-label="Remove ${esc(COND[p.i].name)}" data-i="${p.i}">×</button></span>`).join("")+'<button type="button" class="clear" id="clearAll">Clear all</button>';
+  c.querySelectorAll(".chip button").forEach(b=>b.addEventListener("click",()=>unpick(+b.dataset.i)));
+  c.querySelectorAll(".chip select").forEach(sel=>sel.addEventListener("change",()=>{const p=picked.find(x=>x.i===+sel.dataset.i); p.y=sel.value===""?null:parseFloat(sel.value); render();}));
+  $("#clearAll").addEventListener("click",()=>{picked=[];render();});
+}
+/* ---------- TIME-WINDOW RESOLUTION ----------
+   Given years since diagnosis/treatment, pick the clause of a cell that applies. */
+function clauseWindow(cl){
+  const t=cl.toLowerCase(); let lo=null, hi=null, any=false;
+  const yrs=(n,u)=>/mo/.test(u)?n/12:n;
+  let m;
+  if((m=t.match(/(?:within|<|under|less than|in the (?:past|last)|within the (?:past|last)|w\/in)\s*(?:the\s+)?(?:past\s+|last\s+)?(\d+(?:\.\d+)?)\s*(yrs?|years?|mos?|months?)/))){hi=yrs(+m[1],m[2]);any=true;}
+  if((m=t.match(/(?:after|>|over|more than|beyond|greater than)\s*(\d+(?:\.\d+)?)\s*(yrs?|years?|mos?|months?)/))){lo=yrs(+m[1],m[2]);any=true;}
+  if((m=t.match(/(\d+)\s*[-–]\s*(\d+)\s*(yrs?|years?)/))){lo=+m[1];hi=+m[2];any=true;}
+  if((m=t.match(/(\d+)\+\s*(yrs?|years?)/))){lo=+m[1];any=true;}
+  if(/\b(current|currently|pending|ever)\b/.test(t)) any=false;
+  return any?{lo,hi}:null;
+}
+/* age clauses: "diagnosed before age 50", "onset after 35", "under 40", "60+", "46-59" (no yrs after it) */
+function clauseAge(cl){
+  const t=cl.toLowerCase(); let m; const out=[];
+  if((m=t.match(/(?:diagnosed|dx|onset|insulin|treated)[^;]*?(?:prior to|before)\s*(?:age\s*)?(\d{2})\b/))) out.push({k:"dxBefore",n:+m[1]});
+  else if((m=t.match(/\b(?:prior to|before)\s*age\s*(\d{2})\b/))) out.push({k:"dxBefore",n:+m[1]});
+  if((m=t.match(/(?:diagnosed|dx|onset)[^;]*?(?:after|over)\s*(?:age\s*)?(\d{2})\b/))) out.push({k:"dxAfter",n:+m[1]});
+  else if((m=t.match(/\bafter\s*age\s*(\d{2})\b/))) out.push({k:"dxAfter",n:+m[1]});
+  if((m=t.match(/\b(?:under|below)\s*(?:age\s*)?(\d{2})\b(?!\s*(?:yrs?|years?|mos|months|lbs|mg|%))/))) out.push({k:"ageUnder",n:+m[1]});
+  if((m=t.match(/\b(?:age\s*)?(\d{2})\s*(?:and|or)\s*under\b/))) out.push({k:"ageUnder",n:+m[1]+1});
+  if((m=t.match(/\b(\d{2})\+(?!\s*(?:yrs?|years?))/))) out.push({k:"ageOver",n:+m[1]});
+  else if((m=t.match(/\b(?:over|above)\s*(?:age\s*)?(\d{2})\b(?!\s*(?:yrs?|years?|mos|months|lbs|mg|%|cm))/))) out.push({k:"ageOver",n:+m[1]+1});
+  if((m=t.match(/\b(\d{2})\s*[-–]\s*(\d{2})\b(?!\s*(?:yrs?|years?|mos|months|lbs|mg|%|cm|\/))/))){ if(+m[1]>=16&&+m[2]<=99&&+m[2]>+m[1]) out.push({k:"ageRange",lo:+m[1],hi:+m[2]}); }
+  return out;
+}
+/* evaluate one clause against client age (a) and years-since (y): true / false / null (can't tell) */
+function evalClause(cl,y,a){
+  const w=clauseWindow(cl), ages=clauseAge(cl);
+  if(!w && !ages.length) return null;               // unconditional clause
+  let res=true, unknown=false;
+  if(w){ if(y==null) unknown=true; else if(!((w.lo==null||y>=w.lo)&&(w.hi==null||y<w.hi))) res=false; }
+  for(const c of ages){
+    if(a==null){unknown=true;continue;}
+    const dx=(y==null)?null:a-y;
+    if(c.k==="dxBefore"){ if(dx!=null){ if(!(dx<c.n)) res=false; } else if(a<c.n){/* certainly before */} else unknown=true; }
+    else if(c.k==="dxAfter"){ if(dx!=null){ if(!(dx>=c.n)) res=false; } else if(a<c.n) res=false; else unknown=true; }
+    else if(c.k==="ageUnder"){ if(!(a<c.n)) res=false; }
+    else if(c.k==="ageOver"){ if(!(a>=c.n)) res=false; }
+    else if(c.k==="ageRange"){ if(!(a>=c.lo&&a<=c.hi)) res=false; }
+  }
+  if(!res) return false;
+  return unknown?null:true;
+}
+const outcomeOf=cl=>{const parts=cl.split(/\s[-–]\s/); return parts.length>1?parts[parts.length-1]:cl;};
+function resolveWindow(cell,y,a){
+  if(y==null && a==null) return cell;
+  const clauses=cell.t.split(/;|\.\s+(?=[A-Z])/).map(x=>x.trim()).filter(Boolean);
+  const ev=clauses.map(c=>evalClause(c,y,a));
+  if(!ev.some(e=>e!==null) && !clauses.some(c=>clauseWindow(c)||clauseAge(c).length)) return cell;
+  let hit=null;
+  for(let k=0;k<clauses.length;k++){ if(ev[k]===true){hit=clauses[k];break;} if(ev[k]===null && (clauseWindow(clauses[k])||clauseAge(clauses[k]).length)) break; /* can't see past an undecidable conditional */ }
+  if(!hit){
+    if(ev.some((e,k)=>e===null && (clauseWindow(clauses[k])||clauseAge(clauses[k]).length))) return cell;
+    const fb=clauses.find((c,k)=>ev[k]===null && /otherwise|all others|other|not due|no rating|allowed|premier|standard|select|ok\b|accepted/i.test(c)); if(fb) hit=fb;
+    else if(ev.every(e=>e===false)){
+      const outcomes=clauses.map(outcomeOf), neg=o=>/decline|not eligible|\bgi\b|guaranteed|graded|modified|\brop\b|basic|postpone/i.test(o);
+      if(outcomes.every(neg)) hit="Outside the stated conditions — allowed";
+      else if(outcomes.every(o=>!neg(o))) hit="Doesn't meet the stated conditions - not eligible";
+      else return cell; }
+    else return cell; }
+  const p=parse(outcomeOf(hit));
+  const tag=[y!=null?`${y} yrs ago`:null, a!=null?`age ${a}`:null].filter(Boolean).join(", ");
+  return {t:`${tag} → ${hit}`, s:p.s};
+}
+function renderVerdict(){
+  const v=$("#verdict");
+  const hasInput=client.age!=null||picked.length||client.face!=null||(client.hin!=null&&client.wt!=null);
+  if(!hasInput){v.innerHTML=""; const nx0=$("#suiteNext"); if(nx0) nx0.hidden=true; return;}
+  const all=TYPE_ORDER.filter(([key])=>!(key==="term"&&client.focus==="cash")).map(([key,label])=>({key,label,list:verdictsFor(key)}));
+  // best fit: first non-red carrier in type order
+  let best=null;
+  for(const t of all){ if(t.key==="term") continue; const hit=t.list.find(x=>x.worst==="ok"||x.worst==="tier"); if(hit && (!best || hit.sc>best.hit.sc)) best={t,hit}; }
+  const termOnly=!best && (all.find(t=>t.key==="term")||{list:[]}).list.some(x=>x.worst==="ok"||x.worst==="tier");
+  const outTypes=all.filter(t=>!t.list.some(x=>x.worst==="ok"||x.worst==="tier"));
+  const outTxt=outTypes.length&&outTypes.length<all.length?`<div class="why">${outTypes.map(t=>t.label).join(" and ")}: nothing available with what's entered${outTypes.some(t=>t.list.some(x=>x.worst==="na"))?" (a few carriers are unclear — see the grids below)":""}.</div>`:"";
+  let html="";
+  const missing=[]; if(client.age==null) missing.push("age"); if(client.hin==null||client.wt==null) missing.push("height/weight (build limits apply on most products)"); if(client.face==null) missing.push("coverage amount");
+  const missTxt=(missing.length?`<div class="why">Not checked yet: ${missing.join(", ")}. Add them to tighten the list.</div>`:"")+(picked.length?`<div class="why"><button type="button" id="finePrint" class="fine-link">See what every carrier says about ${picked.map(p=>COND[p.i].name).join(", ")} ↓</button></div>`:"");
+  if(best){ const x=best.hit;
+    html+=`<div class="best"><div class="k">Likely best fit</div><div class="v">${esc(best.t.label)} — ${esc(x.car.name)}</div><div class="why">${esc(x.car.prod)}${x.car.tag?" · "+esc(x.car.tag):""}</div><div class="why">${x.worst==="ok"?"Nothing entered knocks this out.":"Eligible, but expect a lower tier, rating or waiting period — see the notes on the card."}</div>${outTxt}${missTxt}</div>`; }
+  else if(termOnly) html+=`<div class="best"><div class="k">Likely best fit</div><div class="v">No IUL or whole life fits — term is the only option</div><div class="why">Term is never the recommended product; the term carriers below are what's left for this client.</div>${missTxt}</div>`;
+  else html+=`<div class="best"><div class="k">Likely best fit</div><div class="v">Nothing clears on IUL, whole life or term with what's entered</div><div class="why">${client.uw!=="si"?"Check the gray \"not addressed\" carriers and call underwriting, or revisit the entries.":"Nothing simplified-issue fits — switch to <b>Both</b> or <b>Fully underwritten</b> above to see the paramed options."}</div>${missTxt}</div>`;
+  for(const t of all){
+    if(outTypes.includes(t) && outTypes.length<all.length) continue;
+    const n={ok:0,tier:0,na:0,no:0}; t.list.forEach(x=>n[x.worst]++);
+    const shown=DATA[t.key].carriers.filter(c=>{if(!mine(t.key,c)) return false; const fu=c.tag==="Fully underwritten"; if(!(fu?client.uw!=="si":client.uw!=="fu")) return false; if(t.key==="iul"&&client.focus!=="both"&&c.focus&&c.focus!=="both"&&c.focus!==client.focus) return false; return true;}).length;
+    const hidden=shown-t.list.length;
+    html+=`<div class="ptype"><h3>${esc(t.label)} <small>${n.ok} clean · ${n.tier} with conditions · ${n.na} unclear${hidden?` · ${hidden} not eligible (hidden)`:""}</small></h3><div class="lane">`;
+    if(!t.list.length) html+=`<div class="card na"><div class="name">Nothing available</div><div class="prod">No ${esc(t.label.toLowerCase())} product on the grid issues at age ${client.age??"—"} under the current filter.</div></div>`;
+    html+=t.list.map(x=>`<div class="card ${x.worst}"><div class="name">${esc(x.car.name)}</div><div class="prod">${esc(x.car.prod)}${x.car.tag?` · <b>${esc(x.car.tag)}</b>`:""}</div>${
+      x.checks.filter(c=>c.s!=="ok"&&c.s!=="info").map(c=>`<div class="reason ${c.s}">${esc(c.t)}</div>`).join("")}<ul>${
+      x.checks.filter(c=>c.s==="ok"||c.s==="info").map(c=>`<li><b><i class="dot ${c.s==="info"?"na":"ok"}"></i>${esc(c.t)}</b><span></span></li>`).join("")}${
+      x.lines.map(l=>`<li><b><i class="dot ${l.cell.s}"></i>${esc(l.row)}</b><span>${strongDecline(esc(l.cell.t))}</span></li>`).join("")}</ul></div>`).join("");
+    html+="</div></div>";
+  }
+  v.innerHTML=html;
+  const nx=$("#suiteNext"); if(nx) nx.hidden=!best;
+  const fp=$("#finePrint"); if(fp) fp.addEventListener("click",()=>{ onlyPicked=true;
+    const cover=k=>picked.filter(p=>COND[p.i][k]!=null).length; const bestTab=["wl","term","iul"].sort((a,b)=>cover(b)-cover(a)||["iul","wl","term"].indexOf(a)-["iul","wl","term"].indexOf(b))[0];
+    if(cover(bestTab)>cover(tab)){ tab=bestTab; document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x.dataset.tab===tab?"true":"false")); } $("#onlyPicked").setAttribute("aria-pressed","true"); renderGrid(); const g=$("#gridtitle"); if(g&&g.scrollIntoView) g.scrollIntoView({behavior:"smooth",block:"start"}); });
+}
+function renderGrid(){
+  const d=DATA[tab]; const thead=$("#grid thead"), tbody=$("#grid tbody"); const ord=ordered(tab);
+  thead.innerHTML='<tr><th>Illness / condition</th>'+ord.map(ci=>d.carriers[ci]).map(c=>`<th>${esc(c.name)}<small>${esc(c.prod)}</small>${c.tag?`<span class="tag">${esc(c.tag)}</span>`:''}${c.src?`<small>${esc(c.src)}</small>`:''}</th>`).join("")+'</tr>';
+  const pickedRows=new Set(picked.map(p=>COND[p.i][tab]).filter(x=>x!=null));
+  const rows=d.rows.map((r,i)=>({r,i})).filter(o=>!onlyPicked||!pickedRows.size||pickedRows.has(o.i));
+  const missingRows=(onlyPicked&&picked.length)?picked.filter(p=>COND[p.i][tab]==null).map(p=>`<tr class="picked"><th>${esc(COND[p.i].name)}</th><td class="na" colspan="${ord.length}">Not a row on the ${{wl:"whole life",term:"term",iul:"IUL"}[tab]} grid — check the ${tab==="wl"?"Term or IUL":"Whole Life"} tab</td></tr>`).join(""):"";
+  tbody.innerHTML=rows.map(o=>`<tr class="${pickedRows.has(o.i)?"picked":""}"><th>${esc(o.r.name)}</th>${ord.map(ci=>o.r.cells[ci]).map(c=>`<td class="${c.s}">${strongDecline(esc(c.t))}</td>`).join("")}</tr>`).join("")+missingRows;
+  $("#cnt").textContent=`${rows.length} of ${d.rows.length} conditions · ${d.carriers.length} carriers · ${{wl:"Whole Life / Final Expense",term:"Term",iul:"IUL"}[tab]} grid`;
+}
+function renderProducts(){
+  $("#plist").innerHTML=TYPE_ORDER.map(([key,label])=>`<h3 class="ptitle">${esc(label)}</h3><div class="plist">`+DATA[key].products.map(p=>`<div class="pcard"><div class="name">${esc(p.name)}</div><ul>${p.pts.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`).join("")+`</div>`).join("");
+}
+function render(){ renderChips(); renderVerdict(); renderGrid(); }
+document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>{ tab=b.dataset.tab; document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b?"true":"false")); renderGrid(); }));
+$("#onlyPicked").addEventListener("click",e=>{onlyPicked=!onlyPicked;e.currentTarget.setAttribute("aria-pressed",onlyPicked);renderGrid();});
+$("#goatBtn").addEventListener("click",e=>{const d=$("#goatDlg"); if(d.showModal){e.preventDefault(); d.showModal();}});
+$("#goatClose").addEventListener("click",()=>{const d=$("#goatDlg"); d.close?d.close():d.removeAttribute("open");});
+$("#goatDlg").addEventListener("click",e=>{ if(e.target===e.currentTarget){const d=e.currentTarget; d.close?d.close():d.removeAttribute("open");} });
+$("#gearBtn").addEventListener("click",()=>openDrawer(true));
+["#drawerClose","#drawerDone","#scrim"].forEach(sel=>$(sel).addEventListener("click",()=>openDrawer(false)));
+$("#drawerAll").addEventListener("click",()=>{myOff=new Set();mcSave();renderDrawer();render();});
+$("#drawerNone").addEventListener("click",()=>{myOff=new Set(ALL_CARRIERS);mcSave();renderDrawer();render();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape") openDrawer(false);});
+mcLoad();
+readClient(); render(); renderProducts(); if(myOff.size){$("#gearBtn").classList.add("set");$("#gearBtn").textContent=`⚙ My carriers (${myOff.size} off)`;}
+</script>
+<!-- ===== OPTIMUM SUITE: cross-links to the other free tools (shared across all tools) ===== -->
+<style>
+.o-suite{position:relative;margin-left:8px;font-family:'Inter',-apple-system,'Segoe UI',Roboto,sans-serif}
+.o-suite>button{font:inherit;font-size:12px;font-weight:600;color:#fff;background:transparent;border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:7px 14px;cursor:pointer;white-space:nowrap}
+.o-suite>button:hover,.o-suite>button[aria-expanded="true"]{border-color:#fff}
+.o-suite-menu{display:none;position:absolute;right:0;top:calc(100% + 8px);width:340px;max-width:calc(100vw - 24px);background:#fff;border:1px solid #E3DFD4;border-radius:12px;box-shadow:0 14px 34px rgba(22,32,60,.18);padding:8px;z-index:200;text-align:left}
+.o-suite.open .o-suite-menu{display:block}
+.o-suite-menu .k{font-size:11px;font-weight:600;color:#8B8A82;padding:8px 10px 4px}
+.o-suite-menu a{display:block;text-decoration:none;color:#1B1B1B;padding:9px 10px;border-radius:8px}
+.o-suite-menu a:hover{background:#FAF8F2}
+.o-suite-menu a b{display:block;font-family:'Source Serif 4',Georgia,serif;font-size:15px;color:#16203C;font-weight:700}
+.o-suite-menu a span{font-size:12px;color:#4A4A44;line-height:1.45}
+.o-suite-menu a.cur{opacity:.5;pointer-events:none}
+.o-suite-menu a.cur b::after{content:" · you're here";font-family:'Inter',sans-serif;font-size:11px;font-weight:500;color:#8B8A82}
+.o-suite-menu .sgoat{margin:6px 4px 2px;border-top:1px solid #EDE9DF;padding-top:10px}
+.o-suite-menu .sgoat a{color:#A8853A;font-weight:600;font-size:12.5px;padding:4px 6px}
+.o-suite-menu .sgoat a:hover{background:transparent;text-decoration:underline}
+.o-next{background:#fff;border:1px dashed #C9A24E;border-radius:12px;padding:16px 20px;display:flex;gap:18px;align-items:center;flex-wrap:wrap;font-family:'Inter',-apple-system,'Segoe UI',Roboto,sans-serif}
+.o-next[hidden]{display:none}
+.o-next .k{font-size:12px;font-weight:600;color:#8B8A82;flex:0 0 100%}
+.o-next a{flex:1 1 220px;text-decoration:none;color:#1B1B1B;display:flex;gap:10px;align-items:flex-start}
+.o-next a .n{font-family:'Source Serif 4',Georgia,serif;font-size:30px;line-height:1;color:#C9A24E;flex:0 0 auto;min-width:22px}
+.o-next a b{display:block;font-family:'Source Serif 4',Georgia,serif;font-size:16px;color:#16203C;font-weight:700}
+.o-next a span{font-size:12.5px;color:#4A4A44;line-height:1.45}
+.o-next a:hover b{color:#2C4A7C;text-decoration:underline}
+@media(max-width:640px){.o-suite{margin-left:0}.o-suite-menu{right:auto;left:0}}
+</style>
+<script>
+/* ---- SUITE CONFIG: edit URLs here only. Same block lives in every tool. ---- */
+var SUITE = {
+  wizard:    { name:'Insurance Product Wizard',  url:'https://wizard.ffloptimum.com/',
+               blurb:'Enter age and conditions — see which IUL, term and final expense products a client can buy.' },
+  navigator: { name:'Insurance Script Navigator', url:'https://script.ffloptimum.com/',
+               blurb:'Card-by-card call scripts for veteran life, IUL and mortgage protection.' },
+  planning:  { name:'Agent Planning Tools',       url:'https://REPLACE-ME-planning.example.com/',
+               blurb:'Income, activity, agency and commission calculators that pass numbers to each other.' },
+  goat:      { name:'Free agent website, digital card & booking calendar',
+               url:'https://goatleads.com/registration/new?affiliate_id=66c4aa379e0123651ad2f0e6' }
+};
+var SUITE_CURRENT = 'wizard';
+(function(){
+  function menuHTML(){
+    var h='<div class="k">Free tools from Optimum</div>';
+    ['wizard','navigator','planning'].forEach(function(k){
+      var t=SUITE[k], cur=(k===SUITE_CURRENT);
+      h+='<a href="'+t.url+'" class="'+(cur?'cur':'')+'"'+(cur?' aria-current="page"':' target="_blank" rel="noopener"')+'><b>'+t.name+'</b><span>'+t.blurb+'</span></a>';
+    });
+    h+='<div class="sgoat"><a href="'+SUITE.goat.url+'" target="_blank" rel="noopener">&#9733; '+SUITE.goat.name+' &rarr;</a></div>';
+    return h;
+  }
+  function init(){
+    document.querySelectorAll('.o-suite').forEach(function(s){
+      var btn=s.querySelector('button'), menu=s.querySelector('.o-suite-menu');
+      if(!btn||!menu) return;
+      menu.innerHTML=menuHTML();
+      btn.setAttribute('aria-haspopup','true'); btn.setAttribute('aria-expanded','false');
+      btn.addEventListener('click',function(e){e.stopPropagation();var o=!s.classList.contains('open');
+        document.querySelectorAll('.o-suite.open').forEach(function(x){x.classList.remove('open');x.querySelector('button').setAttribute('aria-expanded','false');});
+        s.classList.toggle('open',o); btn.setAttribute('aria-expanded',o?'true':'false');});
+    });
+    document.addEventListener('click',function(){document.querySelectorAll('.o-suite.open').forEach(function(x){x.classList.remove('open');x.querySelector('button').setAttribute('aria-expanded','false');});});
+    document.addEventListener('keydown',function(e){if(e.key==='Escape')document.querySelectorAll('.o-suite.open').forEach(function(x){x.classList.remove('open');x.querySelector('button').setAttribute('aria-expanded','false');});});
+    // contextual cards: <a data-suite="navigator"> gets its href from SUITE
+    document.querySelectorAll('[data-suite]').forEach(function(a){var t=SUITE[a.getAttribute('data-suite')]; if(t){a.href=t.url; a.target='_blank'; a.rel='noopener';}});
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+})();
+</script>
+<script>
+(function(){var v=document.getElementById('verdict'),n=document.getElementById('suiteNext');if(!v||!n)return;
+ function t(){n.hidden=!(v.textContent&&v.textContent.trim().length);}
+ new MutationObserver(t).observe(v,{childList:true,subtree:true,characterData:true});t();})();
+</script>
+<!-- ===== /OPTIMUM SUITE ===== -->
+
+</body>
+</html>
