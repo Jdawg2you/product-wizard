@@ -1,0 +1,5 @@
+#!/bin/bash
+# Blocks a commit whose index.html doesn't parse or has misaligned grid rows.
+# Installed via: git config core.hooksPath .githooks
+# Bypass only with a deliberate: git commit --no-verify
+exec tools/check.sh

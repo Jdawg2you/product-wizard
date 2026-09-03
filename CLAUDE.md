@@ -62,16 +62,13 @@ their text (no pdftotext on this Mac). There is no database — all data is hand
 - Brand: follow OPTIMUM-BRAND-KIT.md exactly (header, footer, tokens, suite block). Do not restyle.
 - No frameworks, no bundler, no external JS. Keep it one file so it deploys by copy.
 
-## Testing without a browser
-A DOM-shim smoke test pattern (used during development):
-```
-node -e "const h=require('fs').readFileSync('index.html','utf8');const js=h.match(/<script>([\s\S]*?)<\/script>/)[1];
-const mk=id=>({id,innerHTML:'',hidden:false,value:'',classList:{add(){},remove(){},toggle(){}},setAttribute(){},addEventListener(){},querySelectorAll(){return[]},querySelector(){return mk()},dataset:{},showModal(){}});
-const els={};global.document={querySelector:s=>els[s]||(els[s]=mk(s)),querySelectorAll:()=>[],createElement:()=>mk(),addEventListener(){}};
-global.localStorage={_:{},getItem(k){return this._[k]||null},setItem(k,v){this._[k]=v}};
-new Function(js+';client.age=58;picked=[{i:COND.findIndex(c=>c.name===\"COPD\"),y:null}];render();console.log(els[\"#verdict\"].innerHTML.replace(/<[^>]+>/g,\" \").slice(0,300))')()"
-```
-Also verify every row has one cell per carrier: `DATA[k].rows.filter(r=>r.cells.length!==DATA[k].carriers.length)`.
+## Testing before committing
+`tools/check.sh` — parses every `<script>` block with JavaScriptCore (ships with macOS; there is no
+node here) and verifies every grid row has one cell per carrier. A pre-commit hook runs it via
+`git config core.hooksPath .githooks`. It exists because an unescaped `"` inside a double-quoted
+string shipped to production, threw SyntaxError, and killed the entire app script — the live site
+served a dead shell. Grepping the deployed HTML passed, because the text was there; the file just
+did not parse. After the checks, load the preview and actually look at it.
 
 ## Open items
 - Americo Eagle Select: FE column still uses 2022 Eagle Premier grid language; need the 3-tier guide.

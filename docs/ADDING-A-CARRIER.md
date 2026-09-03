@@ -64,11 +64,17 @@ IUL chart turned out to be byte-identical to the existing `AM` table.
 
 ### Verify before committing
 
-Run this in the browser console on the preview. It must report zero for all three grids:
-
-```js
-['wl','term','iul'].map(k => [k, DATA[k].rows.filter(r=>r.cells.length!==DATA[k].carriers.length).length])
+```bash
+tools/check.sh
 ```
+
+It parses every `<script>` block with JavaScriptCore and checks that no row's cell count differs
+from its grid's carrier count. A pre-commit hook runs it automatically (`git config core.hooksPath
+.githooks`); `git commit --no-verify` bypasses it, which should be a deliberate act.
+
+**Then load the preview and look at the page.** The checks catch dead code and misaligned grids;
+they cannot tell you a carrier landed in the wrong order or a cell reads wrong. Grepping deployed
+HTML for expected text is not verification — text can be present in a file that does not parse.
 
 ## Writing cells
 
