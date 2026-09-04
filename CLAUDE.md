@@ -87,7 +87,13 @@ did not parse. After the checks, load the preview and actually look at it.
 - Americo term column uses 2020 HMS grid language; Instant Decision Term Series guide has no condition list.
 - Corebridge SIWL: guide not yet received.
 - Royal Neighbors SIWL/GDB: snapshot only; need the application's health questions.
-- IUL focus tags: MoO IUL Express is `focus:"protection"` (hidden when Cash accumulation is picked).
-  Americo Instant Decision IUL is `focus:"cash"` (hidden when Protection is picked). Remaining
-  IUL carriers stay untagged, which means they always show.
+- IUL focus tags: MoO IUL Express and F&G Everlast are `focus:"protection"` (hidden when Cash
+  accumulation is picked); Americo Instant Decision IUL and F&G Pathsetter are `focus:"cash"`
+  (hidden when Protection is picked). Remaining IUL carriers stay untagged and always show.
+  F&G Everlast sits directly after Transamerica FFIUL II Express in the protection order.
+- F&G Everlast carries `tag:"Fast underwriting"` — close to instant, but not instant. Because the
+  underwriting toggle treats anything other than the exact string "Fully underwritten" as
+  simplified, Everlast now shows under Simplified issue while Pathsetter does not, even though the
+  F&G guide gives both the same programme (exam-free to age 60 at $1M or less, full underwriting
+  above that). Worth revisiting if that split is not what Jesse wants.
 - Planning Tools URL in SUITE config is still a placeholder.

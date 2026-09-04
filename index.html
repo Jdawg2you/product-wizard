@@ -559,11 +559,11 @@ iul: {
     {id:"smartul", name:"Foresters", prod:"SMART UL", tag:"Non-medical"},
     {id:"ffiul", name:"Transamerica", prod:"Financial Foundation IUL", tag:"Fully underwritten"},
     {id:"amiul", name:"Americo", prod:"Instant Decision IUL (Series 336)", tag:"Instant decision", src:"Agent guide 23-084-1 (10/25)"},
-    {id:"fgpath", name:"F&G", prod:"Pathsetter", tag:"Fully underwritten", src:"Field UW guide ADV 1100 rev 07/23"},
-    {id:"fgever", name:"F&G", prod:"Everlast", tag:"Fully underwritten", src:"Field UW guide ADV 1100 rev 07/23"}
+    {id:"fgpath", name:"F&G", prod:"Pathsetter", tag:"Fully underwritten", focus:"cash", src:"Field UW guide ADV 1100 rev 07/23"},
+    {id:"fgever", name:"F&G", prod:"Everlast", tag:"Fast underwriting", focus:"protection", src:"Field UW guide ADV 1100 rev 07/23"}
   ],
   orders: {
-    protection: {label:"Protection", ids:["iule","rapid","ffiulx","nlgiul","amiul","smartul","ffiul","fgpath","fgever"]},
+    protection: {label:"Protection", ids:["iule","rapid","ffiulx","fgever","nlgiul","amiul","smartul","ffiul","fgpath"]},
     both:       {label:"Both",       ids:["iule","rapid","amiul","ffiulx","smartul","nlgiul","ffiul","fgpath","fgever"]},
     cash:       {label:"Cash accumulation", ids:["rapid","amiul","ffiulx","smartul","nlgiul","ffiul","fgpath","fgever"]}
   },
