@@ -26,6 +26,13 @@
 | IUL | Transamerica FFIUL | Transamerica Field Guide (2021) | |
 | IUL | Americo Instant Decision IUL | Instant Decision IUL Agent Guide 23-084-1 (10/25) — `docs/guides/` | Ages/face/build only; guide publishes no condition list, so every cell is "not addressed" |
 | snapshot only | Royal Neighbors SIWL/GDB | Agent guide (2020) | Health questions not in guide |
+| IUL | F&G Pathsetter | F&G Field Underwriting Guide ADV 1100, rev 07/2023 — `docs/guides/` | Ages/face/limits only; guide has no condition chart |
+| IUL | F&G Everlast | F&G Field Underwriting Guide ADV 1100, rev 07/2023 — `docs/guides/` | Same; minimum face $100,000 |
+
+Copied into `docs/guides/` so far: Americo Instant Decision IUL agent guide (10/25), Transamerica
+Field Guide to Underwriting (10/21), Foresters Underwriting Guide 503325 (12/23), F&G Field
+Underwriting Guide ADV 1100 (rev 07/23). Note the Foresters file is the **12/23** edition while the
+Foresters columns were built from the 2020 edition — they have not been re-checked against it yet.
 
 The source PDFs live in Jesse's Google Drive "wizard" folder, and are readable through the Drive
 connector — search by carrier name and read the file directly to check a cell against the guide

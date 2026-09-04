@@ -45,7 +45,8 @@ full underwriting grids (browseable, tabbed) and product snapshots per carrier.
 - Term with living benefits: NLG, Transamerica, Foresters SF, InstaBrain Term, Americo, MoO TLA, MoO TLE, AmAm.
   Term without: InstaBrain Pure Term, Transamerica, Foresters (rest trail).
 - IUL: MoO IUL Express, NLG RapidProtect, TA FFIUL II Express, NLG FlexLife, Foresters SMART UL, TA FFIUL,
-  Americo Instant Decision IUL (appended last — Jesse has not given it a priority position yet).
+  Americo Instant Decision IUL, then F&G Pathsetter and F&G Everlast (all appended last — Jesse
+  has not given them priority positions yet).
 - Status beats priority: green > amber (by score) > gray. Priority only breaks ties.
 
 ## Adding carriers / guides
