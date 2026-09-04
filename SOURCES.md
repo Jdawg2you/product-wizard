@@ -34,3 +34,10 @@ before changing it. Verified this way so far: Transamerica FFIUL II Express diab
 
 The source PDFs live in Jesse's Google Drive "wizard" folder. Consider copying them into `docs/guides/` in this repo
 so future updates can be diffed against the exact document that fed each column.
+
+## Rules that are not from a carrier guide
+
+One exception to "every cell traces to a document": where a carrier's guide is silent on blood
+pressure medication count, the tool applies Jesse's rule — 4+ medications is not eligible for term
+or IUL, and questionable for whole life. Carriers that state their own threshold (Americo term and
+American Amicable term both decline at 3+) keep their guide language, which is stricter.

@@ -53,6 +53,17 @@ See `docs/ADDING-A-CARRIER.md`. Source PDFs go in `docs/guides/`; `tools/pdftext
 their text (no pdftotext on this Mac). There is no database — all data is hand-curated arrays here.
 
 ## Conventions
+- Conditions in `MEDS_CONDS` (high blood pressure) swap the "time since" dropdown for a medication
+  count (`MEDOPTS`), stored on the chip as `p.m` rather than `p.y`. `clauseMeds()` reads carrier
+  language like "3+ medications - DECLINE" or "one BP medication allowed for Preferred"; a
+  medication threshold that definitely applies beats an earlier clause that can't be decided.
+  Where a carrier's guide says nothing about medication count, Jesse's rule fills in: 4+ meds is
+  not eligible for term or IUL, and questionable (amber) for whole life. That fallback is a
+  business rule, not guide language — it is the one place a cell does not trace to a document.
+- A condition with no row on a grid at all (blood pressure is absent from whole life, since FE
+  carriers don't treat it as a factor) is marked `offGrid` and must not downgrade a card. A
+  carrier-specific "not addressed" still does — Americo IUL is 107/107 unanswered, so ignoring
+  those would show it as clean for a client with any condition at all.
 - Never invent underwriting language. Every cell traces to a carrier guide (see SOURCES.md).
 - Keep cells short; `;` separates clauses; use "within N yrs – X; over N yrs – Y" phrasing so
   `resolveWindow` can parse it. Age rules as "diagnosed before age N" / "after age N" / "N–M".

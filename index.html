@@ -16,8 +16,9 @@
 <meta property="og:description" content="Enter the client's age and conditions. See which IUL, whole life, or term they can actually buy.">
 <meta property="og:url" content="https://wizard.ffloptimum.com/">
 <meta property="og:image" content="https://wizard.ffloptimum.com/og.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
+<meta property="og:image:width" content="2400">
+<meta property="og:image:height" content="1260">
+<meta property="og:image:alt" content="Insurance Product Wizard — enter the client's age and conditions, see which IUL, whole life, or term they can actually buy. Free from Optimum.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Insurance Product Wizard">
 <meta name="twitter:description" content="Enter the client's age and conditions. See which IUL, whole life, or term they can actually buy.">
@@ -52,6 +53,13 @@
 
   /* ---- Brand band ---- */
   .o-header{background:var(--navy);color:#fff;padding:13px 20px;display:flex;align-items:center;gap:14px}
+  /* Brand mark sits left of the two title rows and matches their combined height exactly:
+     align-self:stretch takes the height of the text block, aspect-ratio keeps it square. */
+  .o-brand{display:flex;align-items:center;gap:12px;min-width:0}
+  /* Brand mark: square, matching the combined height of the title + tagline rows (measured at
+     53px for this header's type sizes). A stretched <img> can't self-size here — flex resolves
+     width before the stretched height, so aspect-ratio has nothing to work from. */
+  .o-mark{flex:0 0 auto;width:53px;height:53px;object-fit:contain;display:block}
   .o-title{font-family:var(--serif);font-weight:700;font-size:20px;color:#fff;letter-spacing:-.01em;white-space:nowrap}
   .o-sub{font-size:12px;font-weight:500;color:rgba(255,255,255,.62);margin-top:3px}
   .o-sub .o-sep{color:rgba(255,255,255,.35);margin:0 4px}
@@ -119,8 +127,8 @@
   .card .reason{font-size:12.5px;color:var(--no);font-weight:600;margin:2px 0 6px}
   .card .reason.tier{color:var(--golddk)}
   .card ul{list-style:none;margin:0;padding:0;font-size:13px}
-  .card li{padding:6px 0;border-top:1px solid var(--rule-soft);display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:start;min-width:0}
-  .card li>*{min-width:0;overflow-wrap:anywhere}
+  .card li{padding:6px 0;border-top:1px solid var(--rule-soft);display:grid;grid-template-columns:minmax(0,44%) minmax(0,1fr);gap:8px;align-items:start;min-width:0}
+  .card li>*{min-width:0;overflow-wrap:break-word;word-break:normal}
   .card li b{font-weight:600;color:var(--slate)}
   /* eligibility lines carry the whole sentence in the label, so they span both columns */
   .card li.full{grid-template-columns:1fr}
@@ -198,10 +206,13 @@
 </head>
 <body>
 <header class="o-header">
-  <div>
+  <div class="o-brand">
+    <img class="o-mark" src="optimum-icon.png" alt="">
+    <div>
     <div class="o-title">Insurance Product Wizard</div>
     <div class="o-sub">Tools built for agents, by agents <span class="o-sep">&middot;</span>
       Brought to you by <a href="https://optimumprotects.com/" target="_blank" rel="noopener">Optimum</a></div>
+    </div>
   </div>
   <a class="o-pill" id="goatBtn" href="https://goatleads.com/registration/new?affiliate_id=66c4aa379e0123651ad2f0e6"
      target="_blank" rel="noopener">&#9733; FREE Agent Website, Digital Business Card &amp; Booking Calendar</a>
@@ -236,7 +247,6 @@
       <label>Height <span class="hw"><select id="hft"><option value="">ft</option><option>4</option><option>5</option><option>6</option></select><select id="hin"><option value="">in</option><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option></select></span></label>
       <label>Weight <input id="wt" type="number" min="50" max="600" inputmode="numeric" placeholder="lbs"></label>
       <label>Sex <select id="sex"><option value="">—</option><option value="m">Male</option><option value="f">Female</option></select></label>
-      <label>Coverage wanted <input id="face" type="number" min="1000" step="1000" inputmode="numeric" placeholder="$"></label>
       <label>Living benefits <select id="lb"><option value="lb">Wants them</option><option value="nolb">Doesn't need them</option></select></label>
     </div>
     <div class="uwpick" role="radiogroup" aria-label="Underwriting type"><span>Show</span>
@@ -740,6 +750,11 @@ for(const k of Object.keys(DATA)){
 
 /* ---------- STATE ---------- */
 let tab="wl", picked=[], onlyPicked=false, activeIdx=-1;
+/* A few conditions are graded by how many medications the client takes, not by how long
+   they've had it — blood pressure being the case agents actually hit. Jesse's rule. */
+const MEDOPTS=[["","not sure"],["1","1 medication"],["2","2 medications"],["3","3 medications"],["4","4 or more"]];
+const MEDS_CONDS={"High blood pressure":1};
+const isMeds=n=>!!MEDS_CONDS[n];
 const YOPTS=[["","any time"],["0.5","under 1 yr ago"],["1.5","1–2 yrs ago"],["3","2–5 yrs ago"],["7","5–10 yrs ago"],["12","10+ yrs ago"]];
 const pickedIdx=()=>picked.map(p=>p.i);
 const client={age:null,hin:null,wt:null,sex:"",face:null,lb:"lb",uw:"si",focus:"both"};
@@ -817,9 +832,9 @@ function readClient(){
   const ft=parseInt($("#hft").value,10), inch=parseInt($("#hin").value,10);
   client.hin=(isNaN(ft)||isNaN(inch))?null:ft*12+inch;
   const w=parseInt($("#wt").value,10); client.wt=isNaN(w)?null:w;
-  client.sex=$("#sex").value; const f=parseInt($("#face").value,10); client.face=isNaN(f)?null:f; client.lb=$("#lb").value;
+  client.sex=$("#sex").value; client.lb=$("#lb").value;
 }
-["#age","#hft","#hin","#wt","#sex","#face","#lb"].forEach(sel=>$(sel).addEventListener("input",()=>{readClient();render();}));
+["#age","#hft","#hin","#wt","#sex","#lb"].forEach(sel=>$(sel).addEventListener("input",()=>{readClient();render();}));
 document.querySelectorAll("#focusSeg button").forEach(b=>b.addEventListener("click",()=>{client.focus=b.dataset.focus;document.querySelectorAll("#focusSeg button").forEach(x=>x.setAttribute("aria-pressed",x===b));render();}));
 document.querySelectorAll("#uwSeg button").forEach(b=>b.addEventListener("click",()=>{client.uw=b.dataset.uw;document.querySelectorAll("#focusSeg button").forEach(b=>b.addEventListener("click",()=>{client.focus=b.dataset.focus;document.querySelectorAll("#focusSeg button").forEach(x=>x.setAttribute("aria-pressed",x===b));render();}));
 document.querySelectorAll("#uwSeg button").forEach(x=>x.setAttribute("aria-pressed",x===b));render();}));
@@ -843,12 +858,13 @@ function eligChecks(key,car){
   const e=(ELIG[key]||{})[car.id]||{}; const out=[];
   if(client.age!=null && e.ages){ if(client.age<e.ages[0]||client.age>e.ages[1]) out.push({s:"no",age:true,t:`Issue ages ${e.ages[0]}–${e.ages[1]}${e.note?" ("+e.note+")":""}`}); else out.push({s:"ok",t:`Issue ages ${e.ages[0]}–${e.ages[1]}`}); }
   else if(client.age!=null && !e.ages) out.push({s:"na",t:"Issue ages not in the guide loaded"});
-  if(client.face!=null){
-    let max=e.face?e.face[1]:null;
-    if(e.faceAge&&client.age!=null){ const band=e.faceAge.find(b=>client.age<=b[0]); if(band) max=band[1]; }
-    if(e.face && client.face<e.face[0]) out.push({s:"no",t:`Minimum face ${money(e.face[0])}`});
-    else if(max!=null && client.face>max) out.push({s:"no",t:`Max face ${money(max)}${e.faceAge&&client.age!=null?" at age "+client.age:""}`});
-    else if(max!=null) out.push({s:"ok",t:`Face OK (max ${money(max)}${e.faceAge&&client.age!=null?" at age "+client.age:""})`});
+  /* Coverage is informational, not a knockout — the agent reads the range and judges fit.
+     When an age is entered and the age bands cut the maximum, show the cut figure. */
+  if(e.face){
+    let max=e.face[1], note="";
+    if(e.faceAge&&client.age!=null){ const band=e.faceAge.find(b=>client.age<=b[0]);
+      if(band&&band[1]!==max){ max=band[1]; note=` at age ${client.age}`; } }
+    out.push({s:"ok",t:`Coverage ${money(e.face[0])}–${money(max)}${note}`});
   }
   if((client.hin==null || client.wt==null) && (e.build||e.bmi)) out.push({s:"info",t:e.bmi?`BMI limit ${e.bmi} — add height/weight to check`:"Build chart applies — add height/weight to check"});
   if(client.hin!=null && client.wt!=null){
@@ -875,17 +891,42 @@ function verdictsFor(key){
     if(key==="iul" && client.focus!=="both" && c.focus && c.focus!=="both" && c.focus!==client.focus) return false; return true;}).map((ci,i)=>{ const car=d.carriers[ci];
     const checks=eligChecks(key,car);
     const lines=picked.map(p=>{ const c=COND[p.i]; const ri=c[key];
-      return ri==null?{row:c.name,cell:{t:"Not on the "+({wl:"whole life",term:"term",iul:"IUL"}[key])+" grid",s:"na"}}:{row:c.name,cell:resolveWindow(d.rows[ri].cells[ci],p.y,client.age)}; });
-    let worst="ok", sc=3; for(const c of checks){ if(rank[c.s]<rank[worst]) worst=c.s; sc=Math.min(sc,score(c)); } for(const l of lines){ if(rank[l.cell.s]<rank[worst]) worst=l.cell.s; sc=Math.min(sc,score(l.cell)); }
+      /* Jesse's rule, applied only where the carrier's own guide is silent on medication count:
+         4+ meds rules out term and IUL outright, and makes whole life questionable. A carrier that
+         states its own threshold (Americo term declines at 3+) keeps its language. Whole life has
+         no blood pressure row at all, so this is the only thing that speaks for it there. */
+      if(isMeds(c.name) && p.m>=4 && (ri==null || !clauseMeds(d.rows[ri].cells[ci].t))){
+        return {row:c.name, cell: key==="wl"
+          ? {t:"4+ blood pressure medications — verify with underwriting",s:"tier"}
+          : {t:"4+ blood pressure medications — not eligible",s:"no"}};
+      }
+      if(ri==null) return {row:c.name,cell:{t:"Not on the "+({wl:"whole life",term:"term",iul:"IUL"}[key])+" grid",s:"na",offGrid:true}};
+      let src=d.rows[ri].cells[ci];
+      /* On 1-2 BP medications the client hasn't been hospitalised for blood pressure, so a
+         hospitalisation clause can't be what's blocking them (Mutual of Omaha reads
+         "Hospitalized within 10 yrs - DECLINE; otherwise OK but check meds"). */
+      if(isMeds(c.name) && p.m!=null && p.m<=2 && /hospitali/i.test(src.t)){
+        const kept=src.t.split(/;/).map(x=>x.trim()).filter(x=>x && !/hospitali/i.test(x));
+        if(kept.length) src=parse(kept.join("; "));
+      }
+      let cell=resolveWindow(src,p.y,client.age,p.m);
+      /* Blood pressure is not a factor most carriers underwrite on. If a carrier's guide simply
+         doesn't answer it, show the grey dot but don't let it downgrade the card. */
+      if(isMeds(c.name) && cell.s==="na") cell={...cell,minor:true};
+      return {row:c.name,cell}; });
+    let worst="ok", sc=3; for(const c of checks){ if(rank[c.s]<rank[worst]) worst=c.s; sc=Math.min(sc,score(c)); } for(const l of lines){ if(l.cell.offGrid||l.cell.minor) continue; if(rank[l.cell.s]<rank[worst]) worst=l.cell.s; sc=Math.min(sc,score(l.cell)); }
     return {key,car,checks,lines,worst,sc,i,ageOut:checks.some(c=>c.s==="no"&&c.age)};
   }).filter(x=>!x.ageOut && x.worst!=="no").sort((a,b)=>b.sc-a.sc || a.i-b.i);
 }
 function renderChips(){
   const c=$("#chips");
   if(!picked.length){c.innerHTML='<span class="hint">Add age and any conditions. Results update as you go.</span>';return;}
-  c.innerHTML=picked.map(p=>`<span class="chip">${esc(COND[p.i].name)}<select data-i="${p.i}" aria-label="Time since diagnosis or last treatment">${YOPTS.map(([v,l])=>`<option value="${v}" ${String(p.y??"")===v?"selected":""}>${l}</option>`).join("")}</select><button type="button" aria-label="Remove ${esc(COND[p.i].name)}" data-i="${p.i}">×</button></span>`).join("")+'<button type="button" class="clear" id="clearAll">Clear all</button>';
+  c.innerHTML=picked.map(p=>{const md=isMeds(COND[p.i].name),opts=md?MEDOPTS:YOPTS,cur=md?p.m:p.y;
+    return `<span class="chip">${esc(COND[p.i].name)}<select data-i="${p.i}" aria-label="${md?"Number of medications":"Time since diagnosis or last treatment"}">${opts.map(([v,l])=>`<option value="${v}" ${String(cur??"")===v?"selected":""}>${l}</option>`).join("")}</select><button type="button" aria-label="Remove ${esc(COND[p.i].name)}" data-i="${p.i}">×</button></span>`;}).join("")+'<button type="button" class="clear" id="clearAll">Clear all</button>';
   c.querySelectorAll(".chip button").forEach(b=>b.addEventListener("click",()=>unpick(+b.dataset.i)));
-  c.querySelectorAll(".chip select").forEach(sel=>sel.addEventListener("change",()=>{const p=picked.find(x=>x.i===+sel.dataset.i); p.y=sel.value===""?null:parseFloat(sel.value); render();}));
+  c.querySelectorAll(".chip select").forEach(sel=>sel.addEventListener("change",()=>{const p=picked.find(x=>x.i===+sel.dataset.i);
+    const v=sel.value===""?null:parseFloat(sel.value);
+    if(isMeds(COND[p.i].name)) p.m=v; else p.y=v; render();}));
   $("#clearAll").addEventListener("click",()=>{picked=[];render();});
 }
 /* ---------- TIME-WINDOW RESOLUTION ----------
@@ -916,7 +957,24 @@ function clauseAge(cl){
   return out;
 }
 /* evaluate one clause against client age (a) and years-since (y): true / false / null (can't tell) */
-function evalClause(cl,y,a){
+/* "3+ medications - DECLINE", "controlled with <= 2 medications - OK",
+   "one BP medication allowed for Preferred" -> the medication threshold a clause applies to. */
+function clauseMeds(cl){
+  const t=cl.toLowerCase(); let m;
+  if((m=t.match(/(\d+)\s*\+\s*(?:bp\s*)?(?:medications?|meds)\b/))) return {op:"gte",n:+m[1]};
+  if((m=t.match(/(?:\u2264|<=|no more than|up to)\s*(\d+)\s*(?:bp\s*)?(?:medications?|meds)\b/))) return {op:"lte",n:+m[1]};
+  if((m=t.match(/(?:fewer than|less than)\s*(\d+)\s*(?:bp\s*)?(?:medications?|meds)\b/))) return {op:"lt",n:+m[1]};
+  if(/\bone\s+(?:bp\s+)?medication\b/.test(t)) return {op:"lte",n:1};
+  return null;
+}
+function evalClause(cl,y,a,m){
+  const meds=clauseMeds(cl);
+  if(meds){
+    if(m==null) return null;
+    if(meds.op==="gte") return m>=meds.n;
+    if(meds.op==="lte") return m<=meds.n;
+    return m<meds.n;
+  }
   const w=clauseWindow(cl), ages=clauseAge(cl);
   if(!w && !ages.length) return null;               // unconditional clause
   let res=true, unknown=false;
@@ -934,15 +992,22 @@ function evalClause(cl,y,a){
   return unknown?null:true;
 }
 const outcomeOf=cl=>{const parts=cl.split(/\s[-–]\s/); return parts.length>1?parts[parts.length-1]:cl;};
-function resolveWindow(cell,y,a){
-  if(y==null && a==null) return cell;
+function resolveWindow(cell,y,a,m){
+  if(y==null && a==null && m==null) return cell;
   const clauses=cell.t.split(/;|\.\s+(?=[A-Z])/).map(x=>x.trim()).filter(Boolean);
-  const ev=clauses.map(c=>evalClause(c,y,a));
-  if(!ev.some(e=>e!==null) && !clauses.some(c=>clauseWindow(c)||clauseAge(c).length)) return cell;
+  const ev=clauses.map(c=>evalClause(c,y,a,m));
+  if(!ev.some(e=>e!==null) && !clauses.some(c=>clauseWindow(c)||clauseAge(c).length||clauseMeds(c))) return cell;
   let hit=null;
-  for(let k=0;k<clauses.length;k++){ if(ev[k]===true){hit=clauses[k];break;} if(ev[k]===null && (clauseWindow(clauses[k])||clauseAge(clauses[k]).length)) break; /* can't see past an undecidable conditional */ }
+  /* A medication threshold that definitely applies wins over an earlier clause we can't decide.
+     Americo term reads "diagnosed within 4 mos - DECLINE; ...; 3+ medications - DECLINE": with no
+     diagnosis date the first clause is unknowable, but 4 meds still means declined. */
+  for(let k=0;k<clauses.length;k++){
+    if(ev[k]===true && clauseMeds(clauses[k]) && /decline|not eligible/i.test(outcomeOf(clauses[k]))){ hit=clauses[k]; break; }
+  }
+  if(!hit)
+  for(let k=0;k<clauses.length;k++){ if(ev[k]===true){hit=clauses[k];break;} if(ev[k]===null && (clauseWindow(clauses[k])||clauseAge(clauses[k]).length||clauseMeds(clauses[k]))) break; /* can't see past an undecidable conditional */ }
   if(!hit){
-    if(ev.some((e,k)=>e===null && (clauseWindow(clauses[k])||clauseAge(clauses[k]).length))) return cell;
+    if(ev.some((e,k)=>e===null && (clauseWindow(clauses[k])||clauseAge(clauses[k]).length||clauseMeds(clauses[k])))) return cell;
     const fb=clauses.find((c,k)=>ev[k]===null && /otherwise|all others|other|not due|no rating|allowed|premier|standard|select|ok\b|accepted/i.test(c)); if(fb) hit=fb;
     else if(ev.every(e=>e===false)){
       const outcomes=clauses.map(outcomeOf), neg=o=>/decline|not eligible|\bgi\b|guaranteed|graded|modified|\brop\b|basic|postpone/i.test(o);
@@ -956,7 +1021,7 @@ function resolveWindow(cell,y,a){
 }
 function renderVerdict(){
   const v=$("#verdict");
-  const hasInput=client.age!=null||picked.length||client.face!=null||(client.hin!=null&&client.wt!=null);
+  const hasInput=client.age!=null||picked.length||(client.hin!=null&&client.wt!=null);
   if(!hasInput){v.innerHTML=""; return;}
   const all=TYPE_ORDER.filter(([key])=>!(key==="term"&&client.focus==="cash")).map(([key,label])=>({key,label,list:verdictsFor(key)}));
   // best fit: first non-red carrier in type order
@@ -966,7 +1031,7 @@ function renderVerdict(){
   const outTypes=all.filter(t=>!t.list.some(x=>x.worst==="ok"||x.worst==="tier"));
   const outTxt=outTypes.length&&outTypes.length<all.length?`<div class="why">${outTypes.map(t=>t.label).join(" and ")}: nothing available with what's entered${outTypes.some(t=>t.list.some(x=>x.worst==="na"))?" (a few carriers are unclear — see the grids below)":""}.</div>`:"";
   let html="";
-  const missing=[]; if(client.age==null) missing.push("age"); if(client.hin==null||client.wt==null) missing.push("height/weight (build limits apply on most products)"); if(client.face==null) missing.push("coverage amount");
+  const missing=[]; if(client.age==null) missing.push("age"); if(client.hin==null||client.wt==null) missing.push("height/weight (build limits apply on most products)");
   const missTxt=(missing.length?`<div class="why">Not checked yet: ${missing.join(", ")}. Add them to tighten the list.</div>`:"")+(picked.length?`<div class="why"><button type="button" id="finePrint" class="fine-link">See what every carrier says about ${picked.map(p=>COND[p.i].name).join(", ")} ↓</button></div>`:"");
   if(best){ const x=best.hit;
     html+=`<div class="best"><div class="k">Likely best fit</div><div class="v">${esc(best.t.label)} — ${esc(x.car.name)}</div><div class="why">${esc(x.car.prod)}${x.car.tag?" · "+esc(x.car.tag):""}</div><div class="why">${x.worst==="ok"?"Nothing entered knocks this out.":"Eligible, but expect a lower tier, rating or waiting period — see the notes on the card."}</div>${outTxt}${missTxt}</div>`; }
@@ -982,7 +1047,7 @@ function renderVerdict(){
     html+=t.list.map(x=>`<div class="card ${x.worst}"><div class="name">${esc(x.car.name)}</div><div class="prod">${esc(x.car.prod)}${x.car.tag?` · <b>${esc(x.car.tag)}</b>`:""}</div>${
       x.checks.filter(c=>c.s!=="ok"&&c.s!=="info").map(c=>`<div class="reason ${c.s}">${esc(c.t)}</div>`).join("")}<ul>${
       x.checks.filter(c=>c.s==="ok"||c.s==="info").map(c=>`<li class="full"><b><i class="dot ${c.s==="info"?"na":"ok"}"></i>${esc(c.t)}</b><span></span></li>`).join("")}${
-      x.lines.map(l=>`<li><b><i class="dot ${l.cell.s}"></i>${esc(l.row)}</b><span>${strongDecline(esc(l.cell.t))}</span></li>`).join("")}</ul></div>`).join("");
+      x.lines.filter(l=>!l.cell.offGrid).map(l=>`<li><b><i class="dot ${l.cell.s}"></i>${esc(l.row)}</b><span>${strongDecline(esc(l.cell.t))}</span></li>`).join("")}</ul></div>`).join("");
     html+="</div></div>";
   }
   v.innerHTML=html;
