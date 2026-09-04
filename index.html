@@ -95,6 +95,14 @@
   .sugg .none{padding:10px 14px;color:var(--muted)}
   .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;min-height:34px;align-items:center}
   .chips .hint{color:var(--muted);font-size:14px}
+  /* Live tally: on a narrow window the results render below the fold, so typing an age looked
+     like nothing happened. This sits in the panel the agent is already looking at. */
+  .tally{display:block;margin:10px 0 0;padding:0;border:0;background:none;font:inherit;font-size:13.5px;
+         color:var(--slate);text-align:left;cursor:pointer}
+  .tally[hidden]{display:none}
+  .tally b{color:var(--navy);font-weight:700}
+  .tally .go{color:var(--golddk);font-weight:600;margin-left:6px}
+  .tally:hover .go{text-decoration:underline}
   .chip{display:inline-flex;align-items:center;gap:8px;background:var(--navy);color:#fff;border-radius:var(--radius-pill);padding:6px 8px 6px 14px;font-size:13.5px;font-weight:600}
   .chip select{border:0;border-radius:var(--radius-pill);padding:3px 6px;font-size:12px;background:rgba(255,255,255,.16);color:#fff;cursor:pointer}
   .chip select option{color:var(--ink)}
@@ -268,6 +276,7 @@
       <div id="sugg" class="sugg" role="listbox"></div>
     </div>
     <div class="chips" id="chips"><span class="hint">Add age and any conditions. Results update as you go.</span></div>
+    <button type="button" class="tally" id="tally" hidden></button>
   </section>
 
   <div class="legend">
@@ -559,7 +568,7 @@ iul: {
     {id:"smartul", name:"Foresters", prod:"SMART UL", tag:"Non-medical"},
     {id:"ffiul", name:"Transamerica", prod:"Financial Foundation IUL", tag:"Fully underwritten"},
     {id:"amiul", name:"Americo", prod:"Instant Decision IUL (Series 336)", tag:"Instant decision", src:"Agent guide 23-084-1 (10/25)"},
-    {id:"fgpath", name:"F&G", prod:"Pathsetter", tag:"Fully underwritten", focus:"cash", src:"Field UW guide ADV 1100 rev 07/23"},
+    {id:"fgpath", name:"F&G", prod:"Pathsetter", tag:"Fast underwriting", focus:"cash", src:"Field UW guide ADV 1100 rev 07/23"},
     {id:"fgever", name:"F&G", prod:"Everlast", tag:"Fast underwriting", focus:"protection", src:"Field UW guide ADV 1100 rev 07/23"}
   ],
   orders: {
@@ -797,12 +806,20 @@ const strongDecline = t => t.replace(/DECLINE/g,"<b>DECLINE</b>");
 const money=n=>"$"+Number(n).toLocaleString();
 
 /* ---------- UNIFIED CONDITION LIST ---------- */
+/* A whole life row that also answers a differently-named term/IUL condition. Without this the
+   card shows nothing for whole life even though the grid has an answer. */
+const WL_ALSO={"Irregular heartbeat / murmur":"AFib / irregular heartbeat"};
 const COND=(()=>{
   const byName={};
   const add=(name,key,idx)=>{ (byName[name]=byName[name]||{name,wl:null,term:null,iul:null})[key]=idx; };
   DATA.term.rows.forEach((r,i)=>add(r.name,"term",i));
   DATA.iul.rows.forEach((r,i)=>add(r.name,"iul",i));
   DATA.wl.rows.forEach((r,i)=>{ const t=WL2T[r.name]||r.name; if(byName[t]) byName[t].wl=i; else add(r.name,"wl",i); });
+  /* Extra term/IUL conditions that the whole life grid answers under an existing row name. */
+  Object.entries(WL_ALSO).forEach(([cond,wlRow])=>{
+    const i=DATA.wl.rows.findIndex(r=>r.name===wlRow);
+    if(i>=0 && byName[cond] && byName[cond].wl==null) byName[cond].wl=i;
+  });
   return Object.values(byName).sort((a,b)=>a.name.localeCompare(b.name));
 })();
 
@@ -1026,13 +1043,21 @@ function resolveWindow(cell,y,a,m){
 function renderVerdict(){
   const v=$("#verdict");
   const hasInput=client.age!=null||picked.length||(client.hin!=null&&client.wt!=null);
-  if(!hasInput){v.innerHTML=""; return;}
+  const ty=$("#tally");
+  if(!hasInput){v.innerHTML=""; if(ty) ty.hidden=true; return;}
   const all=TYPE_ORDER.filter(([key])=>!(key==="term"&&client.focus==="cash")).map(([key,label])=>({key,label,list:verdictsFor(key)}));
   // best fit: first non-red carrier in type order
   let best=null;
   for(const t of all){ if(t.key==="term") continue; const hit=t.list.find(x=>x.worst==="ok"||x.worst==="tier"); if(hit && (!best || hit.sc>best.hit.sc)) best={t,hit}; }
   const termOnly=!best && (all.find(t=>t.key==="term")||{list:[]}).list.some(x=>x.worst==="ok"||x.worst==="tier");
   const outTypes=all.filter(t=>!t.list.some(x=>x.worst==="ok"||x.worst==="tier"));
+  if(ty){
+    const n=all.reduce((t,x)=>t+x.list.filter(y=>y.worst==="ok"||y.worst==="tier").length,0);
+    ty.hidden=false;
+    ty.innerHTML = n
+      ? `<b>${n}</b> product${n===1?"":"s"} match${best?` &middot; likely best fit: <b>${esc(best.t.label)} &mdash; ${esc(best.hit.car.name)}</b>`:""}<span class="go">see them &darr;</span>`
+      : `Nothing clears with what's entered yet.<span class="go">see the detail &darr;</span>`;
+  }
   const outTxt=outTypes.length&&outTypes.length<all.length?`<div class="why">${outTypes.map(t=>t.label).join(" and ")}: nothing available with what's entered${outTypes.some(t=>t.list.some(x=>x.worst==="na"))?" (a few carriers are unclear — see the grids below)":""}.</div>`:"";
   let html="";
   const missing=[]; if(client.age==null) missing.push("age"); if(client.hin==null||client.wt==null) missing.push("height/weight (build limits apply on most products)");
@@ -1089,6 +1114,7 @@ function renderProducts(){
   }).join("");
 }
 function render(){ renderChips(); renderVerdict(); renderGrid(); renderProducts(); }
+$("#tally").addEventListener("click",()=>{const v=$("#verdict"); if(v&&v.scrollIntoView) v.scrollIntoView({behavior:"smooth",block:"start"});});
 document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>{ tab=b.dataset.tab; document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b?"true":"false")); renderGrid(); }));
 $("#onlyPicked").addEventListener("click",e=>{onlyPicked=!onlyPicked;e.currentTarget.setAttribute("aria-pressed",onlyPicked);renderGrid();});
 $("#goatBtn").addEventListener("click",e=>{const d=$("#goatDlg"); if(d.showModal){e.preventDefault(); d.showModal();}});

@@ -65,6 +65,13 @@ their text (no pdftotext on this Mac). There is no database — all data is hand
   carriers don't treat it as a factor) is marked `offGrid` and must not downgrade a card. A
   carrier-specific "not addressed" still does — Americo IUL is 107/107 unanswered, so ignoring
   those would show it as clean for a client with any condition at all.
+- `WL_ALSO` maps a term/IUL condition onto a whole life row filed under a different name
+  ("Irregular heartbeat / murmur" -> the WL row "AFib / irregular heartbeat"). Without it the card
+  showed nothing for whole life while the grid held a real answer. Add an entry whenever the same
+  impairment is named differently across grids.
+- `#tally` under the chips shows the live match count and best fit, and scrolls to the results.
+  It exists because on a narrow window the results render below the fold, so typing an age looked
+  like the tool had done nothing.
 - Never invent underwriting language. Every cell traces to a carrier guide (see SOURCES.md).
 - Keep cells short; `;` separates clauses; use "within N yrs – X; over N yrs – Y" phrasing so
   `resolveWindow` can parse it. Age rules as "diagnosed before age N" / "after age N" / "N–M".
