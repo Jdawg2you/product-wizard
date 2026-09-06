@@ -71,6 +71,35 @@
   .gear:hover,.gear.set{background:transparent;border-color:var(--gold);color:var(--gold)}
   @media(max-width:640px){.o-header{flex-wrap:wrap} .o-pill{width:100%;justify-content:center;text-align:center;margin:6px 0 0} .gear{margin:6px 0 0}}
 
+  /* Recruiting callout. Opt-in and quiet by design: an FFL agent from any agency must be able
+     to use these tools without being pitched, so the strip leads with reassurance and the modal
+     tells an FFL agent they are already set before it offers anything. */
+  .recopen{appearance:none;cursor:pointer;font-family:var(--sans)}
+  .recstrip{background:#EFEADD;border-bottom:1px solid var(--rule);padding:9px 20px;text-align:center;
+    font-size:13px;color:var(--slate);font-family:var(--sans)}
+  .recstrip .recopen{background:transparent;border:0;color:var(--golddk);font-size:13px;font-weight:800;
+    text-decoration:underline;padding:0 0 0 5px}
+  @media(max-width:640px){.recstrip{font-size:12px;padding:8px 14px;line-height:1.5}
+    .recstrip .recopen{font-size:12px}}
+  #recModal{max-width:580px}
+  #recModal .dlg{padding:26px 28px 24px}
+  #recModal h2{margin:0 8px 14px 0;font-size:22px;line-height:1.25;font-family:var(--serif);color:var(--navy)}
+  #recModal .recask{font-size:14.5px;line-height:1.6;color:var(--slate);margin:0 0 4px}
+  #recModal .recask b{color:var(--navy)}
+  #recModal .recnote{background:var(--cream);border-left:3px solid var(--gold);border-radius:0 10px 10px 0;
+    padding:11px 15px;margin:14px 0 16px;font-size:13px;line-height:1.55;color:var(--slate)}
+  #recModal .recnote b{color:var(--navy)}
+  #recModal .recturn{font-size:13px;font-weight:700;color:var(--slate);margin:16px 0 10px}
+  #recModal .gitem{border-top:1px solid var(--rule-soft);padding:11px 0}
+  #recModal .gitem h3{margin:0 0 3px;font-family:var(--serif);font-size:15.5px;font-weight:700;color:var(--navy)}
+  #recModal .gitem p{margin:0;font-size:13px;line-height:1.55;color:var(--slate)}
+  #recModal .gcta{display:block;margin-top:20px;background:var(--navy);color:#fff;text-align:center;
+    text-decoration:none;font-weight:700;font-size:14.5px;padding:13px 18px;border-radius:var(--radius-sm)}
+  #recModal .gcta:hover{background:var(--blue)}
+  #recModal .rec2{margin:12px 0 0;text-align:center;font-size:13.5px}
+  #recModal .rec2 a{color:var(--golddk);font-weight:700;text-decoration:none}
+  #recModal .rec2 a:hover{text-decoration:underline}
+
   main{max-width:1400px;margin:0 auto;padding:22px 20px 40px}
 
   /* ---- Client panel ---- */
@@ -219,7 +248,7 @@
     <div>
     <div class="o-title">Insurance Product Wizard</div>
     <div class="o-sub">Tools built for agents, by agents <span class="o-sep">&middot;</span>
-      Brought to you by <a href="https://optimumprotects.com/" target="_blank" rel="noopener">Optimum</a></div>
+      Brought to you by <a href="https://www.ffloptimum.com/" target="_blank" rel="noopener">Optimum</a></div>
     </div>
   </div>
   <a class="o-pill" id="goatBtn" href="https://goatleads.com/registration/new?affiliate_id=66c4aa379e0123651ad2f0e6"
@@ -227,6 +256,42 @@
   <div class="o-suite"><button type="button">More free tools &#9662;</button><div class="o-suite-menu"></div></div>
   <button type="button" class="gear" id="gearBtn" aria-label="My carriers">&#9881; My carriers</button>
 </header>
+<div class="recstrip">Free for every agent, period.<button type="button" class="recopen" aria-haspopup="dialog">Not a Family First Life agent?</button></div>
+<dialog id="recModal" aria-labelledby="recTitle">
+  <form method="dialog" class="dlg">
+    <button type="button" class="x" id="recClose" aria-label="Close">&#10005;</button>
+    <h2 id="recTitle">Not with Family First Life? You can still use these tools.</h2>
+
+    <p class="recask">They&rsquo;re free, and they stay free. But while you&rsquo;re running your numbers, it&rsquo;s
+    worth asking what you&rsquo;re actually being paid for that production &mdash; <b>a lower contract can
+    cost you six figures over a few years without ever showing up on a single statement.</b>
+    If they&rsquo;re not paying you what you&rsquo;re worth, that&rsquo;s worth a hard look.</p>
+
+    <div class="recnote"><b>Already with FFL?</b> You&rsquo;re in the best position there is &mdash;
+    congratulations.</div>
+
+    <p class="recturn">If you&rsquo;re outside Family First Life, here&rsquo;s the honest take:</p>
+
+    <div class="gitem"><h3>100% independent, never captive</h3>
+      <p>Forty-plus carriers. You write what&rsquo;s best for your client &mdash; not whatever a captive
+      shelf allows.</p></div>
+    <div class="gitem"><h3>Real leads, priced honestly</h3>
+      <p>High-intent leads from vetted independent partners. Not one overpriced in-house lead type
+      you&rsquo;re required to buy, and not &ldquo;free&rdquo; cold leads you quietly pay for in low comp.</p></div>
+    <div class="gitem"><h3>A plug-and-play system from day one</h3>
+      <p>You&rsquo;re handed something that already works. FFL writes over $110 million a month &mdash; more
+      than some brokerages do in a year &mdash; as the fastest-growing brokerage in the country.
+      The system is figured out. You just run it.</p></div>
+    <div class="gitem"><h3>Vested from day one</h3>
+      <p>Your business is yours &mdash; including all renewals.</p></div>
+    <div class="gitem"><h3>The highest compensation in the business</h3>
+      <p>Up to 145% on your own production, plus producer bonuses, manager bonuses, carrier
+      bonuses and company trips.</p></div>
+
+    <a class="gcta" href="https://www.ffloptimum.com/#apply" target="_blank" rel="noopener">Start the conversation &rarr;</a>
+    <p class="rec2"><a href="https://www.ffloptimum.com/#why" target="_blank" rel="noopener">Or read more about the agency first &rarr;</a></p>
+  </form>
+</dialog>
 <dialog id="goatDlg" aria-labelledby="goatTitle">
   <form method="dialog" class="dlg">
     <button type="button" class="x" id="goatClose" aria-label="Close">×</button>
@@ -308,7 +373,7 @@
 
   <p class="foot">Grid language is transcribed from the FFL 2020 term and 2022 final expense grid sheets, plus the Chubb/Combined Generational Life underwriting guide, the Fidelity Life RAPIDecision Final Expense &amp; GI producer guide (May 2026), and the Fidelity Life InstaBrain Term / Pure Term producer guides (May 2026), the Mutual of Omaha Accelerated Underwriting flyer (2023), Simplified Issue guide (April 2026) and Fully Underwritten guide (Sept 2025), the National Life Group Life Underwriting Guide (2020), the Foresters Advantage Plus II / Strong Foundation / Your Term / SMART UL Underwriting Guide (2020), the Americo Instant Decision IUL agent guide (2025) the Royal Neighbors SIWL/GDB agent guide (2020), the Transamerica Field Guide to Underwriting (2021), the Transamerica FFIUL II Express vs FE Express comparison flyer (July 2026), the Transamerica FFIUL II Express agent guide (Sept 2026), the Transamerica FE Express Solution agent guide (July 2026), the Transamerica Trendsetter Term Life guide (Dec 2025), the National Life Group Underwriting Guide (Sept 2025) and the Americo Instant Decision Term Series agent guide (Sept 2025) / eApp underwriting reference (April 2026). Color coding is an agent-facing shortcut, not a carrier decision — underwriting rules change; confirm current guidelines before quoting.</p>
   <p class="o-footer">Built for insurance agents by
-    <a href="https://optimumprotects.com/" target="_blank" rel="noopener">Optimum</a>.</p>
+    <a href="https://www.ffloptimum.com/" target="_blank" rel="noopener">Optimum</a>.</p>
 </main>
 
 <script>
@@ -1127,6 +1192,16 @@ $("#drawerNone").addEventListener("click",()=>{myOff=new Set(ALL_CARRIERS);mcSav
 document.addEventListener("keydown",e=>{if(e.key==="Escape") openDrawer(false);});
 mcLoad();
 readClient(); render(); renderProducts(); if(myOff.size){$("#gearBtn").classList.add("set");$("#gearBtn").textContent=`⚙ My carriers (${myOff.size} off)`;}
+</script>
+<script>
+/* Native <dialog> matches the GOAT pop-out already in this tool: Escape and the scrim come free. */
+(function(){var rm=document.getElementById('recModal');if(!rm)return;
+ function sh(){ if(rm.open) rm.close(); }
+ document.getElementById('recClose').addEventListener('click',sh);
+ rm.addEventListener('click',function(e){ if(e.target===rm) sh(); });
+ document.querySelectorAll('.recopen').forEach(function(b){
+   b.addEventListener('click',function(){ rm.showModal(); document.getElementById('recClose').focus(); });
+ });})();
 </script>
 <!-- ===== OPTIMUM SUITE: cross-links to the other free tools (shared across all tools) ===== -->
 <style>
