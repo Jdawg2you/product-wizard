@@ -239,6 +239,33 @@
   .sr{position:absolute;left:-9999px}
   @media (max-width:640px){ main{padding:14px 12px 40px} tbody th{width:130px;min-width:130px} }
   @media (prefers-reduced-motion:reduce){.drawer{transition:none}}
+/* ===== embedded mode (?embed=1) — the wizard running inside the Script Navigator's
+   Carriers panel. The navigator owns the interview; this trims the page to the answer.
+   Additive only: no rule here changes how the standalone wizard looks. ===== */
+body.embed{background:var(--cream)}
+body.embed .o-header,
+body.embed .recstrip,
+body.embed .gridhead,
+body.embed .gridwrap,
+body.embed .products,
+body.embed .foot,
+body.embed .o-footer,
+body.embed .o-next,
+body.embed #finePrint{display:none!important}
+/* The navigator owns the interview when embedded: one input surface, one answer surface.
+   Duplicating the client panel here would let the two drift apart on the next push. */
+body.embed .client,
+body.embed .qlabel,
+body.embed .searchwrap,
+body.embed .chips{display:none!important}
+body.embed main{padding:10px 12px 16px}
+body.embed .picker{padding:12px 13px}
+body.embed .legend{font-size:11px;gap:8px 12px;margin:10px 0}
+body.embed .verdict .lane{grid-template-columns:1fr}
+body.embed .embed-note{display:block;font-size:11.5px;color:var(--muted);
+  border-top:1px solid var(--rule);margin:14px 0 0;padding:10px 0 0}
+.embed-note{display:none}
+
 </style>
 </head>
 <body>
@@ -352,6 +379,7 @@
   </div>
 
   <section class="verdict" id="verdict"></section>
+  <p class="embed-note">Underwriting grids, product snapshots and the full condition search are in the <a href="https://wizard.ffloptimum.com/" target="_blank" rel="noopener">full wizard</a>.</p>
 
 
 
@@ -1277,6 +1305,105 @@ function SUITE_LIVE(t){ return !!(t && t.url && t.url.indexOf('REPLACE-ME') < 0)
 })();
 </script>
 <!-- ===== /OPTIMUM SUITE ===== -->
+
+<!-- ===== OPTIMUM SUITE — EMBEDDED CLIENT FEED ===== -->
+<script>
+/* Lets the Insurance Script Navigator drive this page while an agent reads a call script.
+   The two tools are separate origins (script. and wizard.), so localStorage is not shared and
+   nothing crosses except window.postMessage between this frame and its parent. No server, no
+   query string, no cookie — client health answers never leave the agent's browser.
+
+   Inbound  {source:"optimum-suite",  type:"client",  v:1, client:{...}}
+   Outbound {source:"optimum-wizard", type:"ready"|"summary", v:1, ...}
+
+   Everything below reads and writes the same state the visible inputs do — it fills the client
+   panel and the condition chips, then calls render(). There is no second code path for
+   eligibility, so an embedded answer and a typed-in answer cannot disagree. */
+(function(){
+"use strict";
+
+var ALLOWED = ["https://script.ffloptimum.com"];
+/* Loosen only when this page is itself being served locally for testing. */
+var DEV = location.protocol === "file:" || /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+
+var embedded = /[?&]embed=1/.test(location.search);
+if (embedded) document.body.classList.add("embed");
+
+function set(sel, val){ var el = document.querySelector(sel); if(el) el.value = (val==null?"":String(val)); }
+function idxOf(name){ for(var i=0;i<COND.length;i++) if(COND[i].name===name) return i; return -1; }
+
+function apply(c){
+  if(!c || typeof c !== "object") return;
+  set("#dob","");
+  set("#age", (typeof c.age === "number") ? c.age : "");
+  if(typeof c.hin === "number"){ set("#hft", Math.floor(c.hin/12)); set("#hin", c.hin%12); }
+  else { set("#hft",""); set("#hin",""); }
+  set("#wt", (typeof c.wt === "number") ? c.wt : "");
+  set("#sex", (c.sex==="m"||c.sex==="f") ? c.sex : "");
+  set("#lb", c.lb==="nolb" ? "nolb" : "lb");
+  readClient();
+
+  picked.length = 0;
+  (Array.isArray(c.conds) ? c.conds : []).forEach(function(x){
+    if(!x || typeof x.name !== "string") return;
+    var i = idxOf(x.name);
+    if(i < 0 || picked.some(function(p){ return p.i === i; })) return;
+    var p = {i:i, y:null};
+    if(isMeds(COND[i].name)) p.m = (x.m === "" || x.m == null) ? null : x.m;
+    else                     p.y = (x.y === "" || x.y == null) ? null : x.y;
+    picked.push(p);
+  });
+  render();
+  report();
+}
+
+/* Same shape the "Likely best fit" call-out uses, so the navigator's one-line summary and this
+   page's headline can never disagree. */
+function report(){
+  if(!embedded || !window.parent || window.parent === window) return;
+  var byType = {}, total = 0, best = null;
+  TYPE_ORDER.forEach(function(t){
+    var key = t[0], label = t[1];
+    if(key === "term" && client.focus === "cash"){ byType[key] = 0; return; }
+    var list = verdictsFor(key).filter(function(x){ return x.worst === "ok" || x.worst === "tier"; });
+    byType[key] = list.length; total += list.length;
+    if(key !== "term" && list.length && (!best || list[0].sc > best.sc))
+      best = {sc:list[0].sc, name: label + " — " + list[0].car.name};
+  });
+  var ready = client.age != null || picked.length || (client.hin != null && client.wt != null);
+  try{
+    window.parent.postMessage({source:"optimum-wizard", type:"summary", v:1,
+      total: total, byType: byType, best: best ? best.name : null, ready: !!ready}, "*");
+  }catch(e){}
+}
+
+window.addEventListener("message", function(e){
+  if(!DEV && ALLOWED.indexOf(e.origin) < 0) return;
+  var d = e.data;
+  if(!d || d.source !== "optimum-suite" || d.type !== "client") return;
+  apply(d.client);
+  /* Tell the sender it landed so it stops re-sending. Without this the navigator keeps
+     retrying for a few seconds and would overwrite anything the agent typed here. */
+  try{ if(e.source) e.source.postMessage({source:"optimum-wizard", type:"applied", v:1}, "*"); }catch(x){}
+});
+/* Opened by the navigator in its own window rather than embedded in a frame. Same contract,
+   different container: greet the opener so it can send straight away. */
+if(window.opener && window.opener !== window){
+  try{ window.opener.postMessage({source:"optimum-wizard", type:"ready", v:1}, "*"); }catch(e){}
+}
+
+if(embedded && window.parent && window.parent !== window){
+  try{ window.parent.postMessage({source:"optimum-wizard", type:"ready", v:1}, "*"); }catch(e){}
+  /* Anything the agent changes inside the panel still reports back. */
+  ["#age","#hft","#hin","#wt","#sex","#lb"].forEach(function(s){
+    var el = document.querySelector(s); if(el) el.addEventListener("input", function(){ setTimeout(report,0); });
+  });
+  document.addEventListener("click", function(){ setTimeout(report,0); });
+  setTimeout(report, 0);
+}
+})();
+</script>
+<!-- ===== /OPTIMUM SUITE — EMBEDDED CLIENT FEED ===== -->
 
 </body>
 </html>
