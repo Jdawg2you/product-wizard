@@ -1334,7 +1334,10 @@ function idxOf(name){ for(var i=0;i<COND.length;i++) if(COND[i].name===name) ret
 
 function apply(c){
   if(!c || typeof c !== "object") return;
-  set("#dob","");
+  /* The navigator sends the date of birth as well as the age it worked out from it, and
+     both tools compute real age the same way. Showing the date of birth is what lets an
+     agent check the number rather than take it on trust. */
+  set("#dob", (typeof c.dob === "string") ? c.dob : "");
   set("#age", (typeof c.age === "number") ? c.age : "");
   if(typeof c.hin === "number"){ set("#hft", Math.floor(c.hin/12)); set("#hin", c.hin%12); }
   else { set("#hft",""); set("#hin",""); }
