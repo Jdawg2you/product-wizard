@@ -152,11 +152,11 @@ did not parse. After the checks, load the preview and actually look at it.
   accumulation is picked); Americo Instant Decision IUL and F&G Pathsetter are `focus:"cash"`
   (hidden when Protection is picked). Remaining IUL carriers stay untagged and always show.
   F&G Everlast sits directly after Transamerica FFIUL II Express in the protection order.
-- F&G Everlast carries `tag:"Fast underwriting"` — close to instant, but not instant. Because the
-  underwriting toggle treats anything other than the exact string "Fully underwritten" as
-  simplified, Everlast now shows under Simplified issue while Pathsetter does not, even though the
-  F&G guide gives both the same programme (exam-free to age 60 at $1M or less, full underwriting
-  above that). Worth revisiting if that split is not what Jesse wants.
+- F&G Everlast carries `tag:"Fast underwriting"` — close to instant, but not instant — and
+  Pathsetter is `tag:"Fully underwritten"`. Confirmed by Jesse 8 Sep 2026: the two products are
+  not the same speed, whatever the shared exam-free programme in the guide suggests. The split is
+  deliberate, so Everlast appears on the Simplified issue default and Pathsetter only once the
+  toggle opens to Both or Fully underwritten.
 - `client.face` is read from no input and filtered on by nothing: `eligChecks` reports each
   carrier's face range as information only. A requested coverage amount is therefore not a
   filter today, which is why the navigator does not capture one.

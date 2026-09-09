@@ -115,6 +115,16 @@
   .seg{display:inline-flex;border:1px solid var(--rule);border-radius:var(--radius-pill);background:var(--card);padding:3px}
   .seg button{border:0;background:transparent;padding:6px 14px;border-radius:var(--radius-pill);font-weight:600;font-size:13px;color:var(--slate);cursor:pointer}
   .seg button[aria-pressed="true"]{background:var(--navy);color:#fff}
+  /* Approximate monthly IUL contribution — sits beside the focus segment as its own bubble. */
+  .pmseg{align-items:center;gap:2px;padding:3px 10px 3px 12px;font-size:13px;color:var(--slate);cursor:text}
+  .pmseg i{font-style:italic;color:var(--muted);font-size:12.5px}
+  .pmseg input{width:58px;border:0;background:transparent;font:inherit;font-size:13px;font-weight:600;
+    color:var(--navy);padding:3px 2px;-moz-appearance:textfield}
+  .pmseg input:focus{outline:none}
+  .pmseg input::-webkit-outer-spin-button,.pmseg input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .pmseg:focus-within{border-color:var(--gold)}
+  .seg.hot{border-color:var(--gold);background:var(--goldsoft);box-shadow:0 0 0 3px rgba(201,162,78,.30)}
+  .seg.eye{border-color:var(--green);box-shadow:0 0 0 3px rgba(63,122,86,.25)}
   .qlabel{display:block;font-weight:600;font-size:13px;color:var(--slate);margin:6px 0}
   .searchwrap{position:relative;max-width:560px}
   .sugg{position:absolute;left:0;right:0;top:calc(100% + 4px);background:var(--card);border:1px solid var(--rule);border-radius:var(--radius-sm);box-shadow:var(--shadow-lift);max-height:280px;overflow:auto;z-index:20;display:none}
@@ -124,6 +134,25 @@
   .sugg .none{padding:10px 14px;color:var(--muted)}
   .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;min-height:34px;align-items:center}
   .chips .hint{color:var(--muted);font-size:14px}
+  .qlabel .sub{font-weight:400;color:var(--muted)}
+  .chip .yrin{width:62px;font:inherit;font-size:12.5px;padding:3px 6px;border:1px solid var(--rule);
+    border-radius:var(--radius-sm);background:var(--card);color:var(--ink);-moz-appearance:textfield}
+  .chip .yrin::-webkit-outer-spin-button,.chip .yrin::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .medchip{display:inline-flex;align-items:center;gap:7px;background:var(--fill);border:1px solid var(--rule);
+    border-radius:var(--radius-pill);padding:5px 6px 5px 12px;font-size:13px;color:var(--slate);margin:0 6px 6px 0}
+  .medchip button{background:none;border:0;cursor:pointer;color:var(--muted);font-size:15px;line-height:1;padding:0 4px}
+  .medchip button:hover{color:var(--no)}
+  #medask{margin:2px 0 0}
+  .medask{background:var(--goldsoft);border:1px solid var(--goldline);border-radius:var(--radius-sm);
+    padding:9px 12px;margin:0 0 7px;font-size:13.5px;color:var(--slate);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .medask b{color:var(--navy)}
+  .medask .sp{margin-left:auto;display:flex;gap:7px}
+  .medask button{font-family:var(--sans);font-size:12.5px;font-weight:700;border-radius:var(--radius-pill);
+    padding:5px 14px;cursor:pointer;border:1px solid var(--rule)}
+  .medask .yes{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .medask .yes:hover{background:var(--blue);border-color:var(--blue)}
+  .medask .no{background:transparent;color:var(--slate)}
+  .medask .no:hover{border-color:var(--muted)}
   /* Live tally: on a narrow window the results render below the fold, so typing an age looked
      like nothing happened. This sits in the panel the agent is already looking at. */
   .tally{display:block;margin:10px 0 0;padding:0;border:0;background:none;font:inherit;font-size:13.5px;
@@ -361,7 +390,15 @@ body.embed .embed-note{display:block;font-size:11.5px;color:var(--muted);
         <button type="button" data-focus="both" aria-pressed="true">Both</button>
         <button type="button" data-focus="cash" aria-pressed="false">Cash accumulation</button>
       </div>
+      <label class="seg pmseg" for="iulpm"><i>IUL&nbsp;$/m</i><input id="iulpm" type="number" min="0" step="25" inputmode="numeric" placeholder="—" aria-label="Approximate IUL contribution per month"></label>
     </div>
+    <label for="medq" class="qlabel">Medications <span class="sub">optional — finds the conditions behind them</span></label>
+    <div class="searchwrap">
+      <input id="medq" type="search" autocomplete="off" placeholder="Type a medication — Eliquis, metformin, lisinopril…" aria-label="Search medications" aria-expanded="false" aria-controls="medsugg">
+      <div id="medsugg" class="sugg" role="listbox"></div>
+    </div>
+    <div class="chips" id="medchips"></div>
+    <div id="medask"></div>
     <label for="q" class="qlabel">Conditions</label>
     <div class="searchwrap">
       <input id="q" type="search" autocomplete="off" placeholder="Type a condition — diabetes, COPD, DUI, stent…" aria-label="Search conditions" aria-expanded="false" aria-controls="sugg">
@@ -661,11 +698,11 @@ iul: {
     {id:"smartul", name:"Foresters", prod:"SMART UL", tag:"Non-medical"},
     {id:"ffiul", name:"Transamerica", prod:"Financial Foundation IUL", tag:"Fully underwritten"},
     {id:"amiul", name:"Americo", prod:"Instant Decision IUL (Series 336)", tag:"Instant decision", src:"Agent guide 23-084-1 (10/25)"},
-    {id:"fgpath", name:"F&G", prod:"Pathsetter", tag:"Fast underwriting", focus:"cash", src:"Field UW guide ADV 1100 rev 07/23"},
+    {id:"fgpath", name:"F&G", prod:"Pathsetter", tag:"Fully underwritten", focus:"cash", src:"Field UW guide ADV 1100 rev 07/23"},
     {id:"fgever", name:"F&G", prod:"Everlast", tag:"Fast underwriting", focus:"protection", src:"Field UW guide ADV 1100 rev 07/23"}
   ],
   orders: {
-    protection: {label:"Protection", ids:["iule","rapid","ffiulx","fgever","nlgiul","smartul","ffiul","fgpath","amiul"]},
+    protection: {label:"Protection", ids:["rapid","iule","ffiulx","fgever","nlgiul","smartul","ffiul","fgpath","amiul"]},
     both:       {label:"Both",       ids:["iule","rapid","amiul","ffiulx","smartul","nlgiul","ffiul","fgpath","fgever"]},
     cash:       {label:"Cash accumulation", ids:["rapid","amiul","nlgiul","ffiulx","smartul","ffiul","fgpath","fgever"]}
   },
@@ -863,7 +900,7 @@ const MEDS_CONDS={"High blood pressure":1};
 const isMeds=n=>!!MEDS_CONDS[n];
 const YOPTS=[["","any time"],["0.5","under 1 yr ago"],["1.5","1–2 yrs ago"],["3","2–5 yrs ago"],["7","5–10 yrs ago"],["12","10+ yrs ago"]];
 const pickedIdx=()=>picked.map(p=>p.i);
-const client={age:null,hin:null,wt:null,sex:"",face:null,lb:"lb",uw:"si",focus:"both"};
+const client={age:null,hin:null,wt:null,sex:"",face:null,lb:"lb",uw:"si",focus:"both",iulpm:null};
 /* ---------- MY CARRIERS (saved in this browser only) ---------- */
 const MC_KEY="ipw.myCarriers.v2";
 let myOff=new Set();   // carrier names the agent has unticked
@@ -902,6 +939,11 @@ const money=n=>"$"+Number(n).toLocaleString();
 /* A whole life row that also answers a differently-named term/IUL condition. Without this the
    card shows nothing for whole life even though the grid has an answer. */
 const WL_ALSO={"Irregular heartbeat / murmur":"AFib / irregular heartbeat"};
+/* Conditions the agent can record that no grid scores. They are captured because they are
+   on the paper profile and the navigator sends them, and because a medication points at
+   them — but with no row on any grid they cannot move a verdict, and the chip says so. */
+var NOGRID=["High cholesterol"];
+
 const COND=(()=>{
   const byName={};
   const add=(name,key,idx)=>{ (byName[name]=byName[name]||{name,wl:null,term:null,iul:null})[key]=idx; };
@@ -913,8 +955,173 @@ const COND=(()=>{
     const i=DATA.wl.rows.findIndex(r=>r.name===wlRow);
     if(i>=0 && byName[cond] && byName[cond].wl==null) byName[cond].wl=i;
   });
+  NOGRID.forEach(n=>{ if(!byName[n]) byName[n]={name:n,wl:null,term:null,iul:null,noGrid:true};
+                      else byName[n].noGrid=true; });
   return Object.values(byName).sort((a,b)=>a.name.localeCompare(b.name));
 })();
+
+/* ---------- MEDICATIONS ----------
+   MEDS, MED_FOR and the soundex matching are ported verbatim from the Insurance Script
+   Navigator so the two tools agree on what a drug implies. That mapping is clinical
+   knowledge rather than carrier-guide language, which is exactly why it must not be
+   re-authored here: one copy, one place to correct it. Row 0 of each MEDS row is the
+   label; the rest are brand/generic aliases. */
+var MEDS=[
+["Eliquis","apixaban"],["Xarelto","rivaroxaban"],["Warfarin","Coumadin"],["Plavix","clopidogrel"],
+["Brilinta","ticagrelor"],["Pradaxa","dabigatran"],["Aspirin"],
+["Metoprolol","Lopressor","Toprol"],["Carvedilol","Coreg"],["Atenolol","Tenormin"],["Bisoprolol"],
+["Lisinopril","Zestril","Prinivil"],["Losartan","Cozaar"],["Valsartan","Diovan"],["Amlodipine","Norvasc"],
+["Hydrochlorothiazide","HCTZ"],["Furosemide","Lasix"],["Spironolactone","Aldactone"],["Clonidine"],
+["Diltiazem","Cardizem"],["Digoxin","Lanoxin"],["Isosorbide","Imdur"],["Nitroglycerin","Nitrostat"],
+["Amiodarone","Cordarone"],["Sotalol"],["Flecainide"],["Entresto","sacubitril"],["Ranexa","ranolazine"],
+["Atorvastatin","Lipitor"],["Simvastatin","Zocor"],["Rosuvastatin","Crestor"],["Pravastatin","Pravachol"],
+["Ezetimibe","Zetia"],["Fenofibrate","Tricor"],["Repatha","evolocumab"],
+["Metformin","Glucophage"],["Glipizide","Glucotrol"],["Glyburide"],["Januvia","sitagliptin"],
+["Jardiance","empagliflozin"],["Farxiga","dapagliflozin"],["Trulicity","dulaglutide"],
+["Ozempic","semaglutide"],["Mounjaro","tirzepatide"],["Victoza","liraglutide"],["Actos","pioglitazone"],
+["Lantus","insulin glargine"],["Humalog","insulin lispro"],["Levemir"],["NovoLog"],["Tresiba"],["Basaglar"],
+["Insulin"],["Gabapentin","Neurontin"],["Pregabalin","Lyrica"],["Duloxetine","Cymbalta"],
+["Levothyroxine","Synthroid"],["Methimazole","Tapazole"],["Prednisone"],["Methotrexate"],
+["Humira","adalimumab"],["Enbrel","etanercept"],["Plaquenil","hydroxychloroquine"],["Imuran","azathioprine"],
+["Albuterol","ProAir","Ventolin"],["Symbicort"],["Advair"],["Trelegy"],["Breo"],["Spiriva","tiotropium"],
+["Singulair","montelukast"],["Prednisolone"],["Oxygen"],
+["Sertraline","Zoloft"],["Escitalopram","Lexapro"],["Fluoxetine","Prozac"],["Citalopram","Celexa"],
+["Bupropion","Wellbutrin"],["Venlafaxine","Effexor"],["Trazodone"],["Mirtazapine","Remeron"],
+["Alprazolam","Xanax"],["Lorazepam","Ativan"],["Clonazepam","Klonopin"],["Diazepam","Valium"],
+["Buspirone","Buspar"],["Lithium"],["Lamotrigine","Lamictal"],["Quetiapine","Seroquel"],
+["Aripiprazole","Abilify"],["Risperidone","Risperdal"],["Olanzapine","Zyprexa"],["Haloperidol","Haldol"],
+["Donepezil","Aricept"],["Memantine","Namenda"],["Levodopa","Sinemet","carbidopa"],["Ropinirole"],
+["Phenytoin","Dilantin"],["Levetiracetam","Keppra"],["Topiramate","Topamax"],["Valproate","Depakote"],
+["Oxycodone","Percocet","OxyContin"],["Hydrocodone","Norco","Vicodin"],["Tramadol","Ultram"],
+["Morphine","MS Contin"],["Fentanyl"],["Methadone"],["Suboxone","buprenorphine"],["Naltrexone"],
+["Meloxicam","Mobic"],["Ibuprofen","Motrin","Advil"],["Naproxen","Aleve"],["Celecoxib","Celebrex"],
+["Omeprazole","Prilosec"],["Pantoprazole","Protonix"],["Famotidine","Pepcid"],
+["Allopurinol","Zyloprim"],["Colchicine"],["Tamsulosin","Flomax"],["Finasteride","Proscar"],
+["Sildenafil","Viagra"],["Tadalafil","Cialis"],["Alendronate","Fosamax"],["Vitamin D"],
+["Furosemide"],["Potassium","K-Dur"],["Amoxicillin"],["Azithromycin","Z-Pak"],["Doxycycline"],
+["Tamoxifen"],["Anastrozole","Arimidex"],["Letrozole","Femara"],["Keytruda","pembrolizumab"],
+["Revlimid","lenalidomide"],["Imbruvica","ibrutinib"],["Gleevec","imatinib"],
+["Entecavir"],["Epclusa"],["Harvoni"],["Truvada"],["Biktarvy"],["Descovy"],
+["Dialysis"],["Sevelamer","Renvela"],["Epogen","epoetin"],["Tacrolimus","Prograf"],["Cyclosporine"],
+["Mycophenolate","CellCept"],["Hydroxyurea"],["Eliquis"]
+];
+var MED_FOR={
+ "Eliquis":["Arrhythmia / AFib","Blood clots / DVT"],"Xarelto":["Arrhythmia / AFib","Blood clots / DVT"],
+ "Warfarin":["Arrhythmia / AFib","Blood clots / DVT"],"Plavix":["Heart attack","Stent"],
+ "Brilinta":["Heart attack","Stent"],"Pradaxa":["Arrhythmia / AFib"],
+ "Metformin":["Diabetes"],"Glipizide":["Diabetes"],"Glyburide":["Diabetes"],"Januvia":["Diabetes"],
+ "Jardiance":["Diabetes"],"Farxiga":["Diabetes"],"Trulicity":["Diabetes"],"Ozempic":["Diabetes"],
+ "Mounjaro":["Diabetes"],"Victoza":["Diabetes"],"Actos":["Diabetes"],"Lantus":["Diabetes"],
+ "Humalog":["Diabetes"],"Insulin":["Diabetes"],"Levemir":["Diabetes"],"Tresiba":["Diabetes"],
+ "Atorvastatin":["High cholesterol"],"Simvastatin":["High cholesterol"],"Rosuvastatin":["High cholesterol"],
+ "Lisinopril":["High blood pressure"],"Losartan":["High blood pressure"],"Amlodipine":["High blood pressure"],
+ "Metoprolol":["High blood pressure","Arrhythmia / AFib"],"Carvedilol":["High blood pressure"],
+ "Amiodarone":["Arrhythmia / AFib"],"Sotalol":["Arrhythmia / AFib"],"Flecainide":["Arrhythmia / AFib"],
+ "Entresto":["Heart disease / disorder"],"Digoxin":["Arrhythmia / AFib"],"Ranexa":["Angina (chest pain)"],
+ "Nitroglycerin":["Angina (chest pain)"],"Isosorbide":["Angina (chest pain)"],
+ "Albuterol":["Asthma (chronic)","COPD"],"Symbicort":["COPD","Asthma (chronic)"],"Advair":["COPD","Asthma (chronic)"],
+ "Trelegy":["COPD"],"Spiriva":["COPD"],"Breo":["COPD"],"Singulair":["Asthma (chronic)"],
+ "Levothyroxine":["Autoimmune disorder"],"Methotrexate":["Rheumatoid arthritis","Autoimmune disorder"],
+ "Humira":["Autoimmune disorder"],"Enbrel":["Rheumatoid arthritis"],"Plaquenil":["Lupus","Rheumatoid arthritis"],
+ "Sertraline":["Depression"],"Escitalopram":["Anxiety","Depression"],"Fluoxetine":["Depression"],
+ "Bupropion":["Depression"],"Venlafaxine":["Depression"],"Mirtazapine":["Depression"],
+ "Alprazolam":["Anxiety"],"Lorazepam":["Anxiety"],"Clonazepam":["Anxiety"],"Buspirone":["Anxiety"],
+ "Lithium":["Bipolar"],"Lamotrigine":["Bipolar"],"Quetiapine":["Bipolar"],"Aripiprazole":["Bipolar"],
+ "Olanzapine":["Schizophrenia / psychosis"],"Risperidone":["Schizophrenia / psychosis"],
+ "Donepezil":["Alzheimer's / dementia"],"Memantine":["Alzheimer's / dementia"],
+ "Levodopa":["Parkinson's disease"],"Ropinirole":["Parkinson's disease"],
+ "Phenytoin":["Epilepsy / seizures"],"Levetiracetam":["Epilepsy / seizures"],"Topiramate":["Epilepsy / seizures"],
+ "Gabapentin":["Neuropathy"],"Pregabalin":["Neuropathy"],"Duloxetine":["Neuropathy","Depression"],
+ "Allopurinol":["Autoimmune disorder"],"Sevelamer":["Kidney disease / failure"],"Epogen":["Kidney disease / failure"],
+ "Tacrolimus":["Transplant"],"Cyclosporine":["Transplant"],"Mycophenolate":["Transplant"],
+ "Tamoxifen":["Cancer"],"Anastrozole":["Cancer"],"Letrozole":["Cancer"],"Keytruda":["Cancer"],
+ "Revlimid":["Cancer"],"Imbruvica":["Cancer"],"Gleevec":["Cancer"],"Hydroxyurea":["Cancer"],
+ "Entecavir":["Hepatitis B"],"Epclusa":["Hepatitis C"],"Harvoni":["Hepatitis C"],
+ "Truvada":["AIDS / HIV / ARC"],"Biktarvy":["AIDS / HIV / ARC"],"Descovy":["AIDS / HIV / ARC"],
+ "Oxygen":["Oxygen / ventilator"],"Dialysis":["Dialysis"]
+};
+/* unpadded soundex, so "elikwis" and "Eliquis" collapse to the same key */
+function medKey(w){
+  var t=String(w||"").toUpperCase().replace(/[^A-Z]/g,"");
+  if(!t) return "";
+  var code={B:1,F:1,P:1,V:1,C:2,G:2,J:2,K:2,Q:2,S:2,X:2,Z:2,D:3,T:3,L:4,M:5,N:5,R:6};
+  var out=t[0], last=code[t[0]]||0;
+  for(var i=1;i<t.length;i++){ var c=t[i], d=code[c];
+    if(d && d!==last) out+=d;
+    if(c!=="H" && c!=="W") last=d||0; }
+  return out;
+}
+function medKey2(w){
+  var t=String(w||"").toUpperCase().replace(/[^A-Z]/g,"");
+  if(!t) return "";
+  var code={B:1,F:1,P:1,V:1,C:2,G:2,J:2,K:2,Q:2,S:2,X:2,Z:2,D:3,T:3,L:4,M:5,N:5,R:6};
+  var out="", last=null;
+  for(var i=0;i<t.length;i++){ var c=t[i], d=code[c];
+    if(d && d!==last) out+=d;
+    if(c!=="H" && c!=="W") last=d||null; }
+  return out;
+}
+var MED_INDEX=(function(){ var ix=[];
+  MEDS.forEach(function(row){ row.forEach(function(n){ ix.push({n:n,label:row[0],k:medKey(n),k2:medKey2(n)}); }); });
+  return ix; })();
+function medSuggest(q,limit){
+  var t=String(q||"").trim(); if(t.length<2) return [];
+  var lt=t.toLowerCase(), kt=medKey(t), k2=medKey2(t);
+  var best={};
+  function offer(label,score){ if(best[label]===undefined || score<best[label]) best[label]=score; }
+  MED_INDEX.forEach(function(m){
+    var ln=m.n.toLowerCase();
+    if(ln===lt)            return offer(m.label,0);
+    if(ln.indexOf(lt)===0) return offer(m.label,1+(m.n.length-t.length)/100);
+    if(ln.indexOf(lt)>0)   return offer(m.label,3);
+    if(kt.length>=2 && m.k.indexOf(kt)===0)  return offer(m.label,4+Math.abs(m.k.length-kt.length)/10);
+    if(k2.length>=3 && m.k2.indexOf(k2)===0) return offer(m.label,6+Math.abs(m.k2.length-k2.length));
+  });
+  return Object.keys(best).sort(function(a,b){return best[a]-best[b];}).slice(0,limit||8);
+}
+var meds=[];       /* medication labels the agent has added */
+var medSkip=[];    /* "med|condition" pairs answered No, so they are not re-asked */
+
+/* ---------- WHAT EACH CONDITION NEEDS ASKED ----------
+   Derived from the cells themselves, so it stays right when a cell changes. A condition needs a
+   year if any carrier states a time window, a medication count if any states a countable
+   threshold, and nothing at all if neither (Alzheimer's, Down's syndrome, Pregnant, Military...). */
+const CONDNEEDS=(()=>{
+  const out={};
+  ["wl","term","iul"].forEach(k=>DATA[k].rows.forEach(r=>{
+    const e=out[r.name]=out[r.name]||{th:new Set(),meds:false};
+    r.cells.forEach(c=>String(c.t).split(/;|\.\s+(?=[A-Z])/).forEach(cl=>{
+      cl=cl.trim();
+      const w=clauseWindow(cl); if(w){ if(w.lo!=null)e.th.add(w.lo); if(w.hi!=null)e.th.add(w.hi); }
+      if(clauseMeds(cl)) e.meds=true;
+      if(clauseAge(cl).length) e.age=true;   /* age at diagnosis also needs the year */
+    }));
+  }));
+  Object.keys(out).forEach(n=>{ out[n].th=[...out[n].th].sort((a,b)=>a-b);
+    out[n].time = out[n].th.length>0 || !!out[n].age; });
+  return out;
+})();
+function needsOf(name){ return CONDNEEDS[name] || {th:[],meds:false,time:false}; }
+
+/* Elapsed years if the thing happened on 1 Jan of that year (the most it could be) and on
+   31 Dec (the least). If a threshold sits between the two, the year alone cannot decide it
+   and the month is worth asking for; otherwise it changes nothing and we do not ask. */
+function yearSpan(yr){
+  const now=new Date(), t=now.getTime();
+  return { hi:(t-new Date(yr,0,1).getTime())/31557600000, lo:Math.max(0,(t-new Date(yr,11,31).getTime())/31557600000) };
+}
+function monthMatters(name,yr){
+  if(!yr) return false;
+  const sp=yearSpan(yr);
+  return needsOf(name).th.some(t=>t>sp.lo && t<sp.hi);
+}
+/* years since, from the year and (when we asked for it) the month */
+function yearsSince(yr,mo){
+  if(!yr) return null;
+  const now=new Date();
+  if(mo) return (now.getTime()-new Date(yr,mo-1,15).getTime())/31557600000;
+  const sp=yearSpan(yr); return (sp.lo+sp.hi)/2;   /* no threshold splits this year, so the middle is safe */
+}
 
 /* ---------- SEARCH ---------- */
 const q=$("#q"), sugg=$("#sugg");
@@ -940,6 +1147,63 @@ q.addEventListener("keydown",e=>{ const list=matches();
 function pick(i){ if(!pickedIdx().includes(i)) picked.push({i,y:null}); q.value=""; activeIdx=-1; sugg.classList.remove("open"); render(); q.focus(); }
 function unpick(i){ picked=picked.filter(x=>x.i!==i); render(); }
 
+/* ---------- MEDICATION SEARCH ----------
+   Type a drug, confirm what it is treating, and the condition lands on the list with whatever
+   follow-up that condition needs (years since, or medication count). Answering No is remembered
+   in medSkip so the same pair is not asked twice. */
+const medq=$("#medq"), medsugg=$("#medsugg");
+let medActive=-1;
+function medMatches(){ return medSuggest(medq.value, 8).filter(n=>meds.indexOf(n)<0); }
+function renderMedSugg(){
+  const list=medMatches(); medsugg.innerHTML="";
+  if(!medq.value.trim()){ medsugg.classList.remove("open"); medq.setAttribute("aria-expanded","false"); return; }
+  if(!list.length) medsugg.innerHTML='<div class="none">No medication matches that — add the condition directly instead.</div>';
+  list.forEach((n,k)=>{ const b=document.createElement("button"); b.type="button"; b.setAttribute("role","option");
+    b.className=k===medActive?"active":""; b.textContent=n;
+    b.addEventListener("mousedown",e=>{e.preventDefault(); addMed(n);}); medsugg.appendChild(b); });
+  medsugg.classList.add("open"); medq.setAttribute("aria-expanded","true");
+}
+function medLabel(n){ const hit=MED_INDEX.filter(m=>m.n.toLowerCase()===String(n).toLowerCase())[0]; return hit?hit.label:n; }
+function addMed(n){ n=medLabel(n);   /* an alias like "Lipitor" must land as its label "Atorvastatin", or MED_FOR misses */
+  if(meds.indexOf(n)<0) meds.push(n); medq.value=""; medActive=-1; medsugg.classList.remove("open"); render(); medq.focus(); }
+function delMed(n){ meds=meds.filter(x=>x!==n); render(); }
+medq.addEventListener("input",()=>{medActive=-1;renderMedSugg();});
+medq.addEventListener("focus",renderMedSugg);
+medq.addEventListener("blur",()=>setTimeout(()=>medsugg.classList.remove("open"),120));
+medq.addEventListener("keydown",e=>{ const list=medMatches();
+  if(e.key==="ArrowDown"){e.preventDefault();medActive=Math.min(medActive+1,list.length-1);renderMedSugg();}
+  else if(e.key==="ArrowUp"){e.preventDefault();medActive=Math.max(medActive-1,0);renderMedSugg();}
+  else if(e.key==="Enter"){e.preventDefault(); if(list.length) addMed(list[Math.max(medActive,0)]);}
+  else if(e.key==="Escape") medsugg.classList.remove("open"); });
+
+/* conditions a chosen medication implies that are not already on the list and not declined */
+function medFlags(){
+  const on=picked.map(p=>COND[p.i].name), out=[];
+  meds.forEach(m=>{ (MED_FOR[m]||[]).forEach(c=>{
+    if(on.indexOf(c)<0 && medSkip.indexOf(m+"|"+c)<0 && !out.some(x=>x.m===m&&x.c===c)) out.push({m,c});
+  }); });
+  return out;
+}
+function renderMeds(){
+  $("#medchips").innerHTML = meds.map(m=>`<span class="medchip">${esc(m)}<button type="button" data-med="${esc(m)}" aria-label="Remove ${esc(m)}">&times;</button></span>`).join("");
+  $("#medchips").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>delMed(b.dataset.med)));
+  const flags=medFlags();
+  $("#medask").innerHTML = flags.map(f=>{
+    const known = COND.some(c=>c.name===f.c);
+    return `<div class="medask"><span><b>${esc(f.m)}</b> — does the client have <b>${esc(f.c)}</b>?${known?"":" (not a condition on these grids)"}</span>`+
+      `<span class="sp"><button type="button" class="yes" data-y="${esc(f.m)}|${esc(f.c)}">Yes</button>`+
+      `<button type="button" class="no" data-n="${esc(f.m)}|${esc(f.c)}">No</button></span></div>`;
+  }).join("");
+  $("#medask").querySelectorAll(".yes").forEach(b=>b.addEventListener("click",()=>{
+    const c=b.dataset.y.split("|")[1], i=COND.findIndex(x=>x.name===c);
+    if(i>=0 && !pickedIdx().includes(i)) picked.push({i,y:null});
+    render();
+  }));
+  $("#medask").querySelectorAll(".no").forEach(b=>b.addEventListener("click",()=>{
+    if(medSkip.indexOf(b.dataset.n)<0) medSkip.push(b.dataset.n); render();
+  }));
+}
+
 /* ---------- CLIENT INPUTS ---------- */
 function readClient(){
   const a=parseInt($("#age").value,10); client.age=isNaN(a)?null:a;
@@ -947,8 +1211,26 @@ function readClient(){
   client.hin=(isNaN(ft)||isNaN(inch))?null:ft*12+inch;
   const w=parseInt($("#wt").value,10); client.wt=isNaN(w)?null:w;
   client.sex=$("#sex").value; client.lb=$("#lb").value;
+  const pm=parseFloat($("#iulpm").value); client.iulpm=isNaN(pm)?null:pm;
+  /* Every search starts on Simplified issue — that is where an agent should begin, and a client
+     with no IUL money has no business being shown fully underwritten products. The contribution
+     is what moves it: $300 opens it to Both, ten times the client's age goes to Fully
+     underwritten, and dropping back below $300 returns it. A blank figure never overrides a
+     choice the agent made by hand. */
+  if(client.iulpm!=null){
+    const want = (client.age!=null && client.iulpm>=client.age*10) ? "fu"
+               : (client.iulpm>=300 ? "both" : "si");
+    if(client.uw!==want){
+      client.uw=want;
+      document.querySelectorAll("#uwSeg button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.uw===want?"true":"false"));
+    }
+  }
+  /* Say so on screen: the underwriting row lights up whenever it is off the Simplified issue
+     default, and the IUL focus row is ringed once there is contribution money in play. */
+  const uwSeg=$("#uwSeg"); if(uwSeg) uwSeg.classList.toggle("hot", client.uw!=="si");
+  const fcSeg=$("#focusSeg"); if(fcSeg) fcSeg.classList.toggle("eye", client.iulpm!=null);
 }
-["#age","#hft","#hin","#wt","#sex","#lb"].forEach(sel=>$(sel).addEventListener("input",()=>{readClient();render();}));
+["#age","#hft","#hin","#wt","#sex","#lb","#iulpm"].forEach(sel=>$(sel).addEventListener("input",()=>{readClient();render();}));
 document.querySelectorAll("#focusSeg button").forEach(b=>b.addEventListener("click",()=>{client.focus=b.dataset.focus;document.querySelectorAll("#focusSeg button").forEach(x=>x.setAttribute("aria-pressed",x===b));render();}));
 document.querySelectorAll("#uwSeg button").forEach(b=>b.addEventListener("click",()=>{client.uw=b.dataset.uw;document.querySelectorAll("#focusSeg button").forEach(b=>b.addEventListener("click",()=>{client.focus=b.dataset.focus;document.querySelectorAll("#focusSeg button").forEach(x=>x.setAttribute("aria-pressed",x===b));render();}));
 document.querySelectorAll("#uwSeg button").forEach(x=>x.setAttribute("aria-pressed",x===b));render();}));
@@ -1035,16 +1317,41 @@ function verdictsFor(key){
 function renderChips(){
   const c=$("#chips");
   if(!picked.length){c.innerHTML='<span class="hint">Add age and any conditions. Results update as you go.</span>';return;}
-  c.innerHTML=picked.map(p=>{const md=isMeds(COND[p.i].name),opts=md?MEDOPTS:YOPTS,cur=md?p.m:p.y;
-    return `<span class="chip">${esc(COND[p.i].name)}<select data-i="${p.i}" aria-label="${md?"Number of medications":"Time since diagnosis or last treatment"}">${opts.map(([v,l])=>`<option value="${v}" ${String(cur??"")===v?"selected":""}>${l}</option>`).join("")}</select><button type="button" aria-label="Remove ${esc(COND[p.i].name)}" data-i="${p.i}">×</button></span>`;}).join("")+'<button type="button" class="clear" id="clearAll">Clear all</button>';
+  const YRNOW=new Date().getFullYear();
+  const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  c.innerHTML=picked.map(p=>{
+    const name=COND[p.i].name, need=needsOf(name), rm=`<button type="button" aria-label="Remove ${esc(name)}" data-i="${p.i}">&times;</button>`;
+    if(COND[p.i].noGrid) return `<span class="chip">${esc(name)}${rm}</span>`;
+    if(isMeds(name))
+      return `<span class="chip">${esc(name)}<select data-i="${p.i}" data-f="m" aria-label="Number of medications">`+
+        MEDOPTS.map(([v,l])=>`<option value="${v}" ${String(p.m??"")===v?"selected":""}>${l}</option>`).join("")+`</select>${rm}</span>`;
+    if(!need.time) return `<span class="chip">${esc(name)}${rm}</span>`;
+    const askMo=monthMatters(name,p.yr);
+    return `<span class="chip">${esc(name)}`+
+      `<input class="yrin" type="number" inputmode="numeric" min="1900" max="${YRNOW}" placeholder="year" data-i="${p.i}" data-f="yr" value="${p.yr??""}" aria-label="Year diagnosed or occurred">`+
+      (askMo?`<select data-i="${p.i}" data-f="mo" aria-label="Month">`+
+        `<option value="">month?</option>`+MONTHS.map((m,n)=>`<option value="${n+1}" ${String(p.mo??"")===String(n+1)?"selected":""}>${m}</option>`).join("")+`</select>`:"")+
+      rm+`</span>`;
+  }).join("")+'<button type="button" class="clear" id="clearAll">Clear all</button>';
+
   c.querySelectorAll(".chip button").forEach(b=>b.addEventListener("click",()=>unpick(+b.dataset.i)));
-  c.querySelectorAll(".chip select").forEach(sel=>sel.addEventListener("change",()=>{const p=picked.find(x=>x.i===+sel.dataset.i);
-    const v=sel.value===""?null:parseFloat(sel.value);
-    if(isMeds(COND[p.i].name)) p.m=v; else p.y=v; render();}));
-  $("#clearAll").addEventListener("click",()=>{picked=[];render();});
+  c.querySelectorAll(".chip select, .chip input").forEach(el=>{
+    const ev = el.tagName==="INPUT" ? "input" : "change";
+    el.addEventListener(ev,()=>{
+      const p=picked.find(x=>x.i===+el.dataset.i); if(!p) return;
+      const f=el.dataset.f, v=el.value===""?null:parseFloat(el.value);
+      if(f==="m") p.m=v;
+      else if(f==="mo") p.mo=v;
+      else if(f==="yr"){ p.yr = (v && v>1900 && v<=new Date().getFullYear()) ? v : null; if(!p.yr) p.mo=null; }
+      p.y = isMeds(COND[p.i].name) ? null : yearsSince(p.yr,p.mo);
+      render();
+      if(f==="yr"){ const again=$("#chips").querySelector(`input[data-i="${p.i}"][data-f="yr"]`);
+        if(again){ again.focus(); again.setSelectionRange(again.value.length,again.value.length); } }
+    });
+  });
+  const ca=$("#clearAll"); if(ca) ca.addEventListener("click",()=>{picked=[];render();});
 }
-/* ---------- TIME-WINDOW RESOLUTION ----------
-   Given years since diagnosis/treatment, pick the clause of a cell that applies. */
+
 function clauseWindow(cl){
   const t=cl.toLowerCase(); let lo=null, hi=null, any=false;
   const yrs=(n,u)=>/mo/.test(u)?n/12:n;
@@ -1106,6 +1413,12 @@ function evalClause(cl,y,a,m){
   return unknown?null:true;
 }
 const outcomeOf=cl=>{const parts=cl.split(/\s[-–]\s/); return parts.length>1?parts[parts.length-1]:cl;};
+/* Elapsed time now comes from a real year, so it is a float — never print it raw. */
+function sinceTxt(y){
+  if(y<1) return Math.max(1,Math.round(y*12))+" mos";
+  const r=Math.round(y*10)/10;
+  return (Number.isInteger(r)?r:r.toFixed(1))+" yrs";
+}
 function resolveWindow(cell,y,a,m){
   if(y==null && a==null && m==null) return cell;
   const clauses=cell.t.split(/;|\.\s+(?=[A-Z])/).map(x=>x.trim()).filter(Boolean);
@@ -1130,7 +1443,7 @@ function resolveWindow(cell,y,a,m){
       else return cell; }
     else return cell; }
   const p=parse(outcomeOf(hit));
-  const tag=[y!=null?`${y} yrs ago`:null, a!=null?`age ${a}`:null].filter(Boolean).join(", ");
+  const tag=[y!=null?`${sinceTxt(y)} ago`:null, a!=null?`age ${a}`:null].filter(Boolean).join(", ");
   return {t:`${tag} → ${hit}`, s:p.s};
 }
 function renderVerdict(){
@@ -1206,7 +1519,7 @@ function renderProducts(){
     return `<h3 class="ptitle">${esc(label)}</h3><div class="plist">`+ps.map(p=>`<div class="pcard"><div class="name">${esc(p.name)}</div><ul>${p.pts.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`).join("")+`</div>`;
   }).join("");
 }
-function render(){ renderChips(); renderVerdict(); renderGrid(); renderProducts(); }
+function render(){ renderChips(); renderMeds(); renderVerdict(); renderGrid(); renderProducts(); }
 $("#tally").addEventListener("click",()=>{const v=$("#verdict"); if(v&&v.scrollIntoView) v.scrollIntoView({behavior:"smooth",block:"start"});});
 document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>{ tab=b.dataset.tab; document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b?"true":"false")); renderGrid(); }));
 $("#onlyPicked").addEventListener("click",e=>{onlyPicked=!onlyPicked;e.currentTarget.setAttribute("aria-pressed",onlyPicked);renderGrid();});
@@ -1353,7 +1666,16 @@ function apply(c){
     if(i < 0 || picked.some(function(p){ return p.i === i; })) return;
     var p = {i:i, y:null};
     if(isMeds(COND[i].name)) p.m = (x.m === "" || x.m == null) ? null : x.m;
-    else                     p.y = (x.y === "" || x.y == null) ? null : x.y;
+    else {
+      /* The year and month are what this page stores; years-since is derived from them.
+         Taking a pre-computed number instead left the year box empty and the number was
+         discarded the moment anyone touched the chip. */
+      var yr=parseInt(x.yr,10), mo=parseInt(x.mo,10);
+      p.yr = (yr>1900 && yr<=new Date().getFullYear()) ? yr : null;
+      p.mo = (p.yr && mo>=1 && mo<=12) ? mo : null;
+      p.y  = p.yr ? yearsSince(p.yr,p.mo)
+                  : ((x.y === "" || x.y == null) ? null : x.y);
+    }
     picked.push(p);
   });
   render();
