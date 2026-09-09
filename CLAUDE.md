@@ -84,7 +84,14 @@ way `renderVerdict` computes them.
 
 ```
 navigator -> wizard   {source:"optimum-suite",  type:"client", v:1, client:{
-                         age, sex, hin (total inches), wt, lb, conds:[{name, y}|{name, m}] }}
+                         age, dob (ISO), sex, hin (total inches), wt, lb,
+                         conds:[{name, yr, mo}|{name, m}] }}
+
+  yr and mo are the year and month it happened - this page stores those on the chip and
+  derives years-since itself, so a record that arrives and one that is typed cannot
+  disagree. A legacy `y` (years-since as a decimal) still rides along and is used only
+  when no yr is given. Names go through COND_ALIAS, so the navigator's "Active cancer"
+  scores as Cancer.
 wizard -> navigator   {source:"optimum-wizard", type:"ready"|"summary", v:1,
                          total, byType:{iul,wl,term}, best, ready}
 ```
