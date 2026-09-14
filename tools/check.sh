@@ -88,9 +88,91 @@ if [ "$FAIL" -eq 0 ] && [ -f "$TMP/block0.js" ]; then
   esac
 fi
 
+# ---- 3. still in step with the Script Navigator? -----------------------------------
+# The navigator hands this page its conditions by name, and the medication tables here are a
+# copy of its own. Either can drift without an error on either side: a renamed row silently
+# stops matching, and a stale medication table quietly asks about the wrong condition. This
+# is the check that would have caught "Active cancer" before anyone noticed it by hand.
+NAV_SRC="${NAV_FILE:-$HOME/script-navigator/index.html}"
+NAV="$TMP/navigator.html"
+if [ -f "$NAV_SRC" ]; then cp "$NAV_SRC" "$NAV"; NAVFROM="$NAV_SRC"
+elif curl -fs --max-time 20 https://script.ffloptimum.com/ -o "$NAV"; then NAVFROM="script.ffloptimum.com"
+else NAV=""; fi
+
+if [ "$FAIL" -eq 0 ] && [ -n "$NAV" ]; then
+  cat > "$TMP/stub.js" <<'JS'
+var mk = function(id){ return {id:id, innerHTML:'', textContent:'', hidden:false, value:'',
+  classList:{add:function(){},remove:function(){},toggle:function(){},contains:function(){return false}},
+  setAttribute:function(){}, getAttribute:function(){return null}, addEventListener:function(){},
+  querySelectorAll:function(){return []}, querySelector:function(){return mk()},
+  dataset:{}, showModal:function(){}, options:[], focus:function(){}, scrollIntoView:function(){} }; };
+var els = {};
+globalThis.document = { querySelector:function(s){ return els[s] || (els[s]=mk(s)); },
+  querySelectorAll:function(){ return []; }, createElement:function(){ return mk(); },
+  addEventListener:function(){}, getElementById:function(s){ return els[s] || (els[s]=mk(s)); },
+  readyState:'complete', head:mk('head'), body:mk('body') };
+globalThis.window = globalThis;
+globalThis.localStorage = { _:{}, getItem:function(k){ return this._[k]||null; },
+  setItem:function(k,v){ this._[k]=v; }, removeItem:function(k){ delete this._[k]; } };
+globalThis.MutationObserver = function(){ return {observe:function(){}}; };
+JS
+  "$JSC" -e "
+    eval(readFile('$TMP/stub.js'));
+    try { var names = new Function(readFile('$TMP/block0.js') + ';return COND.map(function(c){return c.name});')();
+          print(JSON.stringify(names)); }
+    catch (e) { print('ERR ' + e.message); }
+  " > "$TMP/wiz_conds.json" 2>&1
+
+  cat > "$TMP/sync.py" <<'PY2'
+import io, re, sys, json
+nav = io.open(sys.argv[1], encoding='utf-8').read()
+wiz = io.open(sys.argv[2], encoding='utf-8').read()
+raw = io.open(sys.argv[3], encoding='utf-8').read().strip()
+if raw.startswith('ERR'): print('could not load the conditions on this page: ' + raw); sys.exit()
+have = set(json.loads(raw))
+def span(src, pat, o, c):
+    m = re.search(pat, src)
+    if not m: return None
+    i = src.index(o, m.start()); d = 0
+    for k in range(i, len(src)):
+        if src[k] == o: d += 1
+        elif src[k] == c:
+            d -= 1
+            if d == 0: return src[i:k+1]
+def medfor(src):
+    b = span(src, r'(?:var|const|let)\s+MED_FOR\s*=', '{', '}') or ''
+    return {k.strip(): tuple(sorted(re.findall(r'"([^"]+)"', v)))
+            for k, v in re.findall(r'["\']?([^"\':,{}\[\]]+?)["\']?\s*:\s*\[([^\]]*)\]', b)}
+problems = []
+nm, wm = medfor(nav), medfor(wiz)
+if not nm: problems.append('could not read MED_FOR from the navigator')
+elif nm != wm:
+    extra = sorted(set(nm) ^ set(wm)); moved = sorted(k for k in set(nm) & set(wm) if nm[k] != wm[k])
+    problems.append('MED_FOR differs from the navigator - drugs on one side only: %s; mapped differently: %s'
+                    % (extra[:8] or 'none', moved[:8] or 'none'))
+norm = lambda b: re.sub(r'\s+', '', b or '')
+if norm(span(nav, r'(?:var|const|let)\s+MEDS\s*=', '[', ']')) != norm(span(wiz, r'(?:var|const|let)\s+MEDS\s*=', '[', ']')):
+    problems.append('MEDS differs from the navigator')
+pc = span(nav, r'var\s+PF_CONDS\s*=', '[', ']') or ''
+names = set(re.findall(r'"([^"]+)"', pc)) | set(re.findall(r'\{\{c:([^}]+)\}\}', nav))
+names |= set(c for v in nm.values() for c in v)
+missing = sorted(n for n in names if n not in have)
+if missing: problems.append('navigator conditions with no match here: ' + ', '.join(missing))
+if problems: print(' | '.join(problems))
+else: print('SYNCED %d medications, %d condition names' % (len(nm), len(names)))
+PY2
+  OUT=$(python3 "$TMP/sync.py" "$NAV" "$FILE" "$TMP/wiz_conds.json")
+  case "$OUT" in
+    SYNCED*) echo "ok    $OUT (against $NAVFROM)" ;;
+    *)       echo "FAIL  $OUT"; echo "      against $NAVFROM"; FAIL=1 ;;
+  esac
+elif [ -z "$NAV" ]; then
+  echo "warn  navigator not found locally or online - sync with it was not checked"
+fi
+
 echo
 if [ "$FAIL" -eq 0 ]; then
-  echo "PASS  $N script block(s) parse; all grid rows aligned."
+  echo "PASS  $N script block(s) parse; all grid rows aligned; in step with the navigator."
   echo "      Still load the preview and look at it before pushing."
 else
   echo "FAILED — do not push."

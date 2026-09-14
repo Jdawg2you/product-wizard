@@ -106,6 +106,31 @@ is itself served from localhost or a file. Nothing crosses but `postMessage`: th
 separate origins, so no storage is shared, and client health answers deliberately never touch a
 cookie, a query string or a server.
 
+## Kept in step with the Script Navigator
+`tools/check.sh` step 3 fails the commit when this page and the navigator have drifted apart. It
+reads the navigator from `~/script-navigator/index.html` (override with `NAV_FILE=`), falling back
+to script.ffloptimum.com, and warns rather than fails if neither is reachable. It checks that:
+- `MED_FOR` and `MEDS` match the navigator's exactly - they are a copy, and a stale copy asks
+  about the wrong condition without any error;
+- every condition name the navigator can send - its `PF_CONDS`, every `{{c:...}}` tick in its
+  scripts, and every condition its `MED_FOR` points at - resolves to a `COND` entry here,
+  directly or through `COND_ALIAS`.
+When it fails, fix whichever side is wrong; do not bypass it.
+
+## IUL contribution ($/m)
+The contribution is IUL money, so it only moves the IUL list: $300 or more takes IUL to Both, ten
+times the client's age takes IUL to Fully underwritten, a blank figure leaves it alone. That
+override lives in `client.uwIul`, and `uwFor(key)` returns it for `iul` and the agent's own
+`client.uw` for whole life and term. The IUL heading shows a badge while it applies. It used to
+move the shared toggle, and because no whole life product is fully underwritten, 10x age wiped
+all of whole life - the fallback the navigator's script leans on at 9.1.
+
+## Condition chip year input
+A year is only committed once the box holds four digits (or on blur, when anything left over is
+settled). Committing each keystroke rebuilt the chip empty, since every partial year is below 1900,
+so a year could not be typed at all. Do not call `setSelectionRange` on these - number inputs throw.
+`needsOf()` resolves aliases, so an aliased chip gets the year box its real row needs.
+
 ## Conventions
 - Conditions in `MEDS_CONDS` (high blood pressure) swap the "time since" dropdown for a medication
   count (`MEDOPTS`), stored on the chip as `p.m` rather than `p.y`. `clauseMeds()` reads carrier

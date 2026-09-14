@@ -123,6 +123,8 @@
   .pmseg input:focus{outline:none}
   .pmseg input::-webkit-outer-spin-button,.pmseg input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
   .pmseg:focus-within{border-color:var(--gold)}
+  .ptype h3 .uwiul{font-family:var(--sans);font-size:11px;font-weight:700;color:var(--navy);background:var(--goldsoft);
+    border:1px solid var(--goldline);border-radius:var(--radius-pill);padding:2px 9px;margin-left:6px;vertical-align:3px}
   .seg.hot{border-color:var(--gold);background:var(--goldsoft);box-shadow:0 0 0 3px rgba(201,162,78,.30)}
   .seg.eye{border-color:var(--green);box-shadow:0 0 0 3px rgba(63,122,86,.25)}
   .qlabel{display:block;font-weight:600;font-size:13px;color:var(--slate);margin:6px 0}
@@ -1110,7 +1112,9 @@ const CONDNEEDS=(()=>{
     out[n].time = out[n].th.length>0 || !!out[n].age; });
   return out;
 })();
-function needsOf(name){ return CONDNEEDS[name] || {th:[],meds:false,time:false}; }
+/* An alias has no rows of its own, so ask about the row it scores as - otherwise "Active cancer"
+   arrives with a date the agent can neither see nor change, because no year box is drawn. */
+function needsOf(name){ return CONDNEEDS[COND_ALIAS[name]||name] || {th:[],meds:false,time:false}; }
 
 /* Elapsed years if the thing happened on 1 Jan of that year (the most it could be) and on
    31 Dec (the least). If a threshold sits between the two, the year alone cannot decide it
@@ -1221,19 +1225,14 @@ function readClient(){
   const w=parseInt($("#wt").value,10); client.wt=isNaN(w)?null:w;
   client.sex=$("#sex").value; client.lb=$("#lb").value;
   const pm=parseFloat($("#iulpm").value); client.iulpm=isNaN(pm)?null:pm;
-  /* Every search starts on Simplified issue — that is where an agent should begin, and a client
-     with no IUL money has no business being shown fully underwritten products. The contribution
-     is what moves it: $300 opens it to Both, ten times the client's age goes to Fully
-     underwritten, and dropping back below $300 returns it. A blank figure never overrides a
-     choice the agent made by hand. */
-  if(client.iulpm!=null){
-    const want = (client.age!=null && client.iulpm>=client.age*10) ? "fu"
+  /* The contribution is IUL money, so it only moves the IUL list: $300 opens IUL to Both, ten
+     times the client's age takes IUL to Fully underwritten, and a blank figure leaves it alone.
+     Whole life and term keep whatever underwriting the agent chose. It used to move the one
+     toggle every product shares - and since no whole life product is fully underwritten, ten
+     times age wiped all of whole life off the page, which is the fallback the script leans on. */
+  client.uwIul = client.iulpm==null ? null
+               : (client.age!=null && client.iulpm>=client.age*10) ? "fu"
                : (client.iulpm>=300 ? "both" : "si");
-    if(client.uw!==want){
-      client.uw=want;
-      document.querySelectorAll("#uwSeg button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.uw===want?"true":"false"));
-    }
-  }
   /* Say so on screen: the underwriting row lights up whenever it is off the Simplified issue
      default, and the IUL focus row is ringed once there is contribution money in play. */
   const uwSeg=$("#uwSeg"); if(uwSeg) uwSeg.classList.toggle("hot", client.uw!=="si");
@@ -1241,8 +1240,8 @@ function readClient(){
 }
 ["#age","#hft","#hin","#wt","#sex","#lb","#iulpm"].forEach(sel=>$(sel).addEventListener("input",()=>{readClient();render();}));
 document.querySelectorAll("#focusSeg button").forEach(b=>b.addEventListener("click",()=>{client.focus=b.dataset.focus;document.querySelectorAll("#focusSeg button").forEach(x=>x.setAttribute("aria-pressed",x===b));render();}));
-document.querySelectorAll("#uwSeg button").forEach(b=>b.addEventListener("click",()=>{client.uw=b.dataset.uw;document.querySelectorAll("#focusSeg button").forEach(b=>b.addEventListener("click",()=>{client.focus=b.dataset.focus;document.querySelectorAll("#focusSeg button").forEach(x=>x.setAttribute("aria-pressed",x===b));render();}));
-document.querySelectorAll("#uwSeg button").forEach(x=>x.setAttribute("aria-pressed",x===b));render();}));
+/* Each click used to attach another full set of listeners to the focus buttons as well. */
+document.querySelectorAll("#uwSeg button").forEach(b=>b.addEventListener("click",()=>{client.uw=b.dataset.uw;document.querySelectorAll("#uwSeg button").forEach(x=>x.setAttribute("aria-pressed",x===b));readClient();render();}));
 $("#dob").addEventListener("input",()=>{ const v=$("#dob").value; if(!v) return; const d=new Date(v+"T00:00:00"), n=new Date();
   let a=n.getFullYear()-d.getFullYear(); const m=n.getMonth()-d.getMonth(); if(m<0||(m===0&&n.getDate()<d.getDate())) a--;
   if(a>=0&&a<120){ $("#age").value=a; readClient(); render(); } });
@@ -1289,9 +1288,10 @@ function eligChecks(key,car){
 }
 
 /* ---------- VERDICTS ---------- */
+function uwFor(key){ return (key==="iul" && client.uwIul) ? client.uwIul : client.uw; }
 function verdictsFor(key){
   const d=DATA[key];
-  const showFU=client.uw!=="si", showSI=client.uw!=="fu";
+  const uw=uwFor(key), showFU=uw!=="si", showSI=uw!=="fu";
   return ordered(key).filter(ci=>{const c=d.carriers[ci]; if(!mine(key,c)) return false; const fu=c.tag==="Fully underwritten"; if(!(fu?showFU:showSI)) return false;
     if(key==="iul" && client.focus!=="both" && c.focus && c.focus!=="both" && c.focus!==client.focus) return false; return true;}).map((ci,i)=>{ const car=d.carriers[ci];
     const checks=eligChecks(key,car);
@@ -1345,18 +1345,30 @@ function renderChips(){
 
   c.querySelectorAll(".chip button").forEach(b=>b.addEventListener("click",()=>unpick(+b.dataset.i)));
   c.querySelectorAll(".chip select, .chip input").forEach(el=>{
-    const ev = el.tagName==="INPUT" ? "input" : "change";
-    el.addEventListener(ev,()=>{
+    const commit=(onBlur)=>{
       const p=picked.find(x=>x.i===+el.dataset.i); if(!p) return;
-      const f=el.dataset.f, v=el.value===""?null:parseFloat(el.value);
-      if(f==="m") p.m=v;
+      const f=el.dataset.f, raw=String(el.value).trim(), v=raw===""?null:parseFloat(raw);
+      if(f==="yr"){
+        /* A year is typed a digit at a time, and every partial year is below 1900. Committing
+           each keystroke threw the digit away and rebuilt the chip empty, so a year could not be
+           typed at all - and any month already picked went with it. Leave the box alone until it
+           holds a real four-digit year; whatever is left when the agent moves on is settled then. */
+        const ok = /^\d{4}$/.test(raw) && v>1900 && v<=new Date().getFullYear();
+        if(!onBlur && raw!=="" && !ok) return;
+        const nyr = ok ? v : null;
+        if(onBlur && nyr===p.yr && (ok || raw==="")) return;
+        p.yr=nyr; if(!p.yr) p.mo=null;
+      }
+      else if(f==="m") p.m=v;
       else if(f==="mo") p.mo=v;
-      else if(f==="yr"){ p.yr = (v && v>1900 && v<=new Date().getFullYear()) ? v : null; if(!p.yr) p.mo=null; }
       p.y = isMeds(COND[p.i].name) ? null : yearsSince(p.yr,p.mo);
       render();
-      if(f==="yr"){ const again=$("#chips").querySelector(`input[data-i="${p.i}"][data-f="yr"]`);
-        if(again){ again.focus(); again.setSelectionRange(again.value.length,again.value.length); } }
-    });
+      /* No setSelectionRange here: number inputs throw on it. */
+      if(f==="yr" && !onBlur){ const again=$("#chips").querySelector(`input[data-i="${p.i}"][data-f="yr"]`);
+        if(again) again.focus(); }
+    };
+    if(el.tagName==="INPUT"){ el.addEventListener("input",()=>commit(false)); el.addEventListener("change",()=>commit(true)); }
+    else el.addEventListener("change",()=>commit(false));
   });
   const ca=$("#clearAll"); if(ca) ca.addEventListener("click",()=>{picked=[];render();});
 }
@@ -1484,9 +1496,9 @@ function renderVerdict(){
   for(const t of all){
     if(outTypes.includes(t) && outTypes.length<all.length) continue;
     const n={ok:0,tier:0,na:0,no:0}; t.list.forEach(x=>n[x.worst]++);
-    const shown=DATA[t.key].carriers.filter(c=>{if(!mine(t.key,c)) return false; const fu=c.tag==="Fully underwritten"; if(!(fu?client.uw!=="si":client.uw!=="fu")) return false; if(t.key==="iul"&&client.focus!=="both"&&c.focus&&c.focus!=="both"&&c.focus!==client.focus) return false; return true;}).length;
+    const shown=DATA[t.key].carriers.filter(c=>{if(!mine(t.key,c)) return false; const fu=c.tag==="Fully underwritten", uw=uwFor(t.key); if(!(fu?uw!=="si":uw!=="fu")) return false; if(t.key==="iul"&&client.focus!=="both"&&c.focus&&c.focus!=="both"&&c.focus!==client.focus) return false; return true;}).length;
     const hidden=shown-t.list.length;
-    html+=`<div class="ptype"><h3>${esc(t.label)} <small>${n.ok} clean · ${n.tier} with conditions · ${n.na} unclear${hidden?` · ${hidden} not eligible (hidden)`:""}</small></h3><div class="lane">`;
+    html+=`<div class="ptype"><h3>${esc(t.label)}${t.key==="iul"&&client.uwIul?` <span class="uwiul">${{si:"Simplified issue",both:"Both",fu:"Fully underwritten"}[client.uwIul]} &middot; from the $/m</span>`:""} <small>${n.ok} clean · ${n.tier} with conditions · ${n.na} unclear${hidden?` · ${hidden} not eligible (hidden)`:""}</small></h3><div class="lane">`;
     if(!t.list.length) html+=`<div class="card na"><div class="name">Nothing available</div><div class="prod">No ${esc(t.label.toLowerCase())} product on the grid issues at age ${client.age??"—"} under the current filter.</div></div>`;
     html+=t.list.map(x=>`<div class="card ${x.worst}"><div class="name">${esc(x.car.name)}</div><div class="prod">${esc(x.car.prod)}${x.car.tag?` · <b>${esc(x.car.tag)}</b>`:""}</div>${
       x.checks.filter(c=>c.s!=="ok"&&c.s!=="info").map(c=>`<div class="reason ${c.s}">${esc(c.t)}</div>`).join("")}<ul>${
