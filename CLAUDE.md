@@ -42,10 +42,9 @@ full underwriting grids (browseable, tabbed) and product snapshots per carrier.
 
 ## Carrier order (business rule from Jesse — pays better / prices better, top to bottom)
 - WL: Americo, Mutual of Omaha, Corebridge SimpliNow Legacy (SIWL), Chubb, InstaBrain, American Amicable,
-  Transamerica, Foresters, Royal Neighbors Ensured Legacy (SIWL / GDB), Royal Neighbors Jet Whole Life, Royal Neighbors Royal Legacy SPWL (both placed
-  here by default 14 Sep 2026, awaiting Jesse's position), Accendo ("only 6-month advance"), then
-  Royal Neighbors Ensured Legacy GI, then Corebridge GIWL - the guaranteed issue fallbacks, always amber.
-- Term: Royal Neighbors Jet Term Life trails both orders until Jesse places it.
+  Transamerica, Foresters, Accendo ("only 6-month advance"), Corebridge GIWL, then Royal Neighbors at the
+  end for now (Jesse, 14 Sep 2026): Ensured Legacy (SIWL / GDB), Jet Whole Life, Ensured Legacy GI.
+  Only Royal Neighbors' whole life is carried - Jesse removed Royal Legacy SPWL and Jet Term Life.
 - Term with living benefits: NLG, Transamerica, Foresters SF, InstaBrain Term, Americo, MoO TLA, MoO TLE, AmAm.
   Term without: InstaBrain Pure Term, Transamerica, Foresters (rest trail).
 - IUL: MoO IUL Express, NLG RapidProtect, TA FFIUL II Express, NLG FlexLife, Foresters SMART UL, TA FFIUL,
@@ -210,7 +209,7 @@ before `resolveWindow`:
   Transamerica FE Express: insulin - Select (green).
 
 ## Royal Neighbors (2020 field guide)
-Its medical chart gives each condition a check, a call mark or a decline per product. Check reads
+Jet Whole Life only (SPWL and Jet Term removed at Jesse's request). Its medical chart gives each condition a check, a call mark or a decline per product. Check reads
 "Allowed", decline "DECLINE", and the call mark is gray ("individual consideration - call Royal
 Neighbors risk assessment"): the guide gives no outcome, so those must not lead a best fit.
 Conditions the chart doesn't list are gray "not in the guide". Defibrillator / pacemaker and heart

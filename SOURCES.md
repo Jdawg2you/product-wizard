@@ -30,8 +30,6 @@
 | WL | Royal Neighbors Ensured Legacy SIWL / GDB | Ensured Legacy Final Expense agent training guide 2996-1-B Rev. 1-2024 (risk assessment guide, product details) | Replaces the 2020 SIWL/GDB profile (2996-A3); guide not committed |
 | WL | Royal Neighbors Ensured Legacy GI | Same guide | Guaranteed issue; felony and mental incompetence still decline |
 | WL | Royal Neighbors Jet Whole Life | Field Underwriting Guide 2980-B rev 3-2020 (medical chart, requirements, build charts) | Check / call / decline chart; guide not committed |
-| WL | Royal Neighbors Royal Legacy SPWL | Same guide, SPWL column and SPWL build chart | Same |
-| Term | Royal Neighbors Jet Term Life | Same guide; JETerm guide 2990-U (10/2016) is the older product and not used for cells | Same |
 | IUL | F&G Pathsetter | F&G Field Underwriting Guide ADV 1100, rev 07/2023 — `docs/guides/` | Ages/face/limits only; guide has no condition chart |
 | IUL | F&G Everlast | F&G Field Underwriting Guide ADV 1100, rev 07/2023 — `docs/guides/` | Same; minimum face $100,000. Build borrowed from NLG RapidProtect (Jesse's rule) and flagged on the card |
 
