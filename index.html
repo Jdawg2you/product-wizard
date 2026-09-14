@@ -725,7 +725,7 @@ iul: {
     {name:"Transamerica — Financial Foundation IUL (FFIUL)", pts:["Ages 0-85; nonmed to $250K through age 45 and $99K via iGO point-of-sale (18-50; $75K 51-60); paramed above; classes Preferred Elite, Preferred Plus, Preferred, Nontobacco, Preferred Tobacco, Tobacco", "Chronic and critical illness riders must be applied for and pass separate screening (see term snapshot for exclusions); LTC rider available to citizens / green card holders", "Same impairment table as Trendsetter — cell text shows the probable fully-underwritten offer"]},
     {name:"Transamerica — FFIUL II Express (instant decision)", pts:["Ages 18-70 adults (Select Nontobacco / Select Tobacco), 0-17 juvenile; $50K min; max $500K to 60, $300K 61-70, $250K juveniles; 100% instant decision, never referred to an underwriter, coverage in as fast as 15 minutes", "BMI 16.0-39.0 (18.0-39.0 at 60+); build, personal history and Milliman Rx/diagnostic data drive the decision — no exams, no APS", "Hard declines beyond the medical chart: bankruptcy not discharged, felony within 10 yrs, current probation/parole, hospitalization 2+ nights within 1 yr, pending tests within 6 mos, high-risk foreign travel, marijuana-industry / casino / oil-gas-coal-nuclear / arms employment", "Chronic and critical illness riders included unless declined separately (RA, UC/Crohn's, neuropathy, mobility aids, ADL help, Medicaid, handicap placard all block the riders, not the base); terminal illness rider on every policy; no term conversions", "Cells now use the Sept 2026 adult single-condition decision chart — conditions marked * on that chart may still be placed through Transamerica's traditional underwriting (see Financial Foundation IUL column)"]},
     {name:"F&G — Pathsetter (fixed indexed UL)", pts:["Issue ages 0-80; minimum face $50,000; Preferred through Table H (Table 8), so substandard is available", "Exam-free for age 60 and under applying for $1,000,000 or less — do not order a paramed; a telephone interview is often required", "Retention $1M; automatic reinsurance binding limit $10M; jumbo limit $20M (all plans, ages 0-80)", "Preferred needs no ratable conditions, untreated BP within 150/90 (18-50), 160/95 (51-65 and 66+), cholesterol 260 (18-50) and 2 years tobacco-free; Standard allows 1 year", "The field guide publishes no condition-by-condition chart, so every grid cell reads 'not addressed'"]},
-    {name:"F&G — Everlast (fixed indexed UL)", pts:["Issue ages 0-80; minimum face $100,000 — the $100,000-$149,999 band is not available under age 18", "Same underwriting programme as Pathsetter: exam-free to age 60 at $1,000,000 or less, MIB search and instant ID check at all ages and amounts", "Preferred through Table H (Table 8); retention $1M, automatic binding $10M, jumbo $20M", "Build chart is gender- and class-specific (Preferred / Standard, ages 16-50; add 5 lbs for 51-65 and 10 lbs for 66+) — not loaded into the tool, so no build knockout applies", "The field guide publishes no condition-by-condition chart, so every grid cell reads 'not addressed'"]}
+    {name:"F&G — Everlast (fixed indexed UL)", pts:["Build: F&G publishes no chart - the wizard borrows National Life Group's RapidProtect chart (Jesse's call) and marks any result it decides, keeping the card on the page in amber rather than removing it", "Issue ages 0-80; minimum face $100,000 — the $100,000-$149,999 band is not available under age 18", "Same underwriting programme as Pathsetter: exam-free to age 60 at $1,000,000 or less, MIB search and instant ID check at all ages and amounts", "Preferred through Table H (Table 8); retention $1M, automatic binding $10M, jumbo $20M", "Build chart is gender- and class-specific (Preferred / Standard, ages 16-50; add 5 lbs for 51-65 and 10 lbs for 66+) — not loaded into the tool, so no build knockout applies", "The field guide publishes no condition-by-condition chart, so every grid cell reads 'not addressed'"]}
   ],
   rows: [
     ["AIDS / HIV / ARC", "DECLINE", "R|HIV / AIDS - not eligible", "R|Ever - Decline", "A|AIDS - Decline; HIV - moderate rating to Decline (2025 guide)", "DECLINE", "R|Decline", "N|Not in the agent guide - app health questions are all knockouts", "N|Not in the field guide - no condition list published", "N|Not in the field guide - no condition list published"],
@@ -871,7 +871,7 @@ const ELIG={
  term:{ americo:{ages:[20,75],face:[25000,450000],build:"AM"}, moo:{ages:[18,75],face:[25000,550000],faceAge:[[50,550000],[60,450000],[75,350000]],build:"MOOX"}, amam:{face:[25000,300000],build:"AAT"}, foresters:{ages:[18,80],face:[20000,400000],faceAge:[[55,400000],[80,150000]],build:"FSF"},
       ibt:{ages:[18,60],face:[50000,1000000],faceAge:[[55,1000000],[56,900000],[57,800000],[58,700000],[59,600000],[60,500000]],build:"IBT"}, ibpt:{ages:[18,60],face:[50000,1000000],faceAge:[[55,1000000],[56,900000],[57,800000],[58,700000],[59,600000],[60,500000]],build:"IBPT"},
       mooau:{ages:[18,80],face:[25000,20000000],build:"MOOFU"}, nlg:{ages:[18,85],build:"NLGT"}, ta:{ages:[18,80],face:[25000,20000000],build:"TA"} },
- iul:{ amiul:{ages:[18,70],face:[50000,450000],build:"AM"}, fgpath:{ages:[0,80],face:[50000,10000000]}, fgever:{ages:[0,80],face:[100000,10000000]}, iule:{ages:[18,75],face:[25000,550000],faceAge:[[50,550000],[60,450000],[75,350000]],build:"MOOX"}, rapid:{ages:[0,60],face:[50000,500000],build:"NLGP1"}, ffiulx:{ages:[0,70],face:[50000,500000],faceAge:[[17,250000],[60,500000],[70,300000]],bmi:39,bmiMin:16}, nlgiul:{ages:[0,85],build:"NLGT"}, smartul:{ages:[0,75],face:[25000,400000],faceAge:[[55,400000],[75,150000]],build:"FSF"}, ffiul:{ages:[0,85],face:[25000,20000000],build:"TA"} }
+ iul:{ amiul:{ages:[18,70],face:[50000,450000],build:"AM"}, fgpath:{ages:[0,80],face:[50000,10000000]}, fgever:{ages:[0,80],face:[100000,10000000],build:"NLGP1",buildBorrowed:"National Life Group RapidProtect"}, iule:{ages:[18,75],face:[25000,550000],faceAge:[[50,550000],[60,450000],[75,350000]],build:"MOOX"}, rapid:{ages:[0,60],face:[50000,500000],build:"NLGP1"}, ffiulx:{ages:[0,70],face:[50000,500000],faceAge:[[17,250000],[60,500000],[70,300000]],bmi:39,bmiMin:16}, nlgiul:{ages:[0,85],build:"NLGT"}, smartul:{ages:[0,75],face:[25000,400000],faceAge:[[55,400000],[75,150000]],build:"FSF"}, ffiul:{ages:[0,85],face:[25000,20000000],build:"TA"} }
 };
 const TYPE_ORDER=[["iul","IUL"],["wl","Whole Life"],["term","Term"]];
 /* WL row name -> term/IUL row name, for the unified condition list */
@@ -1302,23 +1302,27 @@ function eligChecks(key,car){
       if(band&&band[1]!==max){ max=band[1]; note=` at age ${client.age}`; } }
     out.push({s:"ok",t:`Coverage ${money(e.face[0])}–${money(max)}${note}`});
   }
-  if((client.hin==null || client.wt==null) && (e.build||e.bmi)) out.push({s:"info",t:e.bmi?`BMI limit ${e.bmi} — add height/weight to check`:"Build chart applies — add height/weight to check"});
+  if((client.hin==null || client.wt==null) && (e.build||e.bmi)) out.push({s:"info",t:e.bmi?`BMI limit ${e.bmi} — add height/weight to check`:`Build chart applies${e.buildBorrowed?` (borrowed from ${e.buildBorrowed})`:""} — add height/weight to check`});
   if(client.hin!=null && client.wt!=null){
     const bmi=703*client.wt/(client.hin*client.hin);
     if(e.bmi){ const lo=e.bmiMin?(e.bmi===39&&client.age!=null&&client.age>=60?18:e.bmiMin):0; out.push(bmi>e.bmi?{s:"no",t:`BMI ${bmi.toFixed(1)} — over ${e.bmi} limit`}:(bmi<=lo?{s:"no",t:`BMI ${bmi.toFixed(1)} — under ${lo} minimum`}:{s:"ok",t:`BMI ${bmi.toFixed(1)} (limit ${e.bmi})`})); }
     else if(e.build){
       let key2=e.build; if(key2==="TA") key2=client.sex==="f"?"TAF":"TAM";
+      /* Jesse's rule: F&G publishes no build chart, so Everlast borrows National Life Group's
+         RapidProtect chart. A borrowed chart never removes a carrier on its own - a client outside it
+         stays on the page in amber, and every build line says whose chart decided it. */
+      const bor=e.buildBorrowed ? ` — ${e.buildBorrowed} chart; F&G publishes none, confirm with F&G` : "", outS=e.buildBorrowed?"tier":"no";
       const i=client.hin-H0; const row=(BUILD[key2]||[])[i];
-      if(row===undefined||row===null) out.push({s:"na",t:`Build chart doesn't cover ${ftin(client.hin)}`});
+      if(row===undefined||row===null) out.push({s:"na",t:`Build chart doesn't cover ${ftin(client.hin)}${bor}`});
       else { const [mn,mx]=row;
-        if(mx!=null && client.wt>mx) out.push({s:"no",t:`Over build limit — max ${mx} lbs at ${ftin(client.hin)}${e.build==="TA"&&!client.sex?" (male chart; pick sex for exact)":""}`});
-        else if(mn!=null && client.wt<mn) out.push({s:"no",t:`Under build minimum — ${mn} lbs at ${ftin(client.hin)}`});
+        if(mx!=null && client.wt>mx) out.push({s:outS,t:`Over build limit — max ${mx} lbs at ${ftin(client.hin)}${e.build==="TA"&&!client.sex?" (male chart; pick sex for exact)":""}${bor}`});
+        else if(mn!=null && client.wt<mn) out.push({s:outS,t:`Under build minimum — ${mn} lbs at ${ftin(client.hin)}${bor}`});
         else {
           /* A product with a tighter chart for its full benefit (Corebridge SimpliNow Legacy Max)
              still issues the graded version between the two charts. */
           const lv=e.buildLevel ? (BUILD[e.buildLevel]||[])[i] : null;
           if(lv && (client.wt>lv[1] || client.wt<lv[0])) out.push({s:"tier",t:`Outside the level-benefit build (${lv[0]}–${lv[1]} lbs at ${ftin(client.hin)}) — Graded only`});
-          out.push({s:"ok",t:`Build OK (${mn??"—"}–${mx} lbs at ${ftin(client.hin)})`}); } }
+          out.push({s:"ok",t:`Build OK (${mn??"—"}–${mx} lbs at ${ftin(client.hin)})${bor}`}); } }
     }
   }
   return out;

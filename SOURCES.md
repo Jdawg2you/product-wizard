@@ -29,7 +29,7 @@
 | IUL | Americo Instant Decision IUL | Instant Decision IUL Agent Guide 23-084-1 (10/25) — `docs/guides/` | Ages/face/build only; guide publishes no condition list, so every cell is "not addressed" |
 | snapshot only | Royal Neighbors SIWL/GDB | Agent guide (2020) | Health questions not in guide |
 | IUL | F&G Pathsetter | F&G Field Underwriting Guide ADV 1100, rev 07/2023 — `docs/guides/` | Ages/face/limits only; guide has no condition chart |
-| IUL | F&G Everlast | F&G Field Underwriting Guide ADV 1100, rev 07/2023 — `docs/guides/` | Same; minimum face $100,000 |
+| IUL | F&G Everlast | F&G Field Underwriting Guide ADV 1100, rev 07/2023 — `docs/guides/` | Same; minimum face $100,000. Build borrowed from NLG RapidProtect (Jesse's rule) and flagged on the card |
 
 Copied into `docs/guides/` so far: Americo Instant Decision IUL agent guide (10/25), Transamerica
 Field Guide to Underwriting (10/21), Foresters Underwriting Guide 503325 (12/23), F&G Field

@@ -207,6 +207,12 @@ before `resolveWindow`:
 - Chubb: insulin or A1C over 7 - Graded. American Amicable: pills Immediate, insulin before 50 ROP.
   Transamerica FE Express: insulin - Select (green).
 
+## Borrowed build chart (business rule from Jesse, 14 Sep 2026)
+F&G publishes no build chart, so Everlast uses National Life Group's RapidProtect chart (`NLGP1`), set
+with `ELIG.iul.fgever.buildBorrowed`. A borrowed chart never removes a carrier by itself: over or under
+it, the card stays on the page in amber, and every build line (including "Build OK") names the chart it
+borrowed and says to confirm with F&G. Pathsetter still has no build check.
+
 ## Reading a cell for this client (fixed 14 Sep 2026 from Jesse's screenshot)
 A breast cancer four months old, in remission, showed Transamerica FFIUL II Express and Foresters SMART
 UL green for IUL. Three separate reading errors, all fixed in resolveWindow / preferClauses / cancerCell:
