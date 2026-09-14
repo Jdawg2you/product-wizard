@@ -43,8 +43,8 @@ full underwriting grids (browseable, tabbed) and product snapshots per carrier.
 ## Carrier order (business rule from Jesse — pays better / prices better, top to bottom)
 - WL: Americo, Mutual of Omaha, Corebridge SimpliNow Legacy (SIWL), Chubb, InstaBrain, American Amicable,
   Transamerica, Foresters, Accendo ("only 6-month advance"), Corebridge GIWL, then Royal Neighbors at the
-  end for now (Jesse, 14 Sep 2026): Ensured Legacy (SIWL / GDB), Jet Whole Life, Ensured Legacy GI.
-  Only Royal Neighbors' whole life is carried - Jesse removed Royal Legacy SPWL and Jet Term Life.
+  end for now (Jesse, 14 Sep 2026): Ensured Legacy (SIWL / GDB), then Jet Whole Life. Jesse removed
+  Royal Legacy SPWL, Jet Term Life and the Ensured Legacy guaranteed issue plan.
 - Term with living benefits: NLG, Transamerica, Foresters SF, InstaBrain Term, Americo, MoO TLA, MoO TLE, AmAm.
   Term without: InstaBrain Pure Term, Transamerica, Foresters (rest trail).
 - IUL: MoO IUL Express, NLG RapidProtect, TA FFIUL II Express, NLG FlexLife, Foresters SMART UL, TA FFIUL,
@@ -144,7 +144,9 @@ The test is `goClass()` and it runs in `parse()` both on plain cells and on flat
 with an `A|` prefix, so the prefix does not override this rule. Anything rated case by case ("rate
 for cause", "depending on") stays amber.
 
-Guaranteed issue: Corebridge GIWL takes anyone within its age limits (50-80) regardless of health, so
+Guaranteed issue: Corebridge GIWL is the one guaranteed issue product the wizard carries - Jesse's choice
+(14 Sep 2026); other carriers' GI plans (Royal Neighbors Ensured Legacy GI) are deliberately left out.
+It takes anyone within its age limits (50-80) regardless of health, so
 a client every simplified-issue carrier declines still has that option. Its carrier carries `gi:true`
 and its ELIG entry a `gi` message: `eligChecks` always adds that message as an amber check, and
 `verdictsFor` answers every condition with "no health questions" (marked `minor`, so conditions never
@@ -221,9 +223,8 @@ internal use, and the repo is public. Juvenile Whole Life is left out (adult too
 ## Royal Neighbors Ensured Legacy (2024 training guide)
 The risk assessment guide marks each condition available or not for Preferred, Standard, GDB and GI.
 The SIWL / GDB column reads Standard (green) where Standard is available, Graded (amber) where only GDB
-is, DECLINE where only GI is; conditions it doesn't list are gray. GI takes everything on the list, so
-its column is `gi:true` like Corebridge GIWL, with `giExcept` for the two refusals the guide applies to
-every plan (felony, mentally incompetent). Build matters for Preferred only, so no build check.
+is, DECLINE where only GI is; conditions it doesn't list are gray. The guaranteed issue plan itself
+is not carried (Jesse removed it). Build matters for Preferred only, so no build check.
 
 ## Borrowed build chart (business rule from Jesse, 14 Sep 2026)
 F&G publishes no build chart, so Everlast uses National Life Group's RapidProtect chart (`NLGP1`), set
