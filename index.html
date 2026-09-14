@@ -140,6 +140,8 @@
   .chip .yrin{width:62px;font:inherit;font-size:12.5px;padding:3px 6px;border:1px solid var(--rule);
     border-radius:var(--radius-sm);background:var(--card);color:var(--ink);-moz-appearance:textfield}  .chip .a1cin{width:62px;font:inherit;font-size:12.5px;padding:3px 6px;border:1px solid var(--rule);
     border-radius:var(--radius-sm);background:var(--card);color:var(--ink);-moz-appearance:textfield}
+  .chip i.auto{font-style:normal;font-size:11px;font-weight:600;color:var(--golddk);margin:0 2px 0 4px}
+  .chip .yrin.lastin{width:96px}
   .chip .yrin::-webkit-outer-spin-button,.chip .yrin::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
   .medchip{display:inline-flex;align-items:center;gap:7px;background:var(--fill);border:1px solid var(--rule);
     border-radius:var(--radius-pill);padding:5px 6px 5px 12px;font-size:13px;color:var(--slate);margin:0 6px 6px 0}
@@ -486,8 +488,8 @@ wl: {
     ["Alzheimer's / dementia / memory loss / cognitive", "Guaranteed Issue", "DECLINE", "R|Alzheimer's, dementia or mental incapacity ever - DECLINE", "A|Graded", "A|Within 2 yrs - GI", "DECLINE", "R|Alzheimer's, dementia, cognitive disorder - Decline; memory loss within 2 yrs - Decline, after 2 yrs - Premier", "DECLINE", "DECLINE", "Guaranteed Issue"],
     ["Amputation", "Due to Diabetes - DECLINE", "Due to Diabetes - DECLINE", "Due to diabetic complications - DECLINE; otherwise not asked - Allowed", "A|Within 3 mos, due to disease, complications or assistive device - Graded; otherwise all ratings", "A|Diabetic amputation within 2 yrs - GI; injury - allowed", "Caused by disease - DECLINE", "R|Not due to trauma - Decline", "DECLINE", "Modified; due to any disease or diabetes - DECLINE", "Guaranteed Issue"],
     ["Aneurysm", "Not asked - Allowed", "R|Not allowed", "Brain aneurysm within 6 mos - DECLINE; within 2 yrs - Graded (Level if a brain aneurysm was surgically repaired); over 2 yrs - Allowed (Level)", "A|Graded", "A|Blood vessel disorder within 2 yrs - GI", "Within 2 yrs - ROP", "A|Aortic aneurysm - Select; brain aneurysm within 5 yrs - Select, after 5 yrs - Premier", "Within 2 yrs - Basic", "Within 1 yr - Modified", "Guaranteed Issue"],
-    ["Angina (chest pain)", "Within 1 yr - Guaranteed Issue", "Within 1 yr - DECLINE; within 2 yrs - Graded", "within 6 mos or getting worse - DECLINE; within 2 yrs - Allowed with no tobacco in the past year and no diabetes, otherwise Graded; over 2 yrs - Allowed (Level)", "A|Graded", "A|Within 2 yrs - GI", "Within 2 yrs - ROP", "G|Within 5 yrs - Premier", "Treated within 1 yr - Basic; within 2 yrs - Standard", "Treated within 1 yr - Modified; 1-2 yrs - Standard; > 2 yrs - Preferred", "Guaranteed Issue"],
-    ["Angioplasty", "Within 1 yr - Guaranteed Issue", "Within 1 yr - DECLINE; within 2 yrs - Graded", "within 6 mos or getting worse - DECLINE; within 2 yrs - Allowed with no tobacco in the past year and no diabetes, otherwise Graded; over 2 yrs - Allowed (Level)", "A|Graded (coronary artery disease)", "A|Within 2 yrs - GI", "Not asked - Allowed", "A|Cardiac surgery (stent, bypass, angioplasty, valve, pacemaker) within 1 yr - Select; over 1 yr - Premier", "See Heart Surgery", "See Heart Surgery", "Guaranteed Issue"],
+    ["Angina (chest pain)", "Within 1 yr - Guaranteed Issue", "Within 1 yr - DECLINE; within 2 yrs - Graded", "within 6 mos - DECLINE; getting worse - DECLINE; within 2 yrs - Allowed with no tobacco in the past year and no diabetes, otherwise Graded; over 2 yrs - Allowed (Level)", "A|Graded", "A|Within 2 yrs - GI", "Within 2 yrs - ROP", "G|Within 5 yrs - Premier", "Treated within 1 yr - Basic; within 2 yrs - Standard", "Treated within 1 yr - Modified; 1-2 yrs - Standard; > 2 yrs - Preferred", "Guaranteed Issue"],
+    ["Angioplasty", "Within 1 yr - Guaranteed Issue", "Within 1 yr - DECLINE; within 2 yrs - Graded", "within 6 mos - DECLINE; getting worse - DECLINE; within 2 yrs - Allowed with no tobacco in the past year and no diabetes, otherwise Graded; over 2 yrs - Allowed (Level)", "A|Graded (coronary artery disease)", "A|Within 2 yrs - GI", "Not asked - Allowed", "A|Cardiac surgery (stent, bypass, angioplasty, valve, pacemaker) within 1 yr - Select; over 1 yr - Premier", "See Heart Surgery", "See Heart Surgery", "Guaranteed Issue"],
     ["Arthritis", "Not asked - Allowed", "Not asked - Allowed", "Not asked - Allowed (rheumatoid and psoriatic arthritis: Level)", "A|All ratings; walker/wheelchair or joint replacement recommended - Graded", "Not asked - Allowed", "Not asked - Allowed", "G|Rheumatoid or psoriatic arthritis - Premier", "Not asked - Allowed", "Not asked - Allowed", "Guaranteed Issue"],
     ["Assisted living / long-term care facility", "Within 6 mos - Guaranteed Issue", "Current - DECLINE", "R|Nursing home, home health care or help with daily living - DECLINE", "N|Not addressed in guide - on disability is Graded", "A|Currently confined - GI", "DECLINE", "R|Currently in a nursing home, assisted living, LTC, hospice or adult day care - Decline; hospitalized 2+ times in 1 yr - Decline", "DECLINE", "DECLINE", "Guaranteed Issue"],
     ["Asthma (chronic)", "Not asked - Allowed", "Not asked - Allowed", "Not asked - Allowed", "A|>10 mg steroid daily, oxygen, or ER/hospital within 6 mos - Graded; otherwise Std / Sub-Std / Graded", "Not asked - Allowed", "Not asked - Allowed", "N|Not on the decision chart (severe asthma shown as Accept on the comparison flyer)", "Not asked - Allowed", "Standard", "Guaranteed Issue"],
@@ -503,7 +505,7 @@ wl: {
     ["Chronic pain (6+ narcotic fills)", "Check med list", "Check med list", "Not asked - Allowed", "N|Chronic pain syndrome - all ratings; check med list", "N|Not asked; Rx drug counseling within 2 yrs - GI", "Check med list - see Neuropathy", "G|Pain over 6 mos, within 5 yrs - Premier", "Check meds", "Check meds", "Guaranteed Issue"],
     ["Cirrhosis", "Guaranteed Issue", "DECLINE", "R|Ever - DECLINE", "A|Graded", "A|Liver disorder within 2 yrs - GI", "Treated within 2 yrs - ROP; within 3 yrs - Graded", "A|Graded", "Standard", "Treated within 2 yrs - Modified", "Guaranteed Issue"],
     ["Congestive heart failure", "Guaranteed Issue", "DECLINE", "R|Ever - DECLINE", "A|Graded", "A|Within 2 yrs - GI", "DECLINE", "A|Select", "DECLINE", "DECLINE", "Guaranteed Issue"],
-    ["Coronary artery disease", "Within 1 yr - Guaranteed Issue", "Within 1 yr - DECLINE; within 2 yrs - Graded", "within 6 mos or getting worse - DECLINE; within 2 yrs - Allowed with no tobacco in the past year and no diabetes, otherwise Graded; over 2 yrs - Allowed (Level)", "A|Graded", "A|Within 2 yrs - GI", "ROP", "G|No heart attack, no surgery, within 5 yrs - Premier", "See Heart Disease", "See Heart Disease", "Guaranteed Issue"],
+    ["Coronary artery disease", "Within 1 yr - Guaranteed Issue", "Within 1 yr - DECLINE; within 2 yrs - Graded", "within 6 mos - DECLINE; getting worse - DECLINE; within 2 yrs - Allowed with no tobacco in the past year and no diabetes, otherwise Graded; over 2 yrs - Allowed (Level)", "A|Graded", "A|Within 2 yrs - GI", "ROP", "G|No heart attack, no surgery, within 5 yrs - Premier", "See Heart Disease", "See Heart Disease", "Guaranteed Issue"],
     ["COPD", "Guaranteed Issue", "Graded", "Tobacco in the past year, or hospitalized more than once for it this year - DECLINE; otherwise - Graded", "A|Graded", "A|Within 2 yrs - GI", "Treated within 2 yrs - ROP; within 3 yrs - Graded; > 3 yrs - Immediate", "A|Select", "Standard", "Standard", "Guaranteed Issue"],
     ["Crohn's disease", "Allowed", "Not asked - Allowed", "N|Not named on the application's autoimmune list - check the eApp", "A|Diagnosed within 12 mos, 2+ surgeries, steroids, pending tests or hospitalized within 12 mos - Graded; otherwise all ratings", "Not asked - Allowed", "Not asked - Allowed", "G|Premier", "Not asked - Allowed", "Not asked", "Guaranteed Issue"],
     ["Cystic fibrosis", "Guaranteed Issue", "Graded", "Not asked - Allowed", "A|Graded", "A|Respiratory disorder within 2 yrs - GI", "Not asked - Allowed", "R|Ever - Decline", "Not asked", "DECLINE", "Guaranteed Issue"],
@@ -516,8 +518,8 @@ wl: {
     ["Emphysema (chronic)", "Guaranteed Issue", "Graded", "Tobacco in the past year, or hospitalized more than once for it this year - DECLINE; otherwise - Graded", "A|Graded", "A|Within 2 yrs - GI", "Treated within 2 yrs - ROP; within 3 yrs - Graded", "A|Select", "Standard", "Standard", "Guaranteed Issue"],
     ["Epilepsy / seizures", "Not asked - Allowed", "Not asked - Allowed", "Not asked - Allowed", "A|Brain tumor, surgery within 12 mos or > 1 attack per yr - Graded; otherwise Sub-Std / Graded", "Not asked - Allowed", "Within 3 yrs - Graded", "A|Within 1 yr - Select; over 1 yr - Premier", "Not asked", "Not asked", "Guaranteed Issue"],
     ["Felony", "Within 6 mos - Guaranteed Issue", "Convicted within 2 yrs or awaiting trial - Graded", "within 1 yr - DECLINE; over 1 yr - Allowed", "Not asked", "A|Convicted within 5 yrs - GI", "Not asked - Allowed", "A|Felony charges within 2 yrs or pending - Decline; over 2 yrs - Premier", "Not asked", "Not asked", "Guaranteed Issue"],
-    ["Heart attack", "Within 1 yr - Guaranteed Issue", "Within 1 yr - DECLINE; within 2 yrs - Graded", "within 6 mos or getting worse - DECLINE; within 2 yrs - Allowed with no tobacco in the past year and no diabetes, otherwise Graded; over 2 yrs - Allowed (Level)", "A|Within 6 mos - do not submit; otherwise Graded", "A|Within 2 yrs - GI", "Within 2 yrs - ROP; within 3 yrs - Graded", "A|Single within 1 yr - Select; over 1 yr - Premier; multiple heart attacks - Select", "Within 1 yr - Basic; within 2 yrs - Standard", "Within 1 yr - Modified; 1-2 yrs - Standard; > 2 yrs - Preferred", "Guaranteed Issue"],
-    ["Heart surgery", "Within 1 yr - Guaranteed Issue", "Within 1 yr - DECLINE; within 2 yrs - Graded", "within 6 mos or getting worse - DECLINE; within 2 yrs - Allowed with no tobacco in the past year and no diabetes, otherwise Graded; over 2 yrs - Allowed (Level)", "A|Graded", "A|Within 2 yrs - GI", "Within 2 yrs - ROP; within 3 yrs - Graded", "A|Within 1 yr - Select; over 1 yr - Premier", "Within 1 yr - Basic; within 2 yrs - Standard", "Within 1 yr - Modified; 1-2 yrs - Standard; > 2 yrs - Preferred", "Guaranteed Issue"],
+    ["Heart attack", "Within 1 yr - Guaranteed Issue", "Within 1 yr - DECLINE; within 2 yrs - Graded", "within 6 mos - DECLINE; getting worse - DECLINE; within 2 yrs - Allowed with no tobacco in the past year and no diabetes, otherwise Graded; over 2 yrs - Allowed (Level)", "A|Within 6 mos - do not submit; otherwise Graded", "A|Within 2 yrs - GI", "Within 2 yrs - ROP; within 3 yrs - Graded", "A|Single within 1 yr - Select; over 1 yr - Premier; multiple heart attacks - Select", "Within 1 yr - Basic; within 2 yrs - Standard", "Within 1 yr - Modified; 1-2 yrs - Standard; > 2 yrs - Preferred", "Guaranteed Issue"],
+    ["Heart surgery", "Within 1 yr - Guaranteed Issue", "Within 1 yr - DECLINE; within 2 yrs - Graded", "within 6 mos - DECLINE; getting worse - DECLINE; within 2 yrs - Allowed with no tobacco in the past year and no diabetes, otherwise Graded; over 2 yrs - Allowed (Level)", "A|Graded", "A|Within 2 yrs - GI", "Within 2 yrs - ROP; within 3 yrs - Graded", "A|Within 1 yr - Select; over 1 yr - Premier", "Within 1 yr - Basic; within 2 yrs - Standard", "Within 1 yr - Modified; 1-2 yrs - Standard; > 2 yrs - Preferred", "Guaranteed Issue"],
     ["Heart valve replacement", "Within 1 yr - Guaranteed Issue", "Within 1 yr - DECLINE; within 2 yrs - Graded", "Not asked - Allowed", "A|Graded", "A|Within 2 yrs - GI", "Within 2 yrs - ROP; within 3 yrs - Graded", "A|Valve surgery within 1 yr - Select; over 1 yr - Premier", "Within 1 yr - Basic; within 2 yrs - Standard", "Within 1 yr - Modified; 1-2 yrs - Standard; > 2 yrs - Preferred", "Guaranteed Issue"],
     ["Hepatitis A", "Allowed", "Not asked - Allowed", "Not asked - Allowed", "A|Std / Sub-Std / Graded; cirrhosis - Graded", "A|Liver disorder within 2 yrs - GI", "Chronic or treated within 2 yrs - ROP", "N|Not on the decision chart", "Not asked", "Within 2 yrs - Modified", "Guaranteed Issue"],
     ["Hepatitis B", "Guaranteed Issue", "Not asked - Allowed", "Graded", "A|Std / Sub-Std / Graded; cirrhosis - Graded", "A|Liver disorder within 2 yrs - GI", "Chronic or treated within 2 yrs - ROP", "A|Within 2 yrs - Select; over 2 yrs - Premier", "Standard", "Within 2 yrs - Modified", "Guaranteed Issue"],
@@ -545,7 +547,7 @@ wl: {
     ["Schizophrenia", "Allowed", "Treated / diagnosed within 4 yrs - Graded", "Hospitalized in the past three years - DECLINE; otherwise - Graded", "A|Graded", "A|Hospitalized for mental disorder within 2 yrs - GI; otherwise allowed", "Not asked - Allowed", "A|Within 5 yrs - Select; over 5 yrs - Premier", "Preferred", "Preferred", "Guaranteed Issue"],
     ["Sickle cell anemia", "Allowed", "DECLINE", "R|Ever - DECLINE", "A|Graded", "Not asked - Allowed", "Not asked - Allowed", "R|Ever - Decline", "Not asked", "DECLINE", "Guaranteed Issue"],
     ["Sleep apnea", "Not asked - Allowed", "Graded", "Not asked - Allowed", "A|All ratings; supplemental oxygen with CPAP - Graded", "N|Not asked (ventilator / oxygen - GI)", "See Oxygen", "G|CPAP / concentrator without supplemental oxygen - Premier", "Not asked", "Not asked", "Guaranteed Issue"],
-    ["Stent", "Within 1 yr - Guaranteed Issue", "Within 1 yr - DECLINE; within 2 yrs - Graded", "within 6 mos or getting worse - DECLINE; within 2 yrs - Allowed with no tobacco in the past year and no diabetes, otherwise Graded; over 2 yrs - Allowed (Level)", "A|Graded (coronary artery disease)", "A|Within 2 yrs - GI", "Within 2 yrs - ROP; within 3 yrs - Graded", "A|Within 1 yr - Select; over 1 yr - Premier", "Within 1 yr - Basic; within 2 yrs - Standard", "Not asked - see Heart Surgery", "Guaranteed Issue"],
+    ["Stent", "Within 1 yr - Guaranteed Issue", "Within 1 yr - DECLINE; within 2 yrs - Graded", "within 6 mos - DECLINE; getting worse - DECLINE; within 2 yrs - Allowed with no tobacco in the past year and no diabetes, otherwise Graded; over 2 yrs - Allowed (Level)", "A|Graded (coronary artery disease)", "A|Within 2 yrs - GI", "Within 2 yrs - ROP; within 3 yrs - Graded", "A|Within 1 yr - Select; over 1 yr - Premier", "Within 1 yr - Basic; within 2 yrs - Standard", "Not asked - see Heart Surgery", "Guaranteed Issue"],
     ["Stroke / TIA", "Stroke within 1 yr - Guaranteed Issue; TIA not asked - allowed", "Within 2 yrs - Graded", "TIA within 6 mos - DECLINE; stroke within 1 yr - DECLINE; recurrent TIA, or stroke with diabetes or heart disease ever - DECLINE; within 2 yrs - Graded; over 2 yrs - Allowed (Level)", "A|Stroke within 6 mos - do not submit; otherwise Graded", "A|Within 2 yrs - GI", "Stroke or TIA within 2 yrs - ROP; stroke within 3 yrs - Graded", "A|Stroke or single TIA within 5 yrs - Select; over 5 yrs - Premier", "Within 1 yr - Basic; within 2 yrs - Standard", "Within 1 yr - Modified; 1-2 yrs - Standard; > 2 yrs - Preferred", "Guaranteed Issue"],
     ["Terminal illness", "R|Death within 2 yrs - DECLINE", "R|Death in next 12 mos - DECLINE", "R|Terminal illness - DECLINE", "N|Not addressed - contact underwriting", "A|Life expectancy ≤ 24 mos - GI", "R|Death in next 12 mos - DECLINE", "R|Currently - Decline", "DECLINE", "DECLINE", "Guaranteed Issue"],
     ["Organ transplant", "Guaranteed Issue", "DECLINE", "R|Ever - DECLINE", "A|Graded", "A|Within 2 yrs - GI", "DECLINE", "R|Recipient or recommended - Decline", "DECLINE", "DECLINE", "Guaranteed Issue"],
@@ -877,7 +879,7 @@ const WL2T={"AFib / irregular heartbeat":"Arrhythmia / AFib","Alcohol / drug abu
 
 /* ---------- STATUS DERIVATION ---------- */
 const RX = {
-  decline: /decline|not eligible/i,
+  decline: /decline|not eligible|do not submit/i,
   positive: /\b(graded|modified|rop|standard|preferred|basic|guaranteed|allowed|ok|accepted|immediate|not asked|smoker rate|tobacco rates|case by case|individual case|all classes|all ratings|table [cd]|sub-std|gi|t\d{1,2}|table \d|select|premier|may qualify)\b/i,
   cond: /\b(within|if|after|over|less than|prior to|more than|single|combined|due to|caused by|diagnosed|treated|controlled|chronic|severe|malignant|current|systemic|pulmonary|stage|only|other than|excluding|recreational|received|active|before|while|w\/|ever had|with)\b/i,
   lookup: /(check|see |ask about|meds|not listed|not addressed|call underwriting|contact underwriting)/i,
@@ -1053,6 +1055,8 @@ var MED_FOR={
  "Atorvastatin":["High cholesterol"],"Simvastatin":["High cholesterol"],"Rosuvastatin":["High cholesterol"],
  "Lisinopril":["High blood pressure"],"Losartan":["High blood pressure"],"Amlodipine":["High blood pressure"],
  "Metoprolol":["High blood pressure","Arrhythmia / AFib"],"Carvedilol":["High blood pressure"],
+ "Hydrochlorothiazide":["High blood pressure"],"Valsartan":["High blood pressure"],"Atenolol":["High blood pressure"],"Bisoprolol":["High blood pressure"],
+ "Clonidine":["High blood pressure"],"Diltiazem":["High blood pressure","Arrhythmia / AFib"],"Spironolactone":["High blood pressure","Heart disease / disorder"],"Furosemide":["Heart disease / disorder","High blood pressure"],
  "Amiodarone":["Arrhythmia / AFib"],"Sotalol":["Arrhythmia / AFib"],"Flecainide":["Arrhythmia / AFib"],
  "Entresto":["Heart disease / disorder"],"Digoxin":["Arrhythmia / AFib"],"Ranexa":["Angina (chest pain)"],
  "Nitroglycerin":["Angina (chest pain)"],"Isosorbide":["Angina (chest pain)"],
@@ -1337,16 +1341,102 @@ const CA_WORDS=[["Small intestine",/small (intestine|bowel)/],["Neuroendocrine",
   ["Stomach",/stomach|gastric/],["Esophagus",/esophag|oesophag/],["Head / neck",/head|neck|throat|mouth|oral|tongue|laryn/],
   ["Leukemia",/leuk/],["Multiple myeloma",/myeloma/],["Ovarian",/ovar/],["Sarcoma",/sarcoma/],["Lymphoma",/lymphoma|hodgkin/],["Other",/^other$/]];
 function caType(t){ const x=String(t||"").toLowerCase().trim(); if(!x) return null; if(CA_ALL.includes(t)) return t; const hit=CA_WORDS.find(w=>w[1].test(x)); return hit?hit[0]:null; }
+/* ---------- FOLLOW-UP QUESTIONS (kept identical to the Script Navigator's PF_FOLLOW) ----------
+   Jesse's rule: whatever the script asks, this page asks, and the other way round. Each field is
+   keyed by the navigator's own key, so a handed-over answer lands without translation, and
+   tools/check.sh fails the commit if the two lists drift. What an answer does:
+   - keep:  narrow the carrier's cell to the clauses that name it ("on oxygen" keeps the oxygen clause)
+   - drop:  remove clauses it rules out ("in remission" drops "current - DECLINE"). Drops only match a
+            clause that is about nothing else: Accendo's "current, treated within 2 yrs or recurring -
+            DECLINE" still applies to a client in remission treated last year.
+   - LIFT:  add the condition it implies, as the navigator does (on dialysis -> Dialysis)
+   - ca_last: cancer counts from the most recent of diagnosis and last treatment, since the cells
+     read "diagnosed or treated within"
+   detailCell answers outright where a carrier's rule is written against the answer itself. */
+const NOT_NO=s=>new RegExp("(?<!no |without )"+s,"i");
+const DETAILS={
+ "Diabetes":[{k:"a1c",l:"A1C",num:[3,20]},{k:"dia_tx",l:"pills / insulin?",opt:["Pills","Insulin","Both"]},
+             {k:"dia_neuro",l:"neuropathy?",opt:["No","Yes"]}],
+ "Heart attack":[{k:"ha_since",l:"anything since?",opt:["Nothing since","Another heart attack","Chest pain getting worse","Stent or bypass since"],
+             keep:{"Another heart attack":/multiple/i,"Chest pain getting worse":/getting worse|worsen/i}}],
+ "Stent":[{k:"stent_n",l:"how many?",opt:["1","2","3 or more"]}],
+ "Heart surgery":[{k:"hs_what",l:"what kind?",opt:["Bypass","Valve","Other"],keep:{Bypass:/bypass/i,Valve:/valve/i}}],
+ "Stroke / TIA":[{k:"str_deficit",l:"lasting effects?",opt:["No","Yes"],keep:{Yes:NOT_NO("residual")},drop:{No:NOT_NO("residual")}}],
+ "Cancer":[{k:"ca_type",l:"type?",opt:CA_ALL,text:true},{k:"ca_stage",l:"stage?",opt:CA_STAGES},
+           {k:"ca_status",l:"status?",opt:["In remission","In treatment","Active"],
+            keep:{"In treatment":/current|under treatment/i,"Active":/current|under treatment/i},drop:{"In remission":/^(current|currently|under treatment)\s*[-–]/i}},
+           {k:"ca_last",l:"last treated",year:true}],
+ "Defibrillator / pacemaker":[{k:"pace_what",l:"which?",opt:["Pacemaker","Defibrillator","Both"],
+           keep:{Pacemaker:/pacemaker/i,Defibrillator:/defib/i,Both:/defib/i},drop:{Pacemaker:/defib/i}}],
+ "COPD":[{k:"copd_ox",l:"on oxygen?",opt:["No","Yes"],keep:{Yes:NOT_NO("oxygen")}}],
+ "Kidney disease / failure":[{k:"kid_stage",l:"stage?",opt:["Early / mild","Advanced / failure","On dialysis"],
+           keep:{"Early / mild":/mild|insufficiency|nephritis/i,"Advanced / failure":/failure|advanced|end stage/i,"On dialysis":/dialysis/i}}],
+ "Liver disease":[{k:"liv_what",l:"what kind?",opt:["Fatty liver","Hepatitis","Cirrhosis","Other"],
+           keep:{Hepatitis:/hepatitis/i,Cirrhosis:/cirrhosis/i},drop:{"Fatty liver":/cirrhosis|failure|hepatitis/i}}]
+};
+/* The navigator's COND_FROM_FOLLOW, exactly. */
+const LIFT={dia_neuro:{Yes:"Neuropathy"},ha_since:{"Stent or bypass since":"Angioplasty / bypass"},copd_ox:{Yes:"Oxygen / ventilator"},
+            kid_stage:{"On dialysis":"Dialysis"},liv_what:{Cirrhosis:"Cirrhosis"}};
+const LIFT_NOW={copd_ox:1,kid_stage:1};   /* "on oxygen" and "on dialysis" are happening now, so date them now */
+function detailSpec(k){ for(const c in DETAILS){ const f=DETAILS[c].find(x=>x.k===k); if(f) return f; } return null; }
+function readDetails(x){
+  const src=Object.assign({}, x && x.d && typeof x.d==="object" ? x.d : {}), out={};
+  /* the first handoff (September 2026) sent these four at the top level */
+  if(x){ if(x.type!=null && src.ca_type==null) src.ca_type=x.type; if(x.stage!=null && src.ca_stage==null) src.ca_stage=x.stage;
+         if(x.a1c!=null && src.a1c==null) src.a1c=x.a1c; if(x.tx!=null && src.dia_tx==null) src.dia_tx=x.tx; }
+  Object.keys(src).forEach(k=>{ const f=detailSpec(k), v=src[k]; if(!f || v==null || v==="") return;
+    if(f.num){ const n=Number(v); if(n>=f.num[0] && n<=f.num[1]) out[k]=n; }
+    else if(f.year){ const n=parseInt(v,10); if(n>1900 && n<=new Date().getFullYear()) out[k]=n; }
+    else if(f.text){ const t=caType(v); if(t) out[k]=t; }
+    else if(f.opt.indexOf(String(v))>-1) out[k]=String(v); });
+  return out;
+}
 function chipExtras(name,p){
-  const base=COND_ALIAS[name]||name;
-  const sel=(f,ph,opts,v)=>`<select data-i="${p.i}" data-f="${f}" aria-label="${ph}"><option value="">${ph}</option>`+
-    opts.map(o=>`<option ${v===o?"selected":""}>${esc(o)}</option>`).join("")+`</select>`;
-  if(base==="Cancer") return sel("type","type?",CA_ALL,p.type||"")+sel("stage","stage?",CA_STAGES,p.stage||"");
-  if(base==="Diabetes") return `<input class="a1cin" type="number" inputmode="decimal" step="0.1" min="3" max="20" placeholder="A1C" data-i="${p.i}" data-f="a1c" value="${p.a1c??""}" aria-label="Last A1C">`+
-    sel("tx","pills / insulin?",["Pills","Insulin","Both"],p.tx||"");
-  return "";
+  const spec=DETAILS[COND_ALIAS[name]||name]; if(!spec) return "";
+  const d=p.d||{}, YR=new Date().getFullYear();
+  return spec.map(f=>{
+    const v=d[f.k], at=`data-i="${p.i}" data-f="d:${f.k}" aria-label="${esc(f.l)}"`;
+    if(f.num) return `<input class="a1cin" type="number" inputmode="decimal" step="0.1" min="${f.num[0]}" max="${f.num[1]}" placeholder="${esc(f.l)}" ${at} value="${v??""}">`;
+    if(f.year) return `<input class="yrin lastin" type="number" inputmode="numeric" min="1900" max="${YR}" placeholder="${esc(f.l)}" ${at} value="${v??""}">`;
+    return `<select ${at}><option value="">${esc(f.l)}</option>`+f.opt.map(o=>`<option ${v===o?"selected":""}>${esc(o)}</option>`).join("")+`</select>`;
+  }).join("");
+}
+function preferClauses(src,name,p){
+  const spec=DETAILS[COND_ALIAS[name]||name]; if(!spec || !p.d) return src;
+  let cls=src.t.split(/;|\.\s+(?=[A-Z])/).map(x=>x.trim()).filter(Boolean), changed=false;
+  spec.forEach(f=>{ const v=p.d[f.k]; if(!v) return;
+    const kr=f.keep && f.keep[v]; if(kr){ const m=cls.filter(x=>kr.test(x)); if(m.length && m.length<cls.length){ cls=m; changed=true; } }
+    const dr=f.drop && f.drop[v]; if(dr){ const m=cls.filter(x=>!dr.test(x)); if(m.length && m.length<cls.length){ cls=m; changed=true; } } });
+  if(!changed) return src;
+  /* A kept clause can hold two windows - "pacemaker within 1 yr - Select, over 1 yr - Premier". Kept
+     whole, then read as two, or no date could ever satisfy it. */
+  cls=cls.flatMap(x=>x.split(/,\s+(?=(?:within|over|after|under)\s+\d)/)).map(x=>x.trim()).filter(Boolean);
+  return parse(cls.join("; "));
+}
+function effYears(name,p){
+  const last=p.d && p.d.ca_last;
+  if((COND_ALIAS[name]||name)!=="Cancer" || !last) return p.y;
+  const yl=yearsSince(last,null); return (p.y==null || yl<p.y) ? yl : p.y;
+}
+function liftFrom(k,v){
+  const c=(LIFT[k]||{})[v]; if(!c) return;
+  const i=COND.findIndex(x=>x.name===c); if(i<0 || pickedIdx().includes(i)) return;
+  const now=new Date(), np={i,y:null,yr:null,mo:null,d:{}};
+  if(LIFT_NOW[k]){ np.yr=now.getFullYear(); np.mo=now.getMonth()+1; np.y=yearsSince(np.yr,np.mo); }
+  picked.push(np);
+}
+/* Blood pressure is rated on how many medications control it, and the agent has usually already
+   entered them. The count follows the medication list until the agent picks one themselves;
+   picking "not sure" hands it back. A drug answered No for blood pressure is not counted. */
+function bpFromMeds(){ return meds.filter(m=>(MED_FOR[m]||[]).indexOf("High blood pressure")>-1 && medSkip.indexOf(m+"|High blood pressure")<0).length; }
+function syncBp(){
+  const i=COND.findIndex(c=>c.name==="High blood pressure"), p=picked.find(x=>x.i===i);
+  if(!p || p.mSet) return;
+  const n=bpFromMeds(); p.mAuto=n>0; if(n) p.m=Math.min(n,4); else if(p.mAuto===false && p.m!=null && p.mWasAuto) p.m=null;
+  p.mWasAuto=n>0;
 }
 function detailCell(car,name,p){
+  const D=p.d||{}; p={...p,type:D.ca_type||null,stage:D.ca_stage||null,a1c:D.a1c??null,tx:D.dia_tx||null};
   const base=COND_ALIAS[name]||name, y=p.y;
   /* Corebridge SimpliNow Legacy question sheet AGLC201492: Stage III/IV and lymphoma ever decline;
      13 types decline inside 12 months; inside 48 months nine types are Level unless Stage II and
@@ -1438,9 +1528,13 @@ function verdictsFor(key){
         const kept=src.t.split(/;/).map(x=>x.trim()).filter(x=>x && !/hospitali/i.test(x));
         if(kept.length) src=parse(kept.join("; "));
       }
-      const det=detailCell(car,c.name,p);
+      /* Follow-up answers: a later treatment date counts from then, and the answers narrow the
+         cell to the clauses that fit before the window is resolved. */
+      const yEff=effYears(c.name,p);
+      const det=detailCell(car,c.name,{...p,y:yEff});
       if(det) return {row:c.name,cell:det};
-      let cell=resolveWindow(src,p.y,client.age,p.m);
+      src=preferClauses(src,c.name,p);
+      let cell=resolveWindow(src,yEff,client.age,p.m);
       /* Blood pressure is not a factor most carriers underwrite on. If a carrier's guide simply
          doesn't answer it, show the grey dot but don't let it downgrade the card. */
       if(isMeds(c.name) && cell.s==="na") cell={...cell,minor:true};
@@ -1459,7 +1553,7 @@ function renderChips(){
     if(COND[p.i].noGrid) return `<span class="chip">${esc(name)}${rm}</span>`;
     if(isMeds(name))
       return `<span class="chip">${esc(name)}<select data-i="${p.i}" data-f="m" aria-label="Number of medications">`+
-        MEDOPTS.map(([v,l])=>`<option value="${v}" ${String(p.m??"")===v?"selected":""}>${l}</option>`).join("")+`</select>${rm}</span>`;
+        MEDOPTS.map(([v,l])=>`<option value="${v}" ${String(p.m??"")===v?"selected":""}>${l}</option>`).join("")+`</select>${p.mAuto&&!p.mSet?'<i class="auto">from meds</i>':""}${rm}</span>`;
     const ext=chipExtras(name,p);
     if(!need.time) return `<span class="chip">${esc(name)}${ext}${rm}</span>`;
     const askMo=monthMatters(name,p.yr);
@@ -1486,11 +1580,16 @@ function renderChips(){
         if(onBlur && nyr===p.yr && (ok || raw==="")) return;
         p.yr=nyr; if(!p.yr) p.mo=null;
       }
-      else if(f==="m") p.m=v;
+      else if(f==="m"){ p.m=v; p.mSet=v!=null; }   /* a picked count overrides the medication list; "not sure" hands it back */
       else if(f==="mo") p.mo=v;
-      else if(f==="type"||f==="stage"||f==="tx") p[f]=raw||null;
-      /* A decimal is typed a character at a time too; settle it when the agent moves on. */
-      else if(f==="a1c"){ if(!onBlur) return; p.a1c=(v>=3&&v<=20)?v:null; }
+      else if(f.indexOf("d:")===0){
+        const k=f.slice(2), spec=detailSpec(k); p.d=p.d||{};
+        /* numbers and years are typed a character at a time; settle them when the agent moves on */
+        if(spec.num){ if(!onBlur) return; p.d[k]=(v>=spec.num[0]&&v<=spec.num[1])?v:null; }
+        else if(spec.year){ if(!onBlur) return; p.d[k]=(/^\d{4}$/.test(raw)&&v>1900&&v<=new Date().getFullYear())?v:null; }
+        else p.d[k]=raw||null;
+        liftFrom(k,p.d[k]);
+      }
       p.y = isMeds(COND[p.i].name) ? null : yearsSince(p.yr,p.mo);
       render();
       /* No setSelectionRange here: number inputs throw on it. */
@@ -1670,7 +1769,7 @@ function renderProducts(){
     return `<h3 class="ptitle">${esc(label)}</h3><div class="plist">`+ps.map(p=>`<div class="pcard"><div class="name">${esc(p.name)}</div><ul>${p.pts.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`).join("")+`</div>`;
   }).join("");
 }
-function render(){ renderChips(); renderMeds(); renderVerdict(); renderGrid(); renderProducts(); }
+function render(){ syncBp(); renderChips(); renderMeds(); renderVerdict(); renderGrid(); renderProducts(); }
 $("#tally").addEventListener("click",()=>{const v=$("#verdict"); if(v&&v.scrollIntoView) v.scrollIntoView({behavior:"smooth",block:"start"});});
 document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>{ tab=b.dataset.tab; document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b?"true":"false")); renderGrid(); }));
 $("#onlyPicked").addEventListener("click",e=>{onlyPicked=!onlyPicked;e.currentTarget.setAttribute("aria-pressed",onlyPicked);renderGrid();});
@@ -1810,13 +1909,17 @@ function apply(c){
   set("#lb", c.lb==="nolb" ? "nolb" : "lb");
   readClient();
 
+  /* The medication list rides along, so this page counts blood pressure medications the same way. */
+  meds = (Array.isArray(c.meds) ? c.meds : []).filter(function(n){ return typeof n === "string"; }).map(medLabel)
+           .filter(function(n, k, a){ return a.indexOf(n) === k; });
+  medSkip = (Array.isArray(c.medSkip) ? c.medSkip : []).filter(function(x){ return typeof x === "string"; });
   picked.length = 0;
   (Array.isArray(c.conds) ? c.conds : []).forEach(function(x){
     if(!x || typeof x.name !== "string") return;
     var i = idxOf(x.name);
     if(i < 0 || picked.some(function(p){ return p.i === i; })) return;
     var p = {i:i, y:null};
-    if(isMeds(COND[i].name)) p.m = (x.m === "" || x.m == null) ? null : x.m;
+    if(isMeds(COND[i].name)){ p.m = (x.m === "" || x.m == null) ? null : Number(x.m); p.mSet = !!x.mSet; }
     else {
       /* The year and month are what this page stores; years-since is derived from them.
          Taking a pre-computed number instead left the year box empty and the number was
@@ -1826,12 +1929,18 @@ function apply(c){
       p.mo = (p.yr && mo>=1 && mo<=12) ? mo : null;
       p.y  = p.yr ? yearsSince(p.yr,p.mo)
                   : ((x.y === "" || x.y == null) ? null : x.y);
-      if(typeof x.type === "string") p.type = caType(x.type);
-      if(typeof x.stage === "string" && CA_STAGES.indexOf(x.stage) > -1) p.stage = x.stage;
-      if(typeof x.a1c === "number" && x.a1c >= 3 && x.a1c <= 20) p.a1c = x.a1c;
-      if(typeof x.tx === "string" && /^(Pills|Insulin|Both)$/.test(x.tx)) p.tx = x.tx;
+      p.d = readDetails(x);
     }
     picked.push(p);
+  });
+  /* The navigator adds Oxygen when COPD is "on oxygen" and Dialysis for "on dialysis", with no date of
+     their own. Those answers describe now, so date the added condition now, as this page does. */
+  picked.forEach(function(p){
+    Object.keys(p.d || {}).forEach(function(k){
+      var c = (LIFT[k] || {})[p.d[k]]; if(!c || !LIFT_NOW[k]) return;
+      var q = picked.find(function(x){ return COND[x.i].name === c; }); if(!q || q.yr) return;
+      var now = new Date(); q.yr = now.getFullYear(); q.mo = now.getMonth() + 1; q.y = yearsSince(q.yr, q.mo);
+    });
   });
   render();
   report();

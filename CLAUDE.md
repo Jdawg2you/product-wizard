@@ -86,7 +86,8 @@ way `renderVerdict` computes them.
 ```
 navigator -> wizard   {source:"optimum-suite",  type:"client", v:1, client:{
                          age, dob (ISO), sex, hin (total inches), wt, lb,
-                         conds:[{name, yr, mo, type?, stage?, a1c?, tx?}|{name, m}] }}
+                         conds:[{name, yr, mo, d?:{followUpKey:answer}}|{name, m, mSet?}],
+                         meds:[label], medSkip:["med|condition"] }}
 
   type and stage ride on Cancer / Active cancer (type is the navigator's free text, read by
   caType; stage is one of CA_STAGES); a1c (number) and tx (Pills | Insulin | Both) ride on
@@ -175,6 +176,23 @@ for a count and no date - and the navigator's script asks only the count too.
 Deliberately not asked, to keep the most common and least important condition to one question: the
 guides' diagnosis-within-4-months, hospitalised-within-10-years, dosage-change-within-12-months and
 abnormal-EKG rules. Those cells stay as the guide wrote them for the agent to read.
+
+## One set of questions (business rule from Jesse)
+Whatever the navigator's script asks, this page asks, and the other way round - the navigator is built
+off the same underwriting guides. `DETAILS` here mirrors the navigator's `PF_FOLLOW` key for key and
+answer for answer, and `LIFT` mirrors its `COND_FROM_FOLLOW` (answers that add a condition: neuropathy
+Yes, on oxygen, on dialysis, cirrhosis, stent or bypass since). `tools/check.sh` step 3 fails the commit
+if a question, an answer list or a lift differs. Dates (`dx_*`) are the chip's year box.
+An answer works on the carrier cells three ways: `keep` narrows a cell to the clauses that name it,
+`drop` removes a clause it rules out (only clauses about nothing else), and `detailCell` answers
+outright where a carrier's rule is written against the answer. Cancer counts from the more recent of
+diagnosis and last treatment. Every follow-up rides the handoff under `d:{key:value}`.
+
+Blood pressure count follows the medication list in both tools: every entered drug tagged "High blood
+pressure" in `MED_FOR` counts, unless it was answered No for blood pressure. A count the agent picks
+wins (`mSet`); "not sure" (or clicking the pick off, in the navigator) hands it back. The list rides
+the handoff as `meds` / `medSkip`. Metoprolol, diltiazem, spironolactone and furosemide count though
+they have other uses - the agent can override.
 
 ## Condition details (cancer type / stage, diabetes A1C / treatment)
 Optional dropdowns on the Cancer and Diabetes chips, also filled from the navigator. Blank leaves the

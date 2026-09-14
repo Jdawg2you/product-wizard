@@ -118,10 +118,31 @@ globalThis.MutationObserver = function(){ return {observe:function(){}}; };
 JS
   "$JSC" -e "
     eval(readFile('$TMP/stub.js'));
-    try { var names = new Function(readFile('$TMP/block0.js') + ';return COND.map(function(c){return c.name});')();
-          print(JSON.stringify(names)); }
+    try { var app = new Function(readFile('$TMP/block0.js') + ';return {conds:COND.map(function(c){return c.name}), details:DETAILS, lift:LIFT};')();
+          var det = {};
+          Object.keys(app.details).forEach(function(c){ det[c] = app.details[c].map(function(f){
+            return {k:f.k, opt:f.opt||null, num:!!f.num, year:!!f.year, text:!!f.text}; }); });
+          print(JSON.stringify({conds:app.conds, details:det, lift:app.lift})); }
     catch (e) { print('ERR ' + e.message); }
   " > "$TMP/wiz_conds.json" 2>&1
+
+  # The navigator's follow-up questions and the answers that add a condition, read as data.
+  python3 - "$NAV" "$TMP" <<'PY3'
+import io, re, sys, os
+src = io.open(sys.argv[1], encoding='utf-8').read()
+def span(pat, o, c):
+    m = re.search(pat, src)
+    if not m: return 'null'
+    i = src.index(o, m.start()); d = 0
+    for k in range(i, len(src)):
+        if src[k] == o: d += 1
+        elif src[k] == c:
+            d -= 1
+            if d == 0: return src[i:k+1]
+js = 'print(JSON.stringify({follow:(%s), lift:(%s)}));' % (span(r'var\s+PF_FOLLOW\s*=', '{', '}'), span(r'var\s+COND_FROM_FOLLOW\s*=', '{', '}'))
+io.open(os.path.join(sys.argv[2], 'nav_follow.js'), 'w', encoding='utf-8').write(js)
+PY3
+  "$JSC" "$TMP/nav_follow.js" > "$TMP/nav_follow.json" 2>&1
 
   cat > "$TMP/sync.py" <<'PY2'
 import io, re, sys, json
@@ -129,7 +150,8 @@ nav = io.open(sys.argv[1], encoding='utf-8').read()
 wiz = io.open(sys.argv[2], encoding='utf-8').read()
 raw = io.open(sys.argv[3], encoding='utf-8').read().strip()
 if raw.startswith('ERR'): print('could not load the conditions on this page: ' + raw); sys.exit()
-have = set(json.loads(raw))
+wiz_obj = json.loads(raw)
+have = set(wiz_obj['conds'])
 def span(src, pat, o, c):
     m = re.search(pat, src)
     if not m: return None
@@ -158,10 +180,42 @@ names = set(re.findall(r'"([^"]+)"', pc)) | set(re.findall(r'\{\{c:([^}]+)\}\}',
 names |= set(c for v in nm.values() for c in v)
 missing = sorted(n for n in names if n not in have)
 if missing: problems.append('navigator conditions with no match here: ' + ', '.join(missing))
+# Jesse's rule: whatever the script asks, the wizard asks, and the other way round - same keys,
+# same answers. Dates (dx_*) are the wizard's year box, and the blood pressure count is its own chip.
+nq = 0
+try: nf = json.loads(io.open(sys.argv[4], encoding='utf-8').read())
+except Exception: nf = None
+if not nf or not nf.get('follow'):
+    problems.append('could not read the navigator follow-up questions (PF_FOLLOW)')
+else:
+    wd = wiz_obj['details']
+    for cond, fs in nf['follow'].items():
+        asked = [f for f in fs if not f['k'].startswith('dx_') and f['k'] != 'bp_meds']
+        mine = dict((f['k'], f) for f in wd.get(cond, []))
+        for f in asked:
+            nq += 1
+            w = mine.get(f['k'])
+            if not w:
+                problems.append('navigator asks %s "%s" (%s) - the wizard does not' % (cond, f['l'], f['k'])); continue
+            nopt = [o for o in (f.get('opt') or []) if o != '']
+            if nopt and not w['text'] and (w['opt'] or []) != nopt:
+                problems.append('%s "%s": answers differ - navigator %s, wizard %s' % (cond, f['l'], nopt, w['opt']))
+            if not nopt and not (w['num'] or w['year'] or w['text']):
+                problems.append('%s "%s": typed in the navigator but a pick list in the wizard' % (cond, f['l']))
+        for k in mine:
+            if k not in [f['k'] for f in asked]: problems.append('wizard asks %s %s - the navigator does not' % (cond, k))
+    for cond in wd:
+        if cond not in nf['follow']: problems.append('wizard asks follow-ups on %s - the navigator has none' % cond)
+    if (nf.get('lift') or {}) != (wiz_obj.get('lift') or {}):
+        problems.append('answers that add a condition differ: navigator COND_FROM_FOLLOW vs wizard LIFT')
+    pcs = set(re.findall(r'"([^"]+)"', pc))
+    for m in (wiz_obj.get('lift') or {}).values():
+        for c in m.values():
+            if c not in have or c not in pcs: problems.append('added condition "%s" is missing from one of the condition lists' % c)
 if problems: print(' | '.join(problems))
-else: print('SYNCED %d medications, %d condition names' % (len(nm), len(names)))
+else: print('SYNCED %d medications, %d condition names, %d follow-up questions' % (len(nm), len(names), nq))
 PY2
-  OUT=$(python3 "$TMP/sync.py" "$NAV" "$FILE" "$TMP/wiz_conds.json")
+  OUT=$(python3 "$TMP/sync.py" "$NAV" "$FILE" "$TMP/wiz_conds.json" "$TMP/nav_follow.json")
   case "$OUT" in
     SYNCED*) echo "ok    $OUT (against $NAVFROM)" ;;
     *)       echo "FAIL  $OUT"; echo "      against $NAVFROM"; FAIL=1 ;;
