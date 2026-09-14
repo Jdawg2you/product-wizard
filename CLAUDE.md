@@ -125,6 +125,20 @@ override lives in `client.uwIul`, and `uwFor(key)` returns it for `iul` and the 
 move the shared toggle, and because no whole life product is fully underwritten, 10x age wiped
 all of whole life - the fallback the navigator's script leans on at 9.1.
 
+## Blood pressure (business rule from Jesse)
+Rated on how many medications it takes to control, never on when it started, so the chip asks
+for a count and no date - and the navigator's script asks only the count too.
+- 1-2 medications: controlled. Changes nothing, and a hospitalisation clause is not held against it.
+- 3: questionable. Where a carrier states its own count (Americo term, American Amicable decline at
+  3+) its language decides; where it is silent the card shows amber, "verify with underwriting".
+- 4+: not well controlled - not eligible with any carrier, whole life included, whatever the guide says.
+- A carrier's own medication count only declines when its text says decline. National Life Group's
+  "one BP medication allowed for Preferred" is a rating-class rule: on two medications that shows
+  amber ("controlled, but ... Preferred"), never not-eligible.
+Deliberately not asked, to keep the most common and least important condition to one question: the
+guides' diagnosis-within-4-months, hospitalised-within-10-years, dosage-change-within-12-months and
+abnormal-EKG rules. Those cells stay as the guide wrote them for the agent to read.
+
 ## Condition chip year input
 A year is only committed once the box holds four digits (or on blur, when anything left over is
 settled). Committing each keystroke rebuilt the chip empty, since every partial year is below 1900,

@@ -1296,14 +1296,30 @@ function verdictsFor(key){
     if(key==="iul" && client.focus!=="both" && c.focus && c.focus!=="both" && c.focus!==client.focus) return false; return true;}).map((ci,i)=>{ const car=d.carriers[ci];
     const checks=eligChecks(key,car);
     const lines=picked.map(p=>{ const c=COND[p.i]; const ri=c[key];
-      /* Jesse's rule, applied only where the carrier's own guide is silent on medication count:
-         4+ meds rules out term and IUL outright, and makes whole life questionable. A carrier that
-         states its own threshold (Americo term declines at 3+) keeps its language. Whole life has
-         no blood pressure row at all, so this is the only thing that speaks for it there. */
-      if(isMeds(c.name) && p.m>=4 && (ri==null || !clauseMeds(d.rows[ri].cells[ci].t))){
-        return {row:c.name, cell: key==="wl"
-          ? {t:"4+ blood pressure medications — verify with underwriting",s:"tier"}
-          : {t:"4+ blood pressure medications — not eligible",s:"no"}};
+      /* Jesse's rule. Blood pressure is rated on how many medications it takes to control:
+         1-2 is controlled and changes nothing; 3 is questionable - a carrier that states its own
+         count (Americo term declines at 3+, American Amicable at 3+) keeps its language, and one
+         that is silent shows amber to verify; 4+ is not well controlled and is not eligible with
+         anyone, whole life included, whatever the guide says. Whole life has no blood pressure
+         row, so this is the only thing that speaks for it there. */
+      const bpm=isMeds(c.name) && p.m!=null && p.m!=="" ? Number(p.m) : null;
+      if(bpm!=null && bpm>=4){
+        return {row:c.name, cell:{t:"4+ blood pressure medications — not well controlled, not eligible",s:"no"}};
+      }
+      if(bpm!=null){
+        /* A carrier's medication count only knocks a client out when the carrier says decline.
+           National Life Group reads "one BP medication allowed for Preferred" - a rating class
+           rule - and treating two medications as failing it removed NLG from anyone on two,
+           which is exactly the controlled client this rule says is fine. */
+        const cls=ri==null ? [] : d.rows[ri].cells[ci].t.split(/;|\.\s+(?=[A-Z])/).map(x=>x.trim()).filter(Boolean);
+        const declines=cls.some(cl=>clauseMeds(cl) && /decline|not eligible/i.test(outcomeOf(cl)) && evalClause(cl,null,client.age,bpm)===true);
+        if(!declines){
+          if(bpm===3)
+            return {row:c.name, cell:{t:"3 blood pressure medications — may not be well controlled, verify with underwriting",s:"tier"}};
+          const classRule=cls.find(cl=>clauseMeds(cl) && !/decline|not eligible/i.test(outcomeOf(cl)) && evalClause(cl,null,client.age,bpm)===false);
+          if(classRule)
+            return {row:c.name, cell:{t:`${bpm} blood pressure medications — controlled, may miss the best class (guide: ${classRule})`,s:"tier"}};
+        }
       }
       if(ri==null) return {row:c.name,cell:{t:"Not on the "+({wl:"whole life",term:"term",iul:"IUL"}[key])+" grid",s:"na",offGrid:true}};
       let src=d.rows[ri].cells[ci];
