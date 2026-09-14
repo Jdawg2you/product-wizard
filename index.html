@@ -197,6 +197,7 @@
   .card .prod b{color:var(--slate)}
   .card .reason{font-size:12.5px;color:var(--no);font-weight:600;margin:2px 0 6px}
   .card .reason.tier{color:var(--golddk)}
+  .ptype .why.borrowed{font-size:12.5px;font-weight:600;color:var(--golddk);margin:-2px 0 8px}
   .card ul{list-style:none;margin:0;padding:0;font-size:13px}
   .card li{padding:6px 0;border-top:1px solid var(--rule-soft);display:grid;grid-template-columns:minmax(0,44%) minmax(0,1fr);gap:8px;align-items:start;min-width:0}
   .card li>*{min-width:0;overflow-wrap:break-word;word-break:normal}
@@ -725,7 +726,7 @@ iul: {
     {name:"Transamerica — Financial Foundation IUL (FFIUL)", pts:["Ages 0-85; nonmed to $250K through age 45 and $99K via iGO point-of-sale (18-50; $75K 51-60); paramed above; classes Preferred Elite, Preferred Plus, Preferred, Nontobacco, Preferred Tobacco, Tobacco", "Chronic and critical illness riders must be applied for and pass separate screening (see term snapshot for exclusions); LTC rider available to citizens / green card holders", "Same impairment table as Trendsetter — cell text shows the probable fully-underwritten offer"]},
     {name:"Transamerica — FFIUL II Express (instant decision)", pts:["Ages 18-70 adults (Select Nontobacco / Select Tobacco), 0-17 juvenile; $50K min; max $500K to 60, $300K 61-70, $250K juveniles; 100% instant decision, never referred to an underwriter, coverage in as fast as 15 minutes", "BMI 16.0-39.0 (18.0-39.0 at 60+); build, personal history and Milliman Rx/diagnostic data drive the decision — no exams, no APS", "Hard declines beyond the medical chart: bankruptcy not discharged, felony within 10 yrs, current probation/parole, hospitalization 2+ nights within 1 yr, pending tests within 6 mos, high-risk foreign travel, marijuana-industry / casino / oil-gas-coal-nuclear / arms employment", "Chronic and critical illness riders included unless declined separately (RA, UC/Crohn's, neuropathy, mobility aids, ADL help, Medicaid, handicap placard all block the riders, not the base); terminal illness rider on every policy; no term conversions", "Cells now use the Sept 2026 adult single-condition decision chart — conditions marked * on that chart may still be placed through Transamerica's traditional underwriting (see Financial Foundation IUL column)"]},
     {name:"F&G — Pathsetter (fixed indexed UL)", pts:["Issue ages 0-80; minimum face $50,000; Preferred through Table H (Table 8), so substandard is available", "Exam-free for age 60 and under applying for $1,000,000 or less — do not order a paramed; a telephone interview is often required", "Retention $1M; automatic reinsurance binding limit $10M; jumbo limit $20M (all plans, ages 0-80)", "Preferred needs no ratable conditions, untreated BP within 150/90 (18-50), 160/95 (51-65 and 66+), cholesterol 260 (18-50) and 2 years tobacco-free; Standard allows 1 year", "The field guide publishes no condition-by-condition chart, so every grid cell reads 'not addressed'"]},
-    {name:"F&G — Everlast (fixed indexed UL)", pts:["Build: F&G publishes no chart - the wizard borrows National Life Group's RapidProtect chart (Jesse's call) and marks any result it decides, keeping the card on the page in amber rather than removing it", "Issue ages 0-80; minimum face $100,000 — the $100,000-$149,999 band is not available under age 18", "Same underwriting programme as Pathsetter: exam-free to age 60 at $1,000,000 or less, MIB search and instant ID check at all ages and amounts", "Preferred through Table H (Table 8); retention $1M, automatic binding $10M, jumbo $20M", "Build chart is gender- and class-specific (Preferred / Standard, ages 16-50; add 5 lbs for 51-65 and 10 lbs for 66+) — not loaded into the tool, so no build knockout applies", "The field guide publishes no condition-by-condition chart, so every grid cell reads 'not addressed'"]}
+    {name:"F&G — Everlast (fixed indexed UL)", pts:["Build: F&G publishes no chart - the wizard borrows National Life Group's RapidProtect chart (Jesse's call) and removes Everlast when that chart rules the client out, with a line under the IUL heading saying so", "Issue ages 0-80; minimum face $100,000 — the $100,000-$149,999 band is not available under age 18", "Same underwriting programme as Pathsetter: exam-free to age 60 at $1,000,000 or less, MIB search and instant ID check at all ages and amounts", "Preferred through Table H (Table 8); retention $1M, automatic binding $10M, jumbo $20M", "Build chart is gender- and class-specific (Preferred / Standard, ages 16-50; add 5 lbs for 51-65 and 10 lbs for 66+) — not loaded into the tool, so no build knockout applies", "The field guide publishes no condition-by-condition chart, so every grid cell reads 'not addressed'"]}
   ],
   rows: [
     ["AIDS / HIV / ARC", "DECLINE", "R|HIV / AIDS - not eligible", "R|Ever - Decline", "A|AIDS - Decline; HIV - moderate rating to Decline (2025 guide)", "DECLINE", "R|Decline", "N|Not in the agent guide - app health questions are all knockouts", "N|Not in the field guide - no condition list published", "N|Not in the field guide - no condition list published"],
@@ -1309,14 +1310,14 @@ function eligChecks(key,car){
     else if(e.build){
       let key2=e.build; if(key2==="TA") key2=client.sex==="f"?"TAF":"TAM";
       /* Jesse's rule: F&G publishes no build chart, so Everlast borrows National Life Group's
-         RapidProtect chart. A borrowed chart never removes a carrier on its own - a client outside it
-         stays on the page in amber, and every build line says whose chart decided it. */
-      const bor=e.buildBorrowed ? ` — ${e.buildBorrowed} chart; F&G publishes none, confirm with F&G` : "", outS=e.buildBorrowed?"tier":"no";
+         RapidProtect chart. Outside it the carrier is removed like any other, and the check is marked
+         borrowed so the results say which carrier went and whose chart decided it. */
+      const bor=e.buildBorrowed ? ` — ${e.buildBorrowed} chart; F&G publishes none, confirm with F&G` : "";
       const i=client.hin-H0; const row=(BUILD[key2]||[])[i];
       if(row===undefined||row===null) out.push({s:"na",t:`Build chart doesn't cover ${ftin(client.hin)}${bor}`});
       else { const [mn,mx]=row;
-        if(mx!=null && client.wt>mx) out.push({s:outS,t:`Over build limit — max ${mx} lbs at ${ftin(client.hin)}${e.build==="TA"&&!client.sex?" (male chart; pick sex for exact)":""}${bor}`});
-        else if(mn!=null && client.wt<mn) out.push({s:outS,t:`Under build minimum — ${mn} lbs at ${ftin(client.hin)}${bor}`});
+        if(mx!=null && client.wt>mx) out.push({s:"no",borrowed:!!e.buildBorrowed,t:`Over build limit — max ${mx} lbs at ${ftin(client.hin)}${e.build==="TA"&&!client.sex?" (male chart; pick sex for exact)":""}${bor}`});
+        else if(mn!=null && client.wt<mn) out.push({s:"no",borrowed:!!e.buildBorrowed,t:`Under build minimum — ${mn} lbs at ${ftin(client.hin)}${bor}`});
         else {
           /* A product with a tighter chart for its full benefit (Corebridge SimpliNow Legacy Max)
              still issues the graded version between the two charts. */
@@ -1520,10 +1521,11 @@ function detailCell(car,name,p){
 
 /* ---------- VERDICTS ---------- */
 function uwFor(key){ return (key==="iul" && client.uwIul) ? client.uwIul : client.uw; }
+const BORROWED_OUT={};
 function verdictsFor(key){
   const d=DATA[key];
   const uw=uwFor(key), showFU=uw!=="si", showSI=uw!=="fu";
-  return ordered(key).filter(ci=>{const c=d.carriers[ci]; if(!mine(key,c)) return false; const fu=c.tag==="Fully underwritten"; if(!(fu?showFU:showSI)) return false;
+  const all=ordered(key).filter(ci=>{const c=d.carriers[ci]; if(!mine(key,c)) return false; const fu=c.tag==="Fully underwritten"; if(!(fu?showFU:showSI)) return false;
     if(key==="iul" && client.focus!=="both" && c.focus && c.focus!=="both" && c.focus!==client.focus) return false; return true;}).map((ci,i)=>{ const car=d.carriers[ci];
     const checks=eligChecks(key,car);
     const lines=picked.map(p=>{ const c=COND[p.i]; const ri=c[key];
@@ -1577,8 +1579,11 @@ function verdictsFor(key){
       if(isMeds(c.name) && cell.s==="na") cell={...cell,minor:true};
       return {row:c.name,cell}; });
     let worst="ok", sc=3; for(const c of checks){ if(rank[c.s]<rank[worst]) worst=c.s; sc=Math.min(sc,score(c)); } for(const l of lines){ if(l.cell.offGrid||l.cell.minor) continue; if(rank[l.cell.s]<rank[worst]) worst=l.cell.s; sc=Math.min(sc,score(l.cell)); }
-    return {key,car,checks,lines,worst,sc,i,ageOut:checks.some(c=>c.s==="no"&&c.age)};
-  }).filter(x=>!x.ageOut && x.worst!=="no").sort((a,b)=>b.sc-a.sc || a.i-b.i);
+    return {key,car,checks,lines,worst,sc,i,ageOut:checks.some(c=>c.s==="no"&&c.age),borrowedOut:checks.some(c=>c.s==="no"&&c.borrowed)};
+  });
+  /* A carrier removed on a borrowed build chart is named on the page, since the chart is not its own. */
+  BORROWED_OUT[key]=all.filter(x=>!x.ageOut && x.borrowedOut).map(x=>`${x.car.name} ${x.car.prod} removed on a borrowed build chart (${ELIG[key][x.car.id].buildBorrowed}) — confirm with ${x.car.name}`);
+  return all.filter(x=>!x.ageOut && x.worst!=="no").sort((a,b)=>b.sc-a.sc || a.i-b.i);
 }
 function renderChips(){
   const c=$("#chips");
@@ -1761,19 +1766,22 @@ function renderVerdict(){
       : `Nothing clears with what's entered yet.<span class="go">see the detail &darr;</span>`;
   }
   const outTxt=outTypes.length&&outTypes.length<all.length?`<div class="why">${outTypes.map(t=>t.label).join(" and ")}: nothing available with what's entered${outTypes.some(t=>t.list.some(x=>x.worst==="na"))?" (a few carriers are unclear — see the grids below)":""}.</div>`:"";
+  const borFor=k=>(BORROWED_OUT[k]||[]).map(n=>`<div class="why borrowed">${esc(n)}</div>`).join("");
+  /* A product type with nothing left has no heading to carry the note, so it goes in the call-out. */
+  const borOut=outTypes.length<all.length ? outTypes.map(t=>borFor(t.key)).join("") : "";
   let html="";
   const missing=[]; if(client.age==null) missing.push("age"); if(client.hin==null||client.wt==null) missing.push("height/weight (build limits apply on most products)");
   const missTxt=(missing.length?`<div class="why">Not checked yet: ${missing.join(", ")}. Add them to tighten the list.</div>`:"")+(picked.length?`<div class="why"><button type="button" id="finePrint" class="fine-link">See what every carrier says about ${picked.map(p=>COND[p.i].name).join(", ")} ↓</button></div>`:"");
   if(best){ const x=best.hit;
-    html+=`<div class="best"><div class="k">Likely best fit</div><div class="v">${esc(best.t.label)} — ${esc(x.car.name)}</div><div class="why">${esc(x.car.prod)}${x.car.tag?" · "+esc(x.car.tag):""}</div><div class="why">${x.worst==="ok"?"Nothing entered knocks this out.":"Eligible, but expect a lower tier, rating or waiting period — see the notes on the card."}</div>${outTxt}${missTxt}</div>`; }
-  else if(termOnly) html+=`<div class="best"><div class="k">Likely best fit</div><div class="v">No IUL or whole life fits — term is the only option</div><div class="why">Term is never the recommended product; the term carriers below are what's left for this client.</div>${missTxt}</div>`;
+    html+=`<div class="best"><div class="k">Likely best fit</div><div class="v">${esc(best.t.label)} — ${esc(x.car.name)}</div><div class="why">${esc(x.car.prod)}${x.car.tag?" · "+esc(x.car.tag):""}</div><div class="why">${x.worst==="ok"?"Nothing entered knocks this out.":"Eligible, but expect a lower tier, rating or waiting period — see the notes on the card."}</div>${outTxt}${borOut}${missTxt}</div>`; }
+  else if(termOnly) html+=`<div class="best"><div class="k">Likely best fit</div><div class="v">No IUL or whole life fits — term is the only option</div><div class="why">Term is never the recommended product; the term carriers below are what's left for this client.</div>${borOut}${missTxt}</div>`;
   else html+=`<div class="best"><div class="k">Likely best fit</div><div class="v">Nothing clears on IUL, whole life or term with what's entered</div><div class="why">${client.uw!=="si"?"Check the gray \"not addressed\" carriers and call underwriting, or revisit the entries.":"Nothing simplified-issue fits — switch to <b>Both</b> or <b>Fully underwritten</b> above to see the paramed options."}</div>${missTxt}</div>`;
   for(const t of all){
     if(outTypes.includes(t) && outTypes.length<all.length) continue;
     const n={ok:0,tier:0,na:0,no:0}; t.list.forEach(x=>n[x.worst]++);
     const shown=DATA[t.key].carriers.filter(c=>{if(!mine(t.key,c)) return false; const fu=c.tag==="Fully underwritten", uw=uwFor(t.key); if(!(fu?uw!=="si":uw!=="fu")) return false; if(t.key==="iul"&&client.focus!=="both"&&c.focus&&c.focus!=="both"&&c.focus!==client.focus) return false; return true;}).length;
     const hidden=shown-t.list.length;
-    html+=`<div class="ptype"><h3>${esc(t.label)}${t.key==="iul"&&client.uwIul?` <span class="uwiul">${{si:"Simplified issue",both:"Both",fu:"Fully underwritten"}[client.uwIul]} &middot; from the $/m</span>`:""} <small>${n.ok} clean · ${n.tier} with conditions · ${n.na} unclear${hidden?` · ${hidden} not eligible (hidden)`:""}</small></h3><div class="lane">`;
+    html+=`<div class="ptype"><h3>${esc(t.label)}${t.key==="iul"&&client.uwIul?` <span class="uwiul">${{si:"Simplified issue",both:"Both",fu:"Fully underwritten"}[client.uwIul]} &middot; from the $/m</span>`:""} <small>${n.ok} clean · ${n.tier} with conditions · ${n.na} unclear${hidden?` · ${hidden} not eligible (hidden)`:""}</small></h3>${borFor(t.key)}<div class="lane">`;
     if(!t.list.length) html+=`<div class="card na"><div class="name">Nothing available</div><div class="prod">No ${esc(t.label.toLowerCase())} product on the grid issues at age ${client.age??"—"} under the current filter.</div></div>`;
     html+=t.list.map(x=>`<div class="card ${x.worst}"><div class="name">${esc(x.car.name)}</div><div class="prod">${esc(x.car.prod)}${x.car.tag?` · <b>${esc(x.car.tag)}</b>`:""}</div>${
       x.checks.filter(c=>c.s!=="ok"&&c.s!=="info").map(c=>`<div class="reason ${c.s}">${esc(c.t)}</div>`).join("")}<ul>${

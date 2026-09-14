@@ -209,9 +209,10 @@ before `resolveWindow`:
 
 ## Borrowed build chart (business rule from Jesse, 14 Sep 2026)
 F&G publishes no build chart, so Everlast uses National Life Group's RapidProtect chart (`NLGP1`), set
-with `ELIG.iul.fgever.buildBorrowed`. A borrowed chart never removes a carrier by itself: over or under
-it, the card stays on the page in amber, and every build line (including "Build OK") names the chart it
-borrowed and says to confirm with F&G. Pathsetter still has no build check.
+with `ELIG.iul.fgever.buildBorrowed`. Outside it Everlast is removed like any carrier over its limit
+(Jesse chose this over keeping it amber), and `BORROWED_OUT` puts a line under that product type's
+heading - or in the best-fit call-out when the whole type is empty - naming the carrier and the
+borrowed chart. Every build line, "Build OK" included, also names the chart. Pathsetter still has no build check.
 
 ## Reading a cell for this client (fixed 14 Sep 2026 from Jesse's screenshot)
 A breast cancer four months old, in remission, showed Transamerica FFIUL II Express and Foresters SMART
