@@ -207,6 +207,25 @@ before `resolveWindow`:
 - Chubb: insulin or A1C over 7 - Graded. American Amicable: pills Immediate, insulin before 50 ROP.
   Transamerica FE Express: insulin - Select (green).
 
+## Reading a cell for this client (fixed 14 Sep 2026 from Jesse's screenshot)
+A breast cancer four months old, in remission, showed Transamerica FFIUL II Express and Foresters SMART
+UL green for IUL. Three separate reading errors, all fixed in resolveWindow / preferClauses / cancerCell:
+- Fallback: when no dated clause fits, only a clause about everyone left over may answer ("otherwise -
+  Graded", a bare "Standard"). A clause naming its own case ("basal cell - OK", "Raynaud's - Standard",
+  "injury - allowed") no longer answers for the client; the cell stays amber for the agent to read.
+  Checked against every cell at six dates and two ages: 47 cells changed, all from green to amber or
+  from a wrong case to the full text.
+- Clean periods: "no treatment / recurrence / attacks / seizures / episodes / symptoms / use within N
+  yrs - OK" applies after N years, not inside them. The wording list is deliberate - "(no
+  complications) within 1 yr - Decline" and "No heart attack, no surgery, within 5 yrs" still read as
+  within.
+- Cancer by type (`cancerCell`): with the type known, only clauses about that type or about every type
+  are read, and undated declines ("metastatic, recurrent or multi-site") don't stop the type's own
+  dated rule from settling. With the type unknown, a clause about one type never decides; the cell
+  resolves on the rest or stays amber.
+- "In remission" only removes a carrier's "current - DECLINE" once the latest diagnosis or treatment is
+  a year or more back.
+
 ## Condition chip year input
 A year is only committed once the box holds four digits (or on blur, when anything left over is
 settled). Committing each keystroke rebuilt the chip empty, since every partial year is below 1900,

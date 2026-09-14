@@ -1406,12 +1406,44 @@ function preferClauses(src,name,p){
   let cls=src.t.split(/;|\.\s+(?=[A-Z])/).map(x=>x.trim()).filter(Boolean), changed=false;
   spec.forEach(f=>{ const v=p.d[f.k]; if(!v) return;
     const kr=f.keep && f.keep[v]; if(kr){ const m=cls.filter(x=>kr.test(x)); if(m.length && m.length<cls.length){ cls=m; changed=true; } }
-    const dr=f.drop && f.drop[v]; if(dr){ const m=cls.filter(x=>!dr.test(x)); if(m.length && m.length<cls.length){ cls=m; changed=true; } } });
+    /* Remission with treatment inside the last year is still close enough to current that the
+       carrier's "current - DECLINE" stands. */
+    const recent=f.k==="ca_status" && (()=>{ const y=effYears(name,p); return y==null || y<1; })();
+    const dr=!recent && f.drop && f.drop[v]; if(dr){ const m=cls.filter(x=>!dr.test(x)); if(m.length && m.length<cls.length){ cls=m; changed=true; } } });
   if(!changed) return src;
   /* A kept clause can hold two windows - "pacemaker within 1 yr - Select, over 1 yr - Premier". Kept
      whole, then read as two, or no date could ever satisfy it. */
   cls=cls.flatMap(x=>x.split(/,\s+(?=(?:within|over|after|under)\s+\d)/)).map(x=>x.trim()).filter(Boolean);
   return parse(cls.join("; "));
+}
+/* Cancer cells mix rules for different types - "thyroid after 1 yr - Select; breast after 4 yrs -
+   Select; basal cell - OK; all other types - Decline". Without this, whichever clause's date matched
+   won, so a breast cancer could read as the thyroid or basal cell rule. With the type known, only
+   clauses about that type (or about every type) are read; unknown, a clause about one type can never
+   decide the answer - the cell resolves on the rest, or stays amber for the agent to read. */
+const CA_SKIN=/basal|squamous|non-melanoma|\bskin\b/i, CA_REST=/\ball other(?:s| types)?\b|\ball others\b|\botherwise\b/i;
+const CA_NAMES=CA_WORDS.filter(w=>w[0]!=="Other").map(w=>[w[0], w[0]==="Colon / rectal" ? /colon|colorectal|\brect|\banal\b|anus|bowel/i : new RegExp(w[1].source,"i")]);
+function caNamed(cl){ const out=CA_NAMES.filter(w=>w[1].test(cl)).map(w=>w[0]); if(CA_SKIN.test(cl)) out.push("Skin"); return out; }
+function cancerCell(src,p,y){
+  const cls=src.t.split(/;|\.\s+(?=[A-Z])/).map(x=>x.trim()).filter(Boolean);
+  if(!cls.some(c=>caNamed(c).length)) return null;
+  const t=p.d && p.d.ca_type;
+  const resolved=r=>r.t.indexOf("→")>-1 && !/Outside the stated conditions|Doesn't meet the stated conditions/.test(r.t);
+  if(t){
+    const typeNamed=cls.some(c=>caNamed(c).indexOf(t)>-1);
+    const kept=cls.filter(c=>{ const n=caNamed(c); if(n.length) return n.indexOf(t)>-1; return !(typeNamed && CA_REST.test(c)); });
+    if(!kept.length || kept.length===cls.length) return null;
+    /* "Metastatic, recurrent or multi-site - Decline" can't be dated, so it used to stop the type's
+       own rule from settling: a breast cancer four months old against "breast after 4 yrs - Select"
+       stayed amber and ranked as best fit. Those declines only ever add a decline, so read the type's
+       dated rules without them; if none of those rules fits, the client doesn't qualify. */
+    const dated=kept.filter(c=>!(evalClause(c,y,client.age,p.m)===null && /decline|not eligible/i.test(outcomeOf(c))));
+    if(dated.length && dated.length<kept.length){ const r=resolveWindow(parse(dated.join("; ")),y,client.age,p.m); if(r.t.indexOf("\u2192")>-1) return {cell:r}; }
+    return {cell:resolveWindow(parse(kept.join("; ")),y,client.age,p.m)};
+  }
+  const rest=cls.filter(c=>!caNamed(c).length && !CA_REST.test(c));
+  if(rest.length){ const r=resolveWindow(parse(rest.join("; ")),y,client.age,p.m); if(resolved(r)) return {cell:r}; }
+  return {cell:{...src, s:src.s==="ok"?"tier":src.s}};
 }
 function effYears(name,p){
   const last=p.d && p.d.ca_last;
@@ -1534,7 +1566,8 @@ function verdictsFor(key){
       const det=detailCell(car,c.name,{...p,y:yEff});
       if(det) return {row:c.name,cell:det};
       src=preferClauses(src,c.name,p);
-      let cell=resolveWindow(src,yEff,client.age,p.m);
+      const cc=(COND_ALIAS[c.name]||c.name)==="Cancer" ? cancerCell(src,p,yEff) : null;
+      let cell=cc ? cc.cell : resolveWindow(src,yEff,client.age,p.m);
       /* Blood pressure is not a factor most carriers underwrite on. If a carrier's guide simply
          doesn't answer it, show the grey dot but don't let it downgrade the card. */
       if(isMeds(c.name) && cell.s==="na") cell={...cell,minor:true};
@@ -1606,7 +1639,11 @@ function clauseWindow(cl){
   const t=cl.toLowerCase(); let lo=null, hi=null, any=false;
   const yrs=(n,u)=>/mo/.test(u)?n/12:n;
   let m;
-  if((m=t.match(/(?:within|<|under|less than|in the (?:past|last)|within the (?:past|last)|w\/in)\s*(?:the\s+)?(?:past\s+|last\s+)?(\d+(?:\.\d+)?)\s*(yrs?|years?|mos?|months?)/))){hi=yrs(+m[1],m[2]);any=true;}
+  if((m=t.match(/(?:within|<|under|less than|in the (?:past|last)|within the (?:past|last)|w\/in)\s*(?:the\s+)?(?:past\s+|last\s+)?(\d+(?:\.\d+)?)\s*(yrs?|years?|mos?|months?)/))){
+    /* "no treatment or recurrence within 10 yrs - OK" is a clean period: it applies after 10 years,
+       not to someone diagnosed inside them. Read as within, it passed a cancer four months old. */
+    if(/\b(?:no|without)\s+(?:treatment|recurrence|attacks?|seizures?|episodes?|symptoms|use)\b[^;,]*?(?:within|in the (?:past|last))\s*(?:the\s+)?(?:past\s+|last\s+)?\d/.test(t)) lo=yrs(+m[1],m[2]); else hi=yrs(+m[1],m[2]);
+    any=true;}
   if((m=t.match(/(?:after|>|over|more than|beyond|greater than)\s*(\d+(?:\.\d+)?)\s*(yrs?|years?|mos?|months?)/))){lo=yrs(+m[1],m[2]);any=true;}
   if((m=t.match(/(\d+)\s*[-–]\s*(\d+)\s*(yrs?|years?)/))){lo=+m[1];hi=+m[2];any=true;}
   if((m=t.match(/(\d+)\+\s*(yrs?|years?)/))){lo=+m[1];any=true;}
@@ -1685,7 +1722,12 @@ function resolveWindow(cell,y,a,m){
   for(let k=0;k<clauses.length;k++){ if(ev[k]===true){hit=clauses[k];break;} if(ev[k]===null && (clauseWindow(clauses[k])||clauseAge(clauses[k]).length||clauseMeds(clauses[k]))) break; /* can't see past an undecidable conditional */ }
   if(!hit){
     if(ev.some((e,k)=>e===null && (clauseWindow(clauses[k])||clauseAge(clauses[k]).length||clauseMeds(clauses[k])))) return cell;
-    const fb=clauses.find((c,k)=>ev[k]===null && /otherwise|all others|other|not due|no rating|allowed|premier|standard|select|ok\b|accepted/i.test(c)); if(fb) hit=fb;
+    /* Only a clause that covers everyone left over can be the fallback: "otherwise - Graded", a bare
+       "Standard". A clause naming its own case ("basal cell - OK") is not about this client just
+       because nothing else matched - it made a breast cancer four months old read as "basal cell - OK". */
+    const general=c=>{ const parts=c.split(/\s[-–]\s/); if(parts.length<2) return true;
+      return /^(otherwise|all others?|all other types|others?|not due to .*|not asked|allowed)$/i.test(parts.slice(0,-1).join(" - ").trim()); };
+    const fb=clauses.find((c,k)=>ev[k]===null && general(c) && /otherwise|all others|other|not due|no rating|allowed|premier|standard|select|ok\b|accepted/i.test(c)); if(fb) hit=fb;
     else if(ev.every(e=>e===false)){
       const outcomes=clauses.map(outcomeOf), neg=o=>/decline|not eligible|\bgi\b|guaranteed|graded|modified|\brop\b|basic|postpone/i.test(o);
       if(outcomes.every(neg)) hit="Outside the stated conditions — allowed";
