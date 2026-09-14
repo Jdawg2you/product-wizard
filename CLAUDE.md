@@ -125,16 +125,32 @@ override lives in `client.uwIul`, and `uwFor(key)` returns it for `iul` and the 
 move the shared toggle, and because no whole life product is fully underwritten, 10x age wiped
 all of whole life - the fallback the navigator's script leans on at 9.1.
 
+## Rating classes (business rule from Jesse)
+Everyone is run at Standard, so any class a carrier will issue is a go: Preferred, Standard, Select,
+Premier, "no rating", "all classes" all parse green. Classes that change the benefit stay amber:
+Basic, Graded, Modified, ROP, guaranteed issue, table or sub-standard. A class inside a time window
+("within 1 yr - Basic; within 2 yrs - Standard") stays amber until a date resolves it; resolveWindow
+parses only the outcome it lands on, so it goes green once the date puts the client in a go class.
+Transamerica FE Express "Select" and Foresters PlanRight / Accendo "Standard" are full coverage from
+day one, which is why they are not a lower tier.
+The test is `goClass()` and it runs in `parse()` both on plain cells and on flat cells forced amber
+with an `A|` prefix, so the prefix does not override this rule. Anything rated case by case ("rate
+for cause", "depending on") stays amber.
+
+Guaranteed issue: Corebridge GIWL takes anyone within its age limits regardless of health, so a client
+every simplified-issue carrier declines still has that option. Not loaded yet - see Carrier order.
+
 ## Blood pressure (business rule from Jesse)
 Rated on how many medications it takes to control, never on when it started, so the chip asks
 for a count and no date - and the navigator's script asks only the count too.
 - 1-2 medications: controlled. Changes nothing, and a hospitalisation clause is not held against it.
 - 3: questionable. Where a carrier states its own count (Americo term, American Amicable decline at
   3+) its language decides; where it is silent the card shows amber, "verify with underwriting".
-- 4+: not well controlled - not eligible with any carrier, whole life included, whatever the guide says.
+- 4+: not well controlled - not eligible for simplified issue with any carrier, whole life included,
+  whatever the guide says. Guaranteed issue (Corebridge GIWL) still takes them within its age limits.
 - A carrier's own medication count only declines when its text says decline. National Life Group's
   "one BP medication allowed for Preferred" is a rating-class rule: on two medications that shows
-  amber ("controlled, but ... Preferred"), never not-eligible.
+  green ("controlled, Standard") - see Rating classes - never not-eligible.
 Deliberately not asked, to keep the most common and least important condition to one question: the
 guides' diagnosis-within-4-months, hospitalised-within-10-years, dosage-change-within-12-months and
 abnormal-EKG rules. Those cells stay as the guide wrote them for the agent to read.

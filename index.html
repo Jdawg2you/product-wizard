@@ -874,15 +874,32 @@ const RX = {
   lookup: /(check|see |ask about|meds|not listed|not addressed|call underwriting|contact underwriting)/i,
   ok: /(allowed|not asked|^ok\b|- ok\b|accepted|preferred|all ratings|all classes|immediate|premier)/i
 };
+/* Jesse's rule: everyone is run at Standard, so any rating class the carrier will issue -
+   Preferred, Standard, Select, Premier, no rating - is a go, not a lower tier. Only a class that
+   changes the benefit (Basic, Graded, Modified, ROP, guaranteed issue, table or sub-standard)
+   stays amber, as does anything rated case by case or inside a time window - resolveWindow parses
+   just the outcome it lands on, so "within 2 yrs - Standard" goes green once the date puts the
+   client there. */
+function goClass(t){
+  return /\b(preferred|standard|select|premier|no rating|all classes|all ratings)\b/i.test(t)
+    && !/check|see |ask about|call|rate for|depend/i.test(t)
+    && !/(graded|modified|\brop\b|\bgi\b|guaranteed|\bbasic\b|sub-std|table|standard extra|within|prior to|\bafter\b|\bbefore\b|\bover \d|\d\s*[-–]\s*\d|\bif\b|;)/i.test(t);
+}
 function parse(cell){
   let m = /^([RAGN])\|(.*)$/.exec(cell);
-  if(m) return {t:m[2], s:{R:"no",A:"tier",G:"ok",N:"na"}[m[1]]};
+  if(m){
+    const st={R:"no",A:"tier",G:"ok",N:"na"}[m[1]];
+    /* A flat class cell forced amber - Transamerica FE Express "Select" - is still a go. */
+    if(st==="tier" && goClass(m[2])) return {t:m[2], s:"ok"};
+    return {t:m[2], s:st};
+  }
   const t=cell;
   if(!RX.decline.test(t)){
     if(/^(allowed|not asked)\b/i.test(t) && !/(graded|modified|\brop\b|\bgi\b|guaranteed issue|\bbasic\b|within)/i.test(t)) return {t, s:"ok"};
     if(RX.ok.test(t) && !/check|see /i.test(t) && !/(graded|modified|\brop\b|\bgi\b|guaranteed issue|\bbasic\b|sub-std|\bselect\b|table|within|standard extra|prior to)/i.test(t)) return {t, s:"ok"};
+    if(goClass(t)) return {t, s:"ok"};
     if(RX.lookup.test(t)) return {t, s:"na"};
-    return {t, s:"tier"};                          // Graded / Modified / ROP / Standard / Basic / windows
+    return {t, s:"tier"};                          // Graded / Modified / ROP / Basic / windows
   }
   if(RX.positive.test(t)) return {t, s:"tier"};    // decline in some cases, taken in others
   if(/^(ever had|any history)/i.test(t) || /^decline/i.test(t)) return {t, s:"no"};
@@ -1304,7 +1321,7 @@ function verdictsFor(key){
          row, so this is the only thing that speaks for it there. */
       const bpm=isMeds(c.name) && p.m!=null && p.m!=="" ? Number(p.m) : null;
       if(bpm!=null && bpm>=4){
-        return {row:c.name, cell:{t:"4+ blood pressure medications — not well controlled, not eligible",s:"no"}};
+        return {row:c.name, cell:{t:"4+ blood pressure medications — not well controlled, not eligible for simplified issue",s:"no"}};
       }
       if(bpm!=null){
         /* A carrier's medication count only knocks a client out when the carrier says decline.
@@ -1318,7 +1335,7 @@ function verdictsFor(key){
             return {row:c.name, cell:{t:"3 blood pressure medications — may not be well controlled, verify with underwriting",s:"tier"}};
           const classRule=cls.find(cl=>clauseMeds(cl) && !/decline|not eligible/i.test(outcomeOf(cl)) && evalClause(cl,null,client.age,bpm)===false);
           if(classRule)
-            return {row:c.name, cell:{t:`${bpm} blood pressure medications — controlled, may miss the best class (guide: ${classRule})`,s:"tier"}};
+            return {row:c.name, cell:{t:`${bpm} blood pressure medications — controlled, Standard (guide: ${classRule})`,s:"ok"}};
         }
       }
       if(ri==null) return {row:c.name,cell:{t:"Not on the "+({wl:"whole life",term:"term",iul:"IUL"}[key])+" grid",s:"na",offGrid:true}};
