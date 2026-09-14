@@ -944,6 +944,13 @@ const WL_ALSO={"Irregular heartbeat / murmur":"AFib / irregular heartbeat"};
    them — but with no row on any grid they cannot move a verdict, and the chip says so. */
 var NOGRID=["High cholesterol"];
 
+/* Names the Script Navigator uses for something this tool already scores under another name.
+   "Active cancer" is a flag in its call script — it lets the agent stop asking once cancer is
+   active, because so little is writable — but the underwriting here is simply Cancer's. The
+   alias carries the navigator's wording onto the chip while scoring off the real row, and it
+   means the feed block's exact-match idxOf() resolves it without needing to know about aliases. */
+var COND_ALIAS={"Active cancer":"Cancer"};
+
 const COND=(()=>{
   const byName={};
   const add=(name,key,idx)=>{ (byName[name]=byName[name]||{name,wl:null,term:null,iul:null})[key]=idx; };
@@ -957,6 +964,8 @@ const COND=(()=>{
   });
   NOGRID.forEach(n=>{ if(!byName[n]) byName[n]={name:n,wl:null,term:null,iul:null,noGrid:true};
                       else byName[n].noGrid=true; });
+  Object.entries(COND_ALIAS).forEach(([from,to])=>{ const src=byName[to];
+    if(src && !byName[from]) byName[from]={name:from,wl:src.wl,term:src.term,iul:src.iul,alias:to}; });
   return Object.values(byName).sort((a,b)=>a.name.localeCompare(b.name));
 })();
 
@@ -1127,7 +1136,7 @@ function yearsSince(yr,mo){
 const q=$("#q"), sugg=$("#sugg");
 function matches(){
   const v=q.value.trim().toLowerCase(); if(!v) return [];
-  return COND.map((c,i)=>({c,i})).filter(o=>!pickedIdx().includes(o.i) && o.c.name.toLowerCase().includes(v)).slice(0,12);
+  return COND.map((c,i)=>({c,i})).filter(o=>!o.c.alias && !pickedIdx().includes(o.i) && o.c.name.toLowerCase().includes(v)).slice(0,12);
 }
 function renderSugg(){
   const list=matches(); sugg.innerHTML="";
