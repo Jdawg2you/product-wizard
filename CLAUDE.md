@@ -42,8 +42,10 @@ full underwriting grids (browseable, tabbed) and product snapshots per carrier.
 
 ## Carrier order (business rule from Jesse — pays better / prices better, top to bottom)
 - WL: Americo, Mutual of Omaha, Corebridge SimpliNow Legacy (SIWL), Chubb, InstaBrain, American Amicable,
-  Transamerica, Foresters, Accendo ("only 6-month advance"), then Corebridge GIWL - the guaranteed
-  issue fallback, always last and always amber.
+  Transamerica, Foresters, Royal Neighbors Ensured Legacy (SIWL / GDB), Royal Neighbors Jet Whole Life, Royal Neighbors Royal Legacy SPWL (both placed
+  here by default 14 Sep 2026, awaiting Jesse's position), Accendo ("only 6-month advance"), then
+  Royal Neighbors Ensured Legacy GI, then Corebridge GIWL - the guaranteed issue fallbacks, always amber.
+- Term: Royal Neighbors Jet Term Life trails both orders until Jesse places it.
 - Term with living benefits: NLG, Transamerica, Foresters SF, InstaBrain Term, Americo, MoO TLA, MoO TLE, AmAm.
   Term without: InstaBrain Pure Term, Transamerica, Foresters (rest trail).
 - IUL: MoO IUL Express, NLG RapidProtect, TA FFIUL II Express, NLG FlexLife, Foresters SMART UL, TA FFIUL,
@@ -207,6 +209,23 @@ before `resolveWindow`:
 - Chubb: insulin or A1C over 7 - Graded. American Amicable: pills Immediate, insulin before 50 ROP.
   Transamerica FE Express: insulin - Select (green).
 
+## Royal Neighbors (2020 field guide)
+Its medical chart gives each condition a check, a call mark or a decline per product. Check reads
+"Allowed", decline "DECLINE", and the call mark is gray ("individual consideration - call Royal
+Neighbors risk assessment"): the guide gives no outcome, so those must not lead a best fit.
+Conditions the chart doesn't list are gray "not in the guide". Defibrillator / pacemaker and heart
+disease stay amber until the follow-up answer picks the device or condition. Build uses
+`buildLevel` with a named Standard chart: over Standard is amber "substandard rates", over the
+substandard maximum is out. The guides are not committed - the accelerated build chart is stamped
+internal use, and the repo is public. Juvenile Whole Life is left out (adult tool).
+
+## Royal Neighbors Ensured Legacy (2024 training guide)
+The risk assessment guide marks each condition available or not for Preferred, Standard, GDB and GI.
+The SIWL / GDB column reads Standard (green) where Standard is available, Graded (amber) where only GDB
+is, DECLINE where only GI is; conditions it doesn't list are gray. GI takes everything on the list, so
+its column is `gi:true` like Corebridge GIWL, with `giExcept` for the two refusals the guide applies to
+every plan (felony, mentally incompetent). Build matters for Preferred only, so no build check.
+
 ## Borrowed build chart (business rule from Jesse, 14 Sep 2026)
 F&G publishes no build chart, so Everlast uses National Life Group's RapidProtect chart (`NLGP1`), set
 with `ELIG.iul.fgever.buildBorrowed`. Outside it Everlast is removed like any carrier over its limit
@@ -290,7 +309,6 @@ did not parse. After the checks, load the preview and actually look at it.
   this repo is public. Ask Jesse before committing them.
 - Corebridge aggregate: the April 2025 question sheet says $25K total across SIWL and GIWL; the May
   2025 agent guide says $35K if approved Level. The snapshot uses the newer guide and says so.
-- Royal Neighbors SIWL/GDB: snapshot only; need the application's health questions.
 - IUL focus tags: MoO IUL Express and F&G Everlast are `focus:"protection"` (hidden when Cash
   accumulation is picked); Americo Instant Decision IUL and F&G Pathsetter are `focus:"cash"`
   (hidden when Protection is picked). Remaining IUL carriers stay untagged and always show.
