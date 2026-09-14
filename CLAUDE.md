@@ -86,7 +86,11 @@ way `renderVerdict` computes them.
 ```
 navigator -> wizard   {source:"optimum-suite",  type:"client", v:1, client:{
                          age, dob (ISO), sex, hin (total inches), wt, lb,
-                         conds:[{name, yr, mo}|{name, m}] }}
+                         conds:[{name, yr, mo, type?, stage?, a1c?, tx?}|{name, m}] }}
+
+  type and stage ride on Cancer / Active cancer (type is the navigator's free text, read by
+  caType; stage is one of CA_STAGES); a1c (number) and tx (Pills | Insulin | Both) ride on
+  Diabetes. All optional - see "Condition details".
 
   yr and mo are the year and month it happened - this page stores those on the chip and
   derives years-since itself, so a record that arrives and one that is typed cannot
@@ -171,6 +175,19 @@ for a count and no date - and the navigator's script asks only the count too.
 Deliberately not asked, to keep the most common and least important condition to one question: the
 guides' diagnosis-within-4-months, hospitalised-within-10-years, dosage-change-within-12-months and
 abnormal-EKG rules. Those cells stay as the guide wrote them for the agent to read.
+
+## Condition details (cancer type / stage, diabetes A1C / treatment)
+Optional dropdowns on the Cancer and Diabetes chips, also filled from the navigator. Blank leaves the
+grid cell in charge. `detailCell(car,name,p)` answers for the carriers whose rules turn on them,
+before `resolveWindow`:
+- Corebridge SimpliNow Legacy cancer: Stage III/IV or lymphoma - decline; 13 types within 12 months -
+  decline; within 4 yrs breast, prostate, colon, melanoma, thyroid, kidney, cervical, uterine,
+  testicular are Level unless Stage II, everything else Graded; after 4 yrs the grid cell applies.
+  Stage I of a Level type is green whatever the date, since it is Level either side of 4 yrs.
+- SimpliNow Legacy diabetes: A1C 10+ decline; insulin Graded; pills Level (an unknown A1C still
+  goes on to the insulin question, per the sheet).
+- Chubb: insulin or A1C over 7 - Graded. American Amicable: pills Immediate, insulin before 50 ROP.
+  Transamerica FE Express: insulin - Select (green).
 
 ## Condition chip year input
 A year is only committed once the box holds four digits (or on blur, when anything left over is

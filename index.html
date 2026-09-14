@@ -138,6 +138,7 @@
   .chips .hint{color:var(--muted);font-size:14px}
   .qlabel .sub{font-weight:400;color:var(--muted)}
   .chip .yrin{width:62px;font:inherit;font-size:12.5px;padding:3px 6px;border:1px solid var(--rule);
+    border-radius:var(--radius-sm);background:var(--card);color:var(--ink);-moz-appearance:textfield}  .chip .a1cin{width:62px;font:inherit;font-size:12.5px;padding:3px 6px;border:1px solid var(--rule);
     border-radius:var(--radius-sm);background:var(--card);color:var(--ink);-moz-appearance:textfield}
   .chip .yrin::-webkit-outer-spin-button,.chip .yrin::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
   .medchip{display:inline-flex;align-items:center;gap:7px;background:var(--fill);border:1px solid var(--rule);
@@ -1319,6 +1320,78 @@ function eligChecks(key,car){
   return out;
 }
 
+/* ---------- CONDITION DETAILS (cancer type / stage, diabetes A1C / treatment) ----------
+   Optional extras on a chip. Blank means the grid cell decides as before. Where a carrier's rule
+   turns on them, detailCell answers for that carrier instead of the cell. Every outcome here traces
+   to the guide named beside it. */
+const CA_LEVEL=["Breast","Prostate","Colon / rectal","Melanoma","Thyroid","Kidney","Cervical","Uterine","Testicular"];
+const CA_KNOCK12=["Brain","Lung","Liver","Pancreas","Stomach","Esophagus","Head / neck","Leukemia","Multiple myeloma","Ovarian","Sarcoma","Small intestine","Neuroendocrine"];
+const CA_ALL=[...CA_LEVEL,"Bladder","Bone",...CA_KNOCK12,"Lymphoma","Other"];
+const CA_STAGES=["0 / in situ","I","II","III","IV","Not sure"];
+/* The navigator's type box is free text: "breast", "stage 1 prostate", "colorectal". Anything not
+   recognised stays unknown rather than guessed. */
+const CA_WORDS=[["Small intestine",/small (intestine|bowel)/],["Neuroendocrine",/neuroendocrine|carcinoid/],["Bone",/\bbone\b(?! marrow)/],
+  ["Breast",/breast/],["Prostate",/prostat/],["Colon / rectal",/colon|colorectal|rect|\banal\b|anus|bowel/],["Melanoma",/melanoma/],
+  ["Thyroid",/thyroid/],["Kidney",/kidney|renal|ureter/],["Cervical",/cervi/],["Uterine",/uter|endometri/],["Testicular",/testic/],
+  ["Bladder",/bladder/],["Brain",/brain|glioma|glioblastoma/],["Lung",/lung/],["Liver",/liver|hepato/],["Pancreas",/pancrea/],
+  ["Stomach",/stomach|gastric/],["Esophagus",/esophag|oesophag/],["Head / neck",/head|neck|throat|mouth|oral|tongue|laryn/],
+  ["Leukemia",/leuk/],["Multiple myeloma",/myeloma/],["Ovarian",/ovar/],["Sarcoma",/sarcoma/],["Lymphoma",/lymphoma|hodgkin/],["Other",/^other$/]];
+function caType(t){ const x=String(t||"").toLowerCase().trim(); if(!x) return null; if(CA_ALL.includes(t)) return t; const hit=CA_WORDS.find(w=>w[1].test(x)); return hit?hit[0]:null; }
+function chipExtras(name,p){
+  const base=COND_ALIAS[name]||name;
+  const sel=(f,ph,opts,v)=>`<select data-i="${p.i}" data-f="${f}" aria-label="${ph}"><option value="">${ph}</option>`+
+    opts.map(o=>`<option ${v===o?"selected":""}>${esc(o)}</option>`).join("")+`</select>`;
+  if(base==="Cancer") return sel("type","type?",CA_ALL,p.type||"")+sel("stage","stage?",CA_STAGES,p.stage||"");
+  if(base==="Diabetes") return `<input class="a1cin" type="number" inputmode="decimal" step="0.1" min="3" max="20" placeholder="A1C" data-i="${p.i}" data-f="a1c" value="${p.a1c??""}" aria-label="Last A1C">`+
+    sel("tx","pills / insulin?",["Pills","Insulin","Both"],p.tx||"");
+  return "";
+}
+function detailCell(car,name,p){
+  const base=COND_ALIAS[name]||name, y=p.y;
+  /* Corebridge SimpliNow Legacy question sheet AGLC201492: Stage III/IV and lymphoma ever decline;
+     13 types decline inside 12 months; inside 48 months nine types are Level unless Stage II and
+     bladder, bone and anything unlisted are Graded; after 48 months cancer is not asked. */
+  if(base==="Cancer" && car.id==="cbsi"){
+    const t=p.type, st=p.stage&&p.stage!=="Not sure"?p.stage:null;
+    if(!t && !st) return null;
+    if(st==="III"||st==="IV") return {t:`Stage ${st} - DECLINE`, s:"no"};
+    if(t==="Lymphoma") return {t:"Lymphoma ever - DECLINE", s:"no"};
+    if(y!=null && y>=4) return null;
+    const pre=y==null?"if within 4 yrs: ":"", knock=CA_KNOCK12.includes(t);
+    if(knock && y!=null && y<1) return {t:`${t} cancer within 12 months - DECLINE`, s:"no"};
+    if(t && CA_LEVEL.includes(t)){
+      if(st==="II") return {t:`${pre}${t}, Stage II - Graded`, s:"tier"};
+      if(st) return {t:`${t}, Stage ${st} - Level, full benefit day one`, s:"ok"};
+      return {t:`${pre}${t} - Level unless Stage II (then Graded) - add the stage`, s:"tier"};
+    }
+    if(t) return {t:`${pre}${t} - Graded${knock&&y==null?"; DECLINE if within 12 months":""}`, s:"tier"};
+    if(st==="II") return {t:`${pre}Stage II - Graded`, s:"tier"};
+    return {t:`${pre}Stage ${st} - Level for breast, prostate, colon, melanoma, thyroid, kidney, cervical, uterine or testicular, otherwise Graded - add the type`, s:"tier"};
+  }
+  if(base==="Diabetes" && (p.a1c!=null || p.tx)){
+    const ins=p.tx==="Insulin"||p.tx==="Both", a=p.a1c;
+    /* SimpliNow Legacy: A1C 10+ declines; under 10 or unknown goes on to daily insulin - Graded, none - Level. */
+    if(car.id==="cbsi"){
+      if(a!=null && a>=10) return {t:`A1C ${a} - DECLINE (10 or higher)`, s:"no"};
+      if(ins) return {t:"Daily insulin - Graded", s:"tier"};
+      if(p.tx) return {t:`Pills${a!=null?", A1C "+a:""} - Level, full benefit day one`, s:"ok"};
+      return {t:`A1C ${a} - Level if no daily insulin, Graded on insulin - add pills / insulin`, s:"tier"};
+    }
+    /* Chubb Generational Life: insulin or A1c over 7 goes to Graded. */
+    if(car.id==="chubb" && (ins || (a!=null && a>7))) return {t:`${ins?"Insulin":"A1C "+a+" (over 7)"} - Graded`, s:"tier"};
+    /* American Amicable Senior Choice: insulin before age 50 is ROP, anything else Immediate. */
+    if(car.id==="amam" && p.tx){
+      if(!ins) return {t:"Pills - Immediate", s:"ok"};
+      if(client.age!=null && client.age<50) return {t:"Insulin before age 50 - ROP", s:"tier"};
+      if(client.age!=null && y!=null && client.age-y>=50) return {t:"Diagnosed after 50, so insulin began after 50 - Immediate", s:"ok"};
+      return {t:"Insulin - ROP if it began before age 50, otherwise Immediate", s:"tier"};
+    }
+    /* Transamerica FE Express: insulin is Select, which is full coverage (see Rating classes). */
+    if(car.id==="fex" && ins) return {t:"Insulin - Select", s:"ok"};
+  }
+  return null;
+}
+
 /* ---------- VERDICTS ---------- */
 function uwFor(key){ return (key==="iul" && client.uwIul) ? client.uwIul : client.uw; }
 function verdictsFor(key){
@@ -1365,6 +1438,8 @@ function verdictsFor(key){
         const kept=src.t.split(/;/).map(x=>x.trim()).filter(x=>x && !/hospitali/i.test(x));
         if(kept.length) src=parse(kept.join("; "));
       }
+      const det=detailCell(car,c.name,p);
+      if(det) return {row:c.name,cell:det};
       let cell=resolveWindow(src,p.y,client.age,p.m);
       /* Blood pressure is not a factor most carriers underwrite on. If a carrier's guide simply
          doesn't answer it, show the grey dot but don't let it downgrade the card. */
@@ -1385,13 +1460,14 @@ function renderChips(){
     if(isMeds(name))
       return `<span class="chip">${esc(name)}<select data-i="${p.i}" data-f="m" aria-label="Number of medications">`+
         MEDOPTS.map(([v,l])=>`<option value="${v}" ${String(p.m??"")===v?"selected":""}>${l}</option>`).join("")+`</select>${rm}</span>`;
-    if(!need.time) return `<span class="chip">${esc(name)}${rm}</span>`;
+    const ext=chipExtras(name,p);
+    if(!need.time) return `<span class="chip">${esc(name)}${ext}${rm}</span>`;
     const askMo=monthMatters(name,p.yr);
     return `<span class="chip">${esc(name)}`+
       `<input class="yrin" type="number" inputmode="numeric" min="1900" max="${YRNOW}" placeholder="year" data-i="${p.i}" data-f="yr" value="${p.yr??""}" aria-label="Year diagnosed or occurred">`+
       (askMo?`<select data-i="${p.i}" data-f="mo" aria-label="Month">`+
         `<option value="">month?</option>`+MONTHS.map((m,n)=>`<option value="${n+1}" ${String(p.mo??"")===String(n+1)?"selected":""}>${m}</option>`).join("")+`</select>`:"")+
-      rm+`</span>`;
+      ext+rm+`</span>`;
   }).join("")+'<button type="button" class="clear" id="clearAll">Clear all</button>';
 
   c.querySelectorAll(".chip button").forEach(b=>b.addEventListener("click",()=>unpick(+b.dataset.i)));
@@ -1412,6 +1488,9 @@ function renderChips(){
       }
       else if(f==="m") p.m=v;
       else if(f==="mo") p.mo=v;
+      else if(f==="type"||f==="stage"||f==="tx") p[f]=raw||null;
+      /* A decimal is typed a character at a time too; settle it when the agent moves on. */
+      else if(f==="a1c"){ if(!onBlur) return; p.a1c=(v>=3&&v<=20)?v:null; }
       p.y = isMeds(COND[p.i].name) ? null : yearsSince(p.yr,p.mo);
       render();
       /* No setSelectionRange here: number inputs throw on it. */
@@ -1747,6 +1826,10 @@ function apply(c){
       p.mo = (p.yr && mo>=1 && mo<=12) ? mo : null;
       p.y  = p.yr ? yearsSince(p.yr,p.mo)
                   : ((x.y === "" || x.y == null) ? null : x.y);
+      if(typeof x.type === "string") p.type = caType(x.type);
+      if(typeof x.stage === "string" && CA_STAGES.indexOf(x.stage) > -1) p.stage = x.stage;
+      if(typeof x.a1c === "number" && x.a1c >= 3 && x.a1c <= 20) p.a1c = x.a1c;
+      if(typeof x.tx === "string" && /^(Pills|Insulin|Both)$/.test(x.tx)) p.tx = x.tx;
     }
     picked.push(p);
   });
