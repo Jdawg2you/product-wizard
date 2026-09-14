@@ -10,6 +10,8 @@
 | WL | Transamerica FE Express | FE Express Solution agent guide (Jul 2026) — adult + cancer decision charts, BMI bands | |
 | WL | Foresters PlanRight | 2022 FE grid | |
 | WL | Accendo | 2022 FE grid | |
+| WL | Corebridge SimpliNow Legacy (SIWL) | SimpliNow Legacy Underwriting Questions AGLC201492 REV0425; agent guide AGLC201192 REV0525 (ages, faces, build charts, riders) | Guides not committed (not for public distribution); read by OCR |
+| WL | Corebridge Guaranteed Issue Whole Life | GIWL agent guide AGLC200472 REV0925; consumer brochure AGLC200502 REV1224 | No health questions; every cell Guaranteed Issue |
 | Term | Americo Instant Decision Term | 2020 FFL Term Grid (HMS column); Term Series agent guide (Sep 2025) for specs | |
 | Term | MoO Term Life Express | 2020 term grid; MoO Simplified Issue guide (Apr 2026) | |
 | Term | American Amicable Easy Term | 2020 term grid | |

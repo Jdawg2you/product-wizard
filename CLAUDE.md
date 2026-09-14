@@ -41,8 +41,9 @@ full underwriting grids (browseable, tabbed) and product snapshots per carrier.
 7. Embedded-feed block — lets the Script Navigator drive this page. See "Embedded mode" below.
 
 ## Carrier order (business rule from Jesse — pays better / prices better, top to bottom)
-- WL: Americo, Mutual of Omaha, [Corebridge SIWL — not yet loaded], Chubb, InstaBrain, American Amicable,
-  Transamerica, Foresters, Accendo (last; "only 6-month advance").
+- WL: Americo, Mutual of Omaha, Corebridge SimpliNow Legacy (SIWL), Chubb, InstaBrain, American Amicable,
+  Transamerica, Foresters, Accendo ("only 6-month advance"), then Corebridge GIWL - the guaranteed
+  issue fallback, always last and always amber.
 - Term with living benefits: NLG, Transamerica, Foresters SF, InstaBrain Term, Americo, MoO TLA, MoO TLE, AmAm.
   Term without: InstaBrain Pure Term, Transamerica, Foresters (rest trail).
 - IUL: MoO IUL Express, NLG RapidProtect, TA FFIUL II Express, NLG FlexLife, Foresters SMART UL, TA FFIUL,
@@ -137,8 +138,24 @@ The test is `goClass()` and it runs in `parse()` both on plain cells and on flat
 with an `A|` prefix, so the prefix does not override this rule. Anything rated case by case ("rate
 for cause", "depending on") stays amber.
 
-Guaranteed issue: Corebridge GIWL takes anyone within its age limits regardless of health, so a client
-every simplified-issue carrier declines still has that option. Not loaded yet - see Carrier order.
+Guaranteed issue: Corebridge GIWL takes anyone within its age limits (50-80) regardless of health, so
+a client every simplified-issue carrier declines still has that option. Its carrier carries `gi:true`
+and its ELIG entry a `gi` message: `eligChecks` always adds that message as an amber check, and
+`verdictsFor` answers every condition with "no health questions" (marked `minor`, so conditions never
+move it, including the 4+ blood pressure rule). Its grid cells all read "Guaranteed Issue".
+
+## Corebridge SimpliNow Legacy (SIWL)
+One application, two outcomes: Level (SimpliNow Legacy Max, full benefit day one) or Graded
+(SimpliNow Legacy). Cells use "Allowed (Level)" for the full benefit so it parses green, "Graded" for
+amber, and DECLINE for the knockout steps. Windows follow the question sheet: Section A ever, B 48
+months, C 24 months, D and knockout steps 3-4 12 months, step 5 36 months. Rows the application does
+not ask read "Not asked - Allowed"; Crohn's, ulcerative colitis and Down syndrome are `N|` because the
+autoimmune / mental incapacity questions may or may not catch them.
+Two build charts: `CB` (Graded, the looser, used for the knockout) and `CBL` (Level). ELIG's
+`buildLevel` adds an amber "Graded only" check between the two. Level face steps up with age
+(`faceAge`); smokers 71-80 get Graded only, which the tool cannot tell because it does not ask
+tobacco. Known conservative spots: a TIA 6-12 months ago reads as the stroke-within-1-year decline,
+and cancer type-specific rules show as text for the agent rather than resolving.
 
 ## Blood pressure (business rule from Jesse)
 Rated on how many medications it takes to control, never on when it started, so the chip asks
@@ -208,7 +225,10 @@ did not parse. After the checks, load the preview and actually look at it.
   the other.
 - Americo Eagle Select: FE column still uses 2022 Eagle Premier grid language; need the 3-tier guide.
 - Americo term column uses 2020 HMS grid language; Instant Decision Term Series guide has no condition list.
-- Corebridge SIWL: guide not yet received.
+- Corebridge guides are not in `docs/guides/`: every page is marked not for public distribution and
+  this repo is public. Ask Jesse before committing them.
+- Corebridge aggregate: the April 2025 question sheet says $25K total across SIWL and GIWL; the May
+  2025 agent guide says $35K if approved Level. The snapshot uses the newer guide and says so.
 - Royal Neighbors SIWL/GDB: snapshot only; need the application's health questions.
 - IUL focus tags: MoO IUL Express and F&G Everlast are `focus:"protection"` (hidden when Cash
   accumulation is picked); Americo Instant Decision IUL and F&G Pathsetter are `focus:"cash"`
