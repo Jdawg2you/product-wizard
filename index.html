@@ -197,6 +197,22 @@
   .card .prod b{color:var(--slate)}
   .card .reason{font-size:12.5px;color:var(--no);font-weight:600;margin:2px 0 6px}
   .card .reason.tier{color:var(--golddk)}
+  .card{position:relative}
+  .cardtools{position:absolute;top:10px;right:10px;display:flex;gap:6px;align-items:center;z-index:2}
+  .ctool{width:26px;height:26px;border-radius:50%;border:1px solid var(--rule);background:#fff;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;padding:0;line-height:1;color:var(--navy);text-decoration:none;
+    box-shadow:0 1px 2px rgba(20,25,40,.08);transition:transform .08s ease,background .15s ease,border-color .15s ease}
+  .ctool:hover{background:var(--goldsoft);border-color:var(--gold);transform:translateY(-1px)}
+  .ctool .q{font-family:var(--serif);font-style:italic;font-weight:700;font-size:16px;margin-top:-1px}
+  .ctool .i{font-family:var(--serif);font-style:italic;font-weight:700;font-size:15px}
+  .ctool.off{opacity:.28;cursor:default;box-shadow:none}
+  .ctool.off:hover{background:#fff;border-color:var(--rule);transform:none}
+  .benepop{position:absolute;top:42px;right:10px;z-index:60;width:min(320px,86vw);background:#fff;border:1px solid var(--rule);
+    border-radius:10px;box-shadow:0 10px 30px rgba(20,25,40,.18);padding:12px 14px;font-size:12.5px;line-height:1.5;text-align:left}
+  .benepop h4{margin:0 0 6px;font-family:var(--sans);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--golddk)}
+  .benepop ul{margin:0;padding-left:16px}
+  .benepop li{margin:0 0 5px}
+  .benepop .x{position:absolute;top:6px;right:8px;border:0;background:none;font-size:16px;cursor:pointer;color:#6b6f78;line-height:1}
   .ptype .why.borrowed{font-size:12.5px;font-weight:600;color:var(--golddk);margin:-2px 0 8px}
   .card ul{list-style:none;margin:0;padding:0;font-size:13px}
   .card li{padding:6px 0;border-top:1px solid var(--rule-soft);display:grid;grid-template-columns:minmax(0,44%) minmax(0,1fr);gap:8px;align-items:start;min-width:0}
@@ -703,14 +719,20 @@ term: {
   ]
 },
 iul: {
+  /* Jesse's order, by focus. Status still beats priority - this only breaks ties. */
+  orders: {
+    protection: {label:"Protection", ids:["rapid","iule","ffiulx","fgever","nlgiul","smartul","ffiul","fgpath","amiul"]},
+    cash:       {label:"Cash accumulation", ids:["rapid","amiul","nlgiul","ffiulx","smartul","ffiul","fgpath","fgever"]},
+    both:       {label:"Both", ids:["iule","rapid","amiul","ffiulx","smartul","nlgiul","ffiul","fgpath","fgever"]}
+  },
   carriers: [
     {id:"iule", name:"Mutual of Omaha", prod:"IUL Express", tag:"Simplified issue", focus:"protection"},
     {id:"rapid", name:"National Life Group", prod:"RapidProtect IUL", tag:"Instant decision"},
     {id:"ffiulx", name:"Transamerica", prod:"FFIUL II Express", tag:"Instant decision"},
-    {id:"nlgiul", name:"National Life Group", prod:"FlexLife / PeakLife IUL", tag:"Fully underwritten"},
-    {id:"smartul", name:"Foresters", prod:"SMART UL", tag:"Non-medical"},
+    {id:"nlgiul", name:"National Life Group", prod:"FlexLife", tag:"Fully underwritten"},
+    {id:"smartul", name:"Foresters", prod:"SMART UL", tag:"Non-medical", focus:"protection"},
     {id:"ffiul", name:"Transamerica", prod:"Financial Foundation IUL", tag:"Fully underwritten"},
-    {id:"amiul", name:"Americo", prod:"Instant Decision IUL (Series 336)", tag:"Instant decision", src:"Agent guide 23-084-1 (10/25)"},
+    {id:"amiul", name:"Americo", prod:"Instant Decision IUL (Series 336)", tag:"Instant decision", focus:"cash", src:"Agent guide 23-084-1 (10/25)"},
     {id:"fgpath", name:"F&G", prod:"Pathsetter", tag:"Fully underwritten", focus:"cash", src:"Field UW guide ADV 1100 rev 07/23"},
     {id:"fgever", name:"F&G", prod:"Everlast", tag:"Fast underwriting", focus:"protection", src:"Field UW guide ADV 1100 rev 07/23"}
   ],
@@ -722,7 +744,7 @@ iul: {
   products: [
     {name:"Mutual of Omaha — Indexed Universal Life Express", pts:["Ages 18-75; simplified issue $25K-$550K (18-50), $450K (51-60), $350K (61-75); death benefit guaranteed to age 80-120", "Same simplified-issue knockouts and Rx exclusion list as Term Life Express; multiple impairments over Table 4 - decline; prior United of Omaha offer worse than Table 4 - not eligible", "Living benefit riders (critical, chronic, terminal) plus accidental death, waiver, DI and children's riders; signed illustration required"]},
     {name:"Foresters — SMART UL (non-medical)", pts:["Non-medical limits: ages 0-15 $150K; 16-55 $400K; 56-75 $150K; above that it is fully underwritten (paramed/blood)", "Same non-medical impairment guide as Strong Foundation, except COPD and insulin-treated / Type 1 diabetes are declines on SMART UL", "Non-tobacco = no nicotine product in 12 months (cigars count here); build must be within the non-medical chart; ratable over Table D - do not submit non-medical", "Risk Assessment Line 1-877-622-4249"]},
-    {name:"National Life Group — FlexLife / PeakLife / SummitLife IUL", pts:["FlexLife: ages 0-85; EZ Underwriting (no fluids) up to $3M ages 18-50, $1M ages 51-60, $250K ages 61-65 (Sept 2025 guide); PeakLife and SummitLife minimum face $1M", "Quick quotes now run through the XRAE tool instead of the quotes mailbox", "Classes: Elite (60 mos nicotine-free), Preferred (36), Select (12), Standard, Express Standard 1 (up to Table 4), Express Standard 2 (Tables 5-8), Preferred Tobacco, Standard Tobacco", "Age 60+ must have had routine care and a physical within 24 months or NLG declines; MVR on every applicant 16+", "Quick quotes: UnderwritingQuotes@NationalLife.com (24-hr turnaround) — use before submitting anything on the uninsurable list"]},
+    {name:"National Life Group — FlexLife IUL", pts:["Ages 0-85; EZ Underwriting (no fluids) up to $3M ages 18-50, $1M ages 51-60, $250K ages 61-65 (Sept 2025 guide). FlexLife is the National Life IUL this tool quotes - PeakLife and SummitLife are deliberately left out (Jesse, 16 Sep 2026)", "Quick quotes now run through the XRAE tool instead of the quotes mailbox", "Classes: Elite (60 mos nicotine-free), Preferred (36), Select (12), Standard, Express Standard 1 (up to Table 4), Express Standard 2 (Tables 5-8), Preferred Tobacco, Standard Tobacco", "Age 60+ must have had routine care and a physical within 24 months or NLG declines; MVR on every applicant 16+", "Quick quotes: UnderwritingQuotes@NationalLife.com (24-hr turnaround) — use before submitting anything on the uninsurable list"]},
     {name:"Americo — Instant Decision IUL (Series 336)", pts:["Ages 18-70; $50K-$450K non-medical, no saliva; nicotine / non-nicotine only (no substandard); 24 mos nicotine-free for non-nicotine", "100% instant-decision eApp using app questions, MIB and Rx check; every health question is a knockout — the guide does not publish the list, so the grid column shows 'not addressed' for every condition", "Living benefit riders (critical, chronic, terminal) included; 5-yr no-lapse guarantee; monthly bank draft only; internal replacements not allowed", "Build chart: 4'8\" 80-188 through 6'7\" 157-376"]},
     {name:"National Life Group — RapidProtect / RapidProtect NL IUL", pts:["Simplified-issue IUL with instant decision; ages 0-60, $50K-$500K; Standard NT / Standard Tobacco plus substandard Express NT 1 and Express Tobacco; no table ratings or flat extras; no ABRs on Express classes", "Hard knockouts beyond the medical list: any felony, pending charges, violent crime, license suspended, single DUI within 1 yr, multiple DUIs within 5 yrs, SSDI/DI, hospital admission in past 12 mos, diagnostic testing in past 3 mos", "XRAE quick-quote tool cannot be used for RapidProtect; cells show the guide's qualifying / non-qualifying lists (Sept 2025)"]}
 ,
@@ -940,7 +962,7 @@ const MEDS_CONDS={"High blood pressure":1};
 const isMeds=n=>!!MEDS_CONDS[n];
 const YOPTS=[["","any time"],["0.5","under 1 yr ago"],["1.5","1–2 yrs ago"],["3","2–5 yrs ago"],["7","5–10 yrs ago"],["12","10+ yrs ago"]];
 const pickedIdx=()=>picked.map(p=>p.i);
-const client={age:null,hin:null,wt:null,sex:"",face:null,lb:"lb",uw:"si",focus:"both",iulpm:null};
+const client={age:null,hin:null,wt:null,sex:"",face:null,lb:"lb",uw:"si",uwSet:false,focus:"both",iulpm:null};
 /* ---------- MY CARRIERS (saved in this browser only) ---------- */
 const MC_KEY="ipw.myCarriers.v2";
 let myOff=new Set();   // carrier names the agent has unticked
@@ -1264,13 +1286,20 @@ function readClient(){
   client.hin=(isNaN(ft)||isNaN(inch))?null:ft*12+inch;
   const w=parseInt($("#wt").value,10); client.wt=isNaN(w)?null:w;
   client.sex=$("#sex").value; client.lb=$("#lb").value;
-  const pm=parseFloat($("#iulpm").value); client.iulpm=isNaN(pm)?null:pm;
+  const pm=parseFloat($("#iulpm").value);
+  if(pm!==client.iulpm) client.uwSet=false;      /* a new contribution gets its say again */
+  client.iulpm=isNaN(pm)?null:pm;
   /* The contribution is IUL money, so it only moves the IUL list: $300 opens IUL to Both, ten
      times the client's age takes IUL to Fully underwritten, and a blank figure leaves it alone.
      Whole life and term keep whatever underwriting the agent chose. It used to move the one
      toggle every product shares - and since no whole life product is fully underwritten, ten
      times age wiped all of whole life off the page, which is the fallback the script leans on. */
-  client.uwIul = client.iulpm==null ? null
+  /* Jesse, 16 Sep 2026: on a protection case the contribution says nothing about underwriting. A
+     50-year-old putting in $500 was flipping the list to fully underwritten and losing every
+     simplified issue product, when the answer is still "who writes protection simply". Whether the
+     client can afford the premium is the agent's call, not a filter. So the contribution only moves
+     the list on cash accumulation and Both. */
+  client.uwIul = (client.iulpm==null || client.focus==="protection") ? null
                : (client.age!=null && client.iulpm>=client.age*10) ? "fu"
                : (client.iulpm>=300 ? "both" : "si");
   /* Say so on screen: the underwriting row lights up whenever it is off the Simplified issue
@@ -1281,7 +1310,7 @@ function readClient(){
 ["#age","#hft","#hin","#wt","#sex","#lb","#iulpm"].forEach(sel=>$(sel).addEventListener("input",()=>{readClient();render();}));
 document.querySelectorAll("#focusSeg button").forEach(b=>b.addEventListener("click",()=>{client.focus=b.dataset.focus;document.querySelectorAll("#focusSeg button").forEach(x=>x.setAttribute("aria-pressed",x===b));render();}));
 /* Each click used to attach another full set of listeners to the focus buttons as well. */
-document.querySelectorAll("#uwSeg button").forEach(b=>b.addEventListener("click",()=>{client.uw=b.dataset.uw;document.querySelectorAll("#uwSeg button").forEach(x=>x.setAttribute("aria-pressed",x===b));readClient();render();}));
+document.querySelectorAll("#uwSeg button").forEach(b=>b.addEventListener("click",()=>{client.uw=b.dataset.uw; client.uwSet=true;document.querySelectorAll("#uwSeg button").forEach(x=>x.setAttribute("aria-pressed",x===b));readClient();render();}));
 $("#dob").addEventListener("input",()=>{ const v=$("#dob").value; if(!v) return; const d=new Date(v+"T00:00:00"), n=new Date();
   let a=n.getFullYear()-d.getFullYear(); const m=n.getMonth()-d.getMonth(); if(m<0||(m===0&&n.getDate()<d.getDate())) a--;
   if(a>=0&&a<120){ $("#age").value=a; readClient(); render(); } });
@@ -1536,8 +1565,19 @@ function detailCell(car,name,p){
   return null;
 }
 
+/* ---------- QUOTING LINKS AND PRODUCT BENEFITS ----------
+   Keyed tab:carrierId. Links are the ones Jesse clicked through (15 Sep 2026): a link only earns the
+   icon if it lands the agent where they asked to be - Transamerica term is deliberately absent because
+   its illustrator is a dead end when signed out. Benefits come from the carrier's own product guides,
+   never from an underwriting guide; a product with nothing documented shows a faded icon, not a guess. */
+const QUOTE_LINK={"wl:americo": ["https://tools.americoagent.com/","Americo Agent Tools - sign in, lands on the tools"],"wl:moo": ["https://www3.mutualofomaha.com/mobile-quotes/#/lp","Mutual of Omaha quote - opens straight in, no login"],"wl:cbsi": ["https://rapid-rater.live.web.corebridgefinancial.com/Simplinowquoter","Corebridge Final Expense Quoter - no login"],"wl:chubb": ["https://chubb.insuranceadmin.com/agent/rate","Chubb rating page - sign in, returns to the rater"],"wl:fidelity": ["https://portal.instabrain.io/App/Quote/QuickQuoterPremium#FinalExpense","InstaBrain quoter - sign in, returns to the quoter"],"wl:amam": ["https://www.americanamicable.com/v4/AgentLogin.php","American Amicable agent login"],"wl:fex": ["https://lifeinsurance.transamerica.com/agent/dashboard","Transamerica agent dashboard - sign in, returns here"],"wl:foresters": ["https://forestersmobile.com/","quickquote@Foresters - no login, pick the product there"],"wl:accendo": ["https://www.aetnaseniorproducts.com/","Aetna Senior Supplemental - sign in to quote"],"wl:cbgi": ["https://rapid-rater.live.web.corebridgefinancial.com/Simplinowquoter","Corebridge Final Expense Quoter - no login"],"wl:rnel": ["https://rnaquickquote.org/","Royal Neighbors Quick Quotes - no login"],"wl:rnwl": ["https://rnaquickquote.org/","Royal Neighbors Quick Quotes - no login"],"term:americo": ["https://tools.americoagent.com/","Americo Agent Tools - sign in, lands on the tools"],"term:moo": ["https://www3.mutualofomaha.com/mobile-quotes/#/tle","Mutual of Omaha quote - opens straight in, no login"],"term:amam": ["https://www.americanamicable.com/v4/AgentLogin.php","American Amicable agent login"],"term:foresters": ["https://forestersmobile.com/","quickquote@Foresters - no login, pick the product there"],"term:ibt": ["https://portal.instabrain.io/App/Quote/QuickQuoterPremium#insta-term","InstaBrain quoter - sign in, returns to the quoter"],"term:ibpt": ["https://portal.instabrain.io/App/Quote/QuickQuoterPremium#PureTerm","InstaBrain quoter - sign in, returns to the quoter"],"term:mooau": ["https://www3.mutualofomaha.com/mobile-quotes/#/tla","Mutual of Omaha quote - opens straight in, no login"],"term:nlg": ["https://www.nationallife.com/agent/auth/login","National Life Group - sign in, then ForeSight"],"iul:iule": ["https://www3.mutualofomaha.com/mobile-quotes/#/iule","Mutual of Omaha quote - opens straight in, no login"],"iul:rapid": ["https://www.nationallife.com/agent/auth/login","National Life Group - sign in, then ForeSight"],"iul:ffiulx": ["https://lifeinsurance.transamerica.com/agent/dashboard","Transamerica agent dashboard - sign in, returns here"],"iul:nlgiul": ["https://www.nationallife.com/agent/auth/login","National Life Group - sign in, then ForeSight"],"iul:smartul": ["https://forestersmobile.com/","quickquote@Foresters - no login, pick the product there"],"iul:ffiul": ["https://lifeinsurance.transamerica.com/agent/dashboard","Transamerica agent dashboard - sign in, returns here"],"iul:amiul": ["https://tools.americoagent.com/","Americo Agent Tools - sign in, lands on the tools"],"iul:fgpath": ["https://saleslink.fglife.com/","F&G SalesLink - sign in, then Illustrations"],"iul:fgever": ["https://saleslink.fglife.com/","F&G SalesLink - sign in, then Illustrations"]};
+const PROD_BENEFITS={"wl:americo": ["Terminal illness accelerated benefit - 12 months, or 24 in IL, MA and TX (Eagle Select I & II)", "Accidental death rider available (Eagle Select 1 & 2)", "Quit Smoking Advantage: smokers get non-smoker rates for 3 years"], "wl:moo": ["Level plan: accelerated death benefit for terminal illness or nursing home confinement, included", "Accidental death rider optional, Level plan only", "Graded plan carries no riders at all"], "wl:cbsi": ["Level: terminal illness and nursing home confinement riders at no charge", "Optional accidental death rider, issue ages 50-75", "Premiums stop at or before 95; endows at 100"], "wl:chubb": ["No living benefit riders on this product", "Graded class pays return of premium plus 3.75% for 2 years, full benefit after", "Accidental death pays the full benefit"], "wl:fidelity": ["Guaranteed issue pays return of premium plus 5% in years 1-3, then the full benefit", "Accidental death pays the full benefit from day one on GI"], "wl:amam": ["Terminal illness rider", "Grandchild rider - covers great-grandchildren too", "Nursing home waiver of premium"], "wl:fex": ["Accelerated death benefit with nursing home benefit, no extra premium (fees apply when used)", "Concierge funeral planning at no cost", "Not available if the client already needs help with daily living"], "wl:foresters": ["Preferred and Standard: terminal illness accelerated benefit, no extra premium", "Common carrier accidental death and family health benefit included", "Basic class gets none of these", "Foresters member benefits: interest-free terminal illness loan up to 75% of face, orphan scholarships up to $6,000 a year, free wills and powers of attorney"], "wl:accendo": [], "wl:cbgi": ["Chronic illness rider returns premiums paid, up to 25% of face", "Terminal illness rider pays 50% of the death benefit", "Both included at no cost"], "wl:rnel": ["Accelerated death benefit: terminal illness or permanent nursing home confinement (face $7,000+)", "Charitable giving rider: 1% of face, up to $1,000", "Grandchild rider: $60 a year covers every grandchild at $5,000", "Accidental death rider, ages 50-70, costs extra", "Royal Neighbors member programs: bereavement support, member relief fund, scholarships, prescription savings"], "wl:rnwl": ["Guaranteed cash value that can be borrowed against", "Two payment choices: paid up in 20 years, or lower payments to age 121", "Royal Neighbors member programs: bereavement support, member relief fund, scholarships, prescription savings"], "term:americo": ["Living benefits (critical, chronic, terminal) included on CBO, Term 125/100 and Continuation", "CBO returns 100% or 50% of base premiums at the end of the term", "+50% accidental death on CBO, +25% on Term 125", "Payment Protector has no living benefits"], "term:moo": ["Living benefits (terminal, chronic, critical) included", "Residential damage waiver, unemployment waiver and common carrier death benefit, all included", "Critical illness drops off if return of premium is chosen", "Renewable annually to age 100"], "term:amam": ["Living benefit riders (critical, chronic, terminal)", "Accidental death, waiver, disability income and children's riders", "Return of premium option"], "term:foresters": ["Accelerated death benefit covers critical, chronic AND terminal, no extra premium", "Common carrier accidental death and family health benefit included", "Charity benefit: an extra 1% of face (max $100,000) to a charity the client names, without reducing the death benefit", "Foresters member benefits: interest-free terminal illness loan up to 75% of face, orphan scholarships up to $6,000 a year, free wills and powers of attorney"], "term:ibt": ["Chronic or terminal paid as one lump sum, no waiting period, no extra premium", "Chronic triggers on cognitive impairment or losing 2+ activities of daily living", "No critical illness on this product", "Accidental death rider costs extra"], "term:ibpt": ["Terminal illness only - up to 50% of face, max $100,000", "No chronic or critical illness", "Accidental death rider ages 20-65, expires at 80"], "term:mooau": ["Terminal illness accelerated benefit and unemployment waiver, included", "No chronic or critical illness - the trade for being fully underwritten", "Accidental death, children's, other insured and disability waiver optional"], "term:nlg": ["Accelerated benefits for terminal, chronic, Alzheimer's / Lewy Body and critical illness or injury, no extra premium", "Lifetime caps: $1.5M terminal, chronic or Alzheimer's; $1M critical", "The payment is discounted, not the full face", "Chronic is not available once the insured is terminally ill"], "term:ta": ["Trendsetter LB has chronic, critical and terminal built in", "Trendsetter Super has none - that is the difference between them"], "iul:iule": ["Living benefits for terminal, chronic and critical illness", "Lapse Guard and a guaranteed insurability rider"], "iul:rapid": ["Accelerated benefits for terminal, chronic, Alzheimer's and critical illness or injury"], "iul:ffiulx": ["Terminal illness rider included on every policy", "Chronic and critical included unless declined in underwriting, no extra cost"], "iul:nlgiul": ["Accelerated benefits (terminal, chronic, Alzheimer's, critical) at no extra cost", "Premium Chronic Care Rider does not discount the death benefit", "Lifetime Income Benefit Rider - a stream of income for life", "Fertility Journey Rider - lump-sum credit, whatever the rating", "Death benefit can be paid over 10-30 years; charitable matching gift rider"], "iul:smartul": ["Accelerated death benefit covers critical, chronic AND terminal, no extra deduction", "Common carrier accidental death and family health benefit included", "Charity benefit: an extra 1% of face (max $100,000), without reducing the death benefit", "Foresters member benefits: interest-free terminal illness loan up to 75% of face, orphan scholarships up to $6,000 a year, free wills and powers of attorney"], "iul:ffiul": ["Terminal illness accelerated benefit", "Chronic and critical riders need a separate screening", "Long-term care rider for citizens and green card holders"], "iul:amiul": ["Living benefit riders (critical, chronic, terminal) included", "5-year no-lapse guarantee"], "iul:fgpath": ["Critical, chronic and terminal illness riders", "Terminal means a life expectancy under 24 months", "Guaranteed 0.25% minimum return even in a year the index falls", "0.25% persistency bonus from policy year 11", "Accelerating one of the three riders terminates the other two", "Positioned for cash value accumulation and retirement income; maximum variable loan rate 5%"], "iul:fgever": ["Critical, chronic and terminal illness riders", "Terminal means a life expectancy under 24 months", "Guaranteed 0.25% minimum return even in a year the index falls", "0.25% persistency bonus from policy year 11", "Accelerating one of the three riders terminates the other two", "Positioned for legacy and death benefit protection; maximum variable loan rate 5.5%"]};
+
 /* ---------- VERDICTS ---------- */
-function uwFor(key){ return (key==="iul" && client.uwIul) ? client.uwIul : client.uw; }
+/* The contribution suggests the underwriting for IUL, but the agent overrules it: click Show and the
+   list follows that click until the contribution is typed again. Without this a $600 client could
+   never be shown the simplified issue IULs, even when the agent asked for them. */
+function uwFor(key){ return (key==="iul" && client.uwIul && !client.uwSet) ? client.uwIul : client.uw; }
 const BORROWED_OUT={};
 function verdictsFor(key){
   const d=DATA[key];
@@ -1798,19 +1838,39 @@ function renderVerdict(){
     const n={ok:0,tier:0,na:0,no:0}; t.list.forEach(x=>n[x.worst]++);
     const shown=DATA[t.key].carriers.filter(c=>{if(!mine(t.key,c)) return false; const fu=c.tag==="Fully underwritten", uw=uwFor(t.key); if(!(fu?uw!=="si":uw!=="fu")) return false; if(t.key==="iul"&&client.focus!=="both"&&c.focus&&c.focus!=="both"&&c.focus!==client.focus) return false; return true;}).length;
     const hidden=shown-t.list.length;
-    html+=`<div class="ptype"><h3>${esc(t.label)}${t.key==="iul"&&client.uwIul?` <span class="uwiul">${{si:"Simplified issue",both:"Both",fu:"Fully underwritten"}[client.uwIul]} &middot; from the $/m</span>`:""} <small>${n.ok} clean · ${n.tier} with conditions · ${n.na} unclear${hidden?` · ${hidden} not eligible (hidden)`:""}</small></h3>${borFor(t.key)}<div class="lane">`;
+    html+=`<div class="ptype"><h3>${esc(t.label)}${t.key==="iul"&&client.uwIul?` <span class="uwiul">${{si:"Simplified issue",both:"Both",fu:"Fully underwritten"}[client.uwIul]} &middot; from the $/m${client.uwSet?", overruled by Show":""}</span>`:""} <small>${n.ok} clean · ${n.tier} with conditions · ${n.na} unclear${hidden?` · ${hidden} not eligible (hidden)`:""}</small></h3>${borFor(t.key)}<div class="lane">`;
     if(!t.list.length) html+=`<div class="card na"><div class="name">Nothing available</div><div class="prod">No ${esc(t.label.toLowerCase())} product on the grid issues at age ${client.age??"—"} under the current filter.</div></div>`;
-    html+=t.list.map(x=>`<div class="card ${x.worst}"><div class="name">${esc(x.car.name)}</div><div class="prod">${esc(x.car.prod)}${x.car.tag?` · <b>${esc(x.car.tag)}</b>`:""}</div>${
+    html+=t.list.map(x=>{ const ck=`${t.key}:${x.car.id}`, ql=QUOTE_LINK[ck], bn=PROD_BENEFITS[ck]||[];
+      const tools=`<div class="cardtools">`+
+        (ql?`<a class="ctool" href="${ql[0]}" target="_blank" rel="noopener" title="${esc(ql[1])}" aria-label="Quote ${esc(x.car.name)}"><span class="q">e</span></a>`
+           :`<span class="ctool off" title="No quoting link that lands where you asked"><span class="q">e</span></span>`)+
+        (bn.length?`<button type="button" class="ctool bene" data-k="${ck}" title="What this product includes" aria-label="What ${esc(x.car.name)} includes"><span class="i">i</span></button>`
+           :`<span class="ctool off" title="The guides we hold list no benefits for this product"><span class="i">i</span></span>`)+
+      `</div>`;
+      return `<div class="card ${x.worst}">${tools}<div class="name">${esc(x.car.name)}</div>`+`<div class="prod">${esc(x.car.prod)}${x.car.tag?` · <b>${esc(x.car.tag)}</b>`:""}</div>${
       x.checks.filter(c=>c.s!=="ok"&&c.s!=="info").map(c=>`<div class="reason ${c.s}">${esc(c.t)}</div>`).join("")}<ul>${
       x.checks.filter(c=>c.s==="ok"||c.s==="info").map(c=>`<li class="full"><b><i class="dot ${c.s==="info"?"na":"ok"}"></i>${esc(c.t)}</b><span></span></li>`).join("")}${
-      x.lines.filter(l=>!l.cell.offGrid).map(l=>`<li><b><i class="dot ${l.cell.s}"></i>${esc(l.row)}</b><span>${strongDecline(esc(l.cell.t))}</span></li>`).join("")}</ul></div>`).join("");
+      x.lines.filter(l=>!l.cell.offGrid).map(l=>`<li><b><i class="dot ${l.cell.s}"></i>${esc(l.row)}</b><span>${strongDecline(esc(l.cell.t))}</span></li>`).join("")}</ul></div>`; }).join("");
     html+="</div></div>";
   }
   v.innerHTML=html;
+  /* The benefits pop-up: one at a time, closes on a second click or anywhere outside. */
+  v.querySelectorAll(".ctool.bene").forEach(b=>b.addEventListener("click",e=>{
+    e.stopPropagation();
+    const card=b.closest(".card"), open=card.querySelector(".benepop");
+    v.querySelectorAll(".benepop").forEach(p=>p.remove());
+    if(open) return;
+    const list=PROD_BENEFITS[b.dataset.k]||[];
+    const pop=document.createElement("div"); pop.className="benepop";
+    pop.innerHTML=`<button type="button" class="x" aria-label="Close">&times;</button><h4>What it includes</h4><ul>${list.map(i=>`<li>${esc(i)}</li>`).join("")}</ul>`;
+    card.appendChild(pop);
+    pop.querySelector(".x").addEventListener("click",()=>pop.remove());
+  }));
   const fp=$("#finePrint"); if(fp) fp.addEventListener("click",()=>{ onlyPicked=true;
     const cover=k=>picked.filter(p=>COND[p.i][k]!=null).length; const bestTab=["wl","term","iul"].sort((a,b)=>cover(b)-cover(a)||["iul","wl","term"].indexOf(a)-["iul","wl","term"].indexOf(b))[0];
     if(cover(bestTab)>cover(tab)){ tab=bestTab; document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x.dataset.tab===tab?"true":"false")); } $("#onlyPicked").setAttribute("aria-pressed","true"); renderGrid(); const g=$("#gridtitle"); if(g&&g.scrollIntoView) g.scrollIntoView({behavior:"smooth",block:"start"}); });
 }
+document.addEventListener("click",e=>{ if(!e.target.closest(".benepop,.ctool")) document.querySelectorAll(".benepop").forEach(p=>p.remove()); });
 function renderGrid(){
   const d=DATA[tab]; const thead=$("#grid thead"), tbody=$("#grid tbody");
   const ord=ordered(tab).filter(ci=>mine(tab,d.carriers[ci]));

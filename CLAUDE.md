@@ -47,9 +47,14 @@ full underwriting grids (browseable, tabbed) and product snapshots per carrier.
   Royal Legacy SPWL, Jet Term Life and the Ensured Legacy guaranteed issue plan.
 - Term with living benefits: NLG, Transamerica, Foresters SF, InstaBrain Term, Americo, MoO TLA, MoO TLE, AmAm.
   Term without: InstaBrain Pure Term, Transamerica, Foresters (rest trail).
-- IUL: MoO IUL Express, NLG RapidProtect, TA FFIUL II Express, NLG FlexLife, Foresters SMART UL, TA FFIUL,
-  Americo Instant Decision IUL, then F&G Pathsetter and F&G Everlast (all appended last — Jesse
-  has not given them priority positions yet).
+- IUL: now in `DATA.iul.orders`, by focus (Jesse, 16 Sep 2026).
+  Protection: RapidProtect, MoO IUL Express, TA FFIUL II Express, F&G Everlast, FlexLife, Foresters
+  SMART UL, TA FFIUL, F&G Pathsetter, Americo. Cash: RapidProtect, Americo, FlexLife, TA FFIUL II
+  Express, Foresters, TA FFIUL, Pathsetter, Everlast. Both: MoO, RapidProtect, Americo, TA FFIUL II
+  Express, Foresters, FlexLife, TA FFIUL, Pathsetter, Everlast.
+- IUL focus tags: protection = MoO IUL Express, F&G Everlast, Foresters SMART UL. Cash = Americo
+  Instant Decision IUL, F&G Pathsetter. The rest show on both.
+- National Life's IUL is carried as **FlexLife only** - PeakLife and SummitLife are deliberately out.
 - Status beats priority: green > amber (by score) > gray. Priority only breaks ties.
 
 ## Adding carriers / guides
@@ -126,7 +131,13 @@ When it fails, fix whichever side is wrong; do not bypass it.
 
 ## IUL contribution ($/m)
 The contribution is IUL money, so it only moves the IUL list: $300 or more takes IUL to Both, ten
-times the client's age takes IUL to Fully underwritten, a blank figure leaves it alone. That
+times the client's age takes IUL to Fully underwritten, a blank figure leaves it alone. Two limits on
+that, both Jesse's (16 Sep 2026):
+- **Protection focus ignores it entirely.** On a protection case the question is who writes protection
+  simply, not how much the client saves; a 50-year-old at $500 was losing every simplified issue IUL.
+  Whether the premium is affordable is the agent's call, not a filter.
+- **The Show toggle overrules it.** Clicking Show sets `client.uwSet` and the list follows the click
+  until a new contribution is typed. The IUL heading says "overruled by Show" while that holds. That
 override lives in `client.uwIul`, and `uwFor(key)` returns it for `iul` and the agent's own
 `client.uw` for whole life and term. The IUL heading shows a badge while it applies. It used to
 move the shared toggle, and because no whole life product is fully underwritten, 10x age wiped
