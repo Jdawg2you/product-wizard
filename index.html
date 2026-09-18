@@ -2125,5 +2125,32 @@ if(embedded && window.parent && window.parent !== window){
 </script>
 <!-- ===== /OPTIMUM SUITE — EMBEDDED CLIENT FEED ===== -->
 
+<!-- ===== GoatCounter — page counts only ==========================================
+     No cookies, no consent banner, nothing from the form: it sends a path, a referrer
+     and a screen size. Never add a session recorder here (Hotjar, FullStory, Clarity) —
+     those capture form fields, which on these tools means client health conditions,
+     names and beneficiaries.
+
+     allow_frame: the Script Navigator loads the wizard in an iframe. GoatCounter skips
+     iframes by default, so without this every carrier lookup run from inside a call
+     would go uncounted.
+
+     path(): all four suite sites report into one dashboard, so each is prefixed with its
+     subdomain — /wizard, /script, /tools, /portal — and embedded wizard loads land on
+     /wizard/embedded, which separates "opened the wizard" from "ran it inside a script".
+     localhost and file:// are skipped by count.js itself.
+============================================================================== -->
+<script>
+window.goatcounter = {
+  allow_frame: true,
+  path: function (p) {
+    var sub = location.hostname.split('.')[0] || 'unknown';
+    var embed = /[?&]embed=1/.test(location.search) ? '/embedded' : '';
+    return '/' + sub + (p === '/' ? '' : p) + embed;
+  }
+};
+</script>
+<script data-goatcounter="https://ffloptimum.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+
 </body>
 </html>
