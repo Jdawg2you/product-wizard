@@ -2131,13 +2131,16 @@ if(embedded && window.parent && window.parent !== window){
      those capture form fields, which on these tools means client health conditions,
      names and beneficiaries.
 
-     allow_frame: the Script Navigator loads the wizard in an iframe. GoatCounter skips
-     iframes by default, so without this every carrier lookup run from inside a call
-     would go uncounted.
+     allow_frame: kept deliberately, though nothing is framed today — the Script Navigator
+     opens the wizard with window.open, in its own window. count.js skips frames by
+     default, and the failure is silent: an embedded page would simply stop counting
+     rather than error. One line to keep that from ever happening quietly.
 
      path(): all four suite sites report into one dashboard, so each is prefixed with its
-     subdomain — /wizard, /script, /tools, /portal — and embedded wizard loads land on
-     /wizard/embedded, which separates "opened the wizard" from "ran it inside a script".
+     subdomain — /wizard, /script, /tools, /portal. The /embedded branch only fires on a
+     page loaded with ?embed=1, which nothing currently does. To see wizard opens that
+     came from a call script rather than someone opening it directly, read the referrer
+     (script.ffloptimum.com), not the path — count.js sends document.referrer by default.
      localhost and file:// are skipped by count.js itself.
 ============================================================================== -->
 <script>
