@@ -412,6 +412,12 @@ body.embed .embed-note{display:block;font-size:11.5px;color:var(--muted);
         <button type="button" data-focus="both" aria-pressed="true">Both</button>
         <button type="button" data-focus="cash" aria-pressed="false">Cash accumulation</button>
       </div>
+      <span class="gap">Paying by</span>
+      <div class="seg" id="paySeg" role="radiogroup" aria-label="How the premium is drawn">
+        <button type="button" data-pay="bank" aria-pressed="true">Bank account</button>
+        <button type="button" data-pay="dx" aria-pressed="false">Direct Express</button>
+        <button type="button" data-pay="app" aria-pressed="false">Chime / Cash App</button>
+      </div>
       <label class="seg pmseg" for="iulpm"><i>IUL&nbsp;$/m</i><input id="iulpm" type="number" min="0" step="25" inputmode="numeric" placeholder="—" aria-label="Approximate IUL contribution per month"></label>
     </div>
     <label for="medq" class="qlabel">Medications <span class="sub">optional — finds the conditions behind them</span></label>
@@ -962,7 +968,20 @@ const MEDS_CONDS={"High blood pressure":1};
 const isMeds=n=>!!MEDS_CONDS[n];
 const YOPTS=[["","any time"],["0.5","under 1 yr ago"],["1.5","1–2 yrs ago"],["3","2–5 yrs ago"],["7","5–10 yrs ago"],["12","10+ yrs ago"]];
 const pickedIdx=()=>picked.map(p=>p.i);
-const client={age:null,hin:null,wt:null,sex:"",face:null,lb:"lb",uw:"si",uwSet:false,focus:"both",iulpm:null};
+/* How the premium is drawn narrows the list before underwriting does — which is why the script
+   asks it at minute eight rather than at the application. Jesse's rule, not guide language: a
+   Direct Express card or an app-only account (Chime, Cash App) is refused by most carriers'
+   billing. Named by carrier, which covers every product that carrier has on any tab, because
+   billing is set at the carrier not the product. "bank" is an ordinary chequing or savings
+   account and rules nothing out. Aflac is not in this tool, so it is not on either list. */
+const PAY = {
+  bank: null,
+  dx:  ["Corebridge", "Transamerica", "InstaBrain"],
+  app: ["American Amicable", "Transamerica", "InstaBrain", "Accendo (Aetna/CVS)"]
+};
+const PAY_LABEL = {bank:"a bank account", dx:"a Direct Express card", app:"Chime or Cash App"};
+const payOK = c => { const a = PAY[client.pay]; return !a || a.some(n => c.name.indexOf(n) === 0); };
+const client={age:null,hin:null,wt:null,sex:"",face:null,lb:"lb",uw:"si",uwSet:false,focus:"both",iulpm:null,pay:"bank"};
 /* ---------- MY CARRIERS (saved in this browser only) ---------- */
 const MC_KEY="ipw.myCarriers.v2";
 let myOff=new Set();   // carrier names the agent has unticked
@@ -1310,6 +1329,7 @@ function readClient(){
 ["#age","#hft","#hin","#wt","#sex","#lb","#iulpm"].forEach(sel=>$(sel).addEventListener("input",()=>{readClient();render();}));
 document.querySelectorAll("#focusSeg button").forEach(b=>b.addEventListener("click",()=>{client.focus=b.dataset.focus;document.querySelectorAll("#focusSeg button").forEach(x=>x.setAttribute("aria-pressed",x===b));render();}));
 /* Each click used to attach another full set of listeners to the focus buttons as well. */
+document.querySelectorAll("#paySeg button").forEach(b=>b.addEventListener("click",()=>{client.pay=b.dataset.pay;document.querySelectorAll("#paySeg button").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));render();}));
 document.querySelectorAll("#uwSeg button").forEach(b=>b.addEventListener("click",()=>{client.uw=b.dataset.uw; client.uwSet=true;document.querySelectorAll("#uwSeg button").forEach(x=>x.setAttribute("aria-pressed",x===b));readClient();render();}));
 $("#dob").addEventListener("input",()=>{ const v=$("#dob").value; if(!v) return; const d=new Date(v+"T00:00:00"), n=new Date();
   let a=n.getFullYear()-d.getFullYear(); const m=n.getMonth()-d.getMonth(); if(m<0||(m===0&&n.getDate()<d.getDate())) a--;
@@ -1582,7 +1602,7 @@ const BORROWED_OUT={};
 function verdictsFor(key){
   const d=DATA[key];
   const uw=uwFor(key), showFU=uw!=="si", showSI=uw!=="fu";
-  const all=ordered(key).filter(ci=>{const c=d.carriers[ci]; if(!mine(key,c)) return false; const fu=c.tag==="Fully underwritten"; if(!(fu?showFU:showSI)) return false;
+  const all=ordered(key).filter(ci=>{const c=d.carriers[ci]; if(!mine(key,c)) return false; if(!payOK(c)) return false; const fu=c.tag==="Fully underwritten"; if(!(fu?showFU:showSI)) return false;
     if(key==="iul" && client.focus!=="both" && c.focus && c.focus!=="both" && c.focus!==client.focus) return false; return true;}).map((ci,i)=>{ const car=d.carriers[ci];
     const checks=eligChecks(key,car);
     const lines=picked.map(p=>{ const c=COND[p.i]; const ri=c[key];
@@ -1828,15 +1848,23 @@ function renderVerdict(){
   const borOut=outTypes.length<all.length ? outTypes.map(t=>borFor(t.key)).join("") : "";
   let html="";
   const missing=[]; if(client.age==null) missing.push("age"); if(client.hin==null||client.wt==null) missing.push("height/weight (build limits apply on most products)");
+  /* Say it out loud. A carrier removed for billing is not ineligible — the client would be
+     approved, the premium just cannot be drawn that way — so it needs its own sentence rather
+     than disappearing into the "not eligible" count. */
+  const payGone = client.pay === "bank" ? 0 : TYPE_ORDER.reduce((n,[k]) =>
+    n + DATA[k].carriers.filter(c => mine(k,c) && !payOK(c)).length, 0);
+  const payTxt = payGone
+    ? `<div class="why">Paying by ${esc(PAY_LABEL[client.pay])}: <b>${payGone}</b> product${payGone===1?"":"s"} hidden that will not bill it. They are not ineligible — switch to <b>Bank account</b> above to see them.</div>`
+    : "";
   const missTxt=(missing.length?`<div class="why">Not checked yet: ${missing.join(", ")}. Add them to tighten the list.</div>`:"")+(picked.length?`<div class="why"><button type="button" id="finePrint" class="fine-link">See what every carrier says about ${picked.map(p=>COND[p.i].name).join(", ")} ↓</button></div>`:"");
   if(best){ const x=best.hit;
-    html+=`<div class="best"><div class="k">Likely best fit</div><div class="v">${esc(best.t.label)} — ${esc(x.car.name)}</div><div class="why">${esc(x.car.prod)}${x.car.tag?" · "+esc(x.car.tag):""}</div><div class="why">${x.worst==="ok"?"Nothing entered knocks this out.":"Eligible, but expect a lower tier, rating or waiting period — see the notes on the card."}</div>${outTxt}${borOut}${missTxt}</div>`; }
-  else if(termOnly) html+=`<div class="best"><div class="k">Likely best fit</div><div class="v">No IUL or whole life fits — term is the only option</div><div class="why">Term is never the recommended product; the term carriers below are what's left for this client.</div>${borOut}${missTxt}</div>`;
-  else html+=`<div class="best"><div class="k">Likely best fit</div><div class="v">Nothing clears on IUL, whole life or term with what's entered</div><div class="why">${client.uw!=="si"?"Check the gray \"not addressed\" carriers and call underwriting, or revisit the entries.":"Nothing simplified-issue fits — switch to <b>Both</b> or <b>Fully underwritten</b> above to see the paramed options."}</div>${missTxt}</div>`;
+    html+=`<div class="best"><div class="k">Likely best fit</div><div class="v">${esc(best.t.label)} — ${esc(x.car.name)}</div><div class="why">${esc(x.car.prod)}${x.car.tag?" · "+esc(x.car.tag):""}</div><div class="why">${x.worst==="ok"?"Nothing entered knocks this out.":"Eligible, but expect a lower tier, rating or waiting period — see the notes on the card."}</div>${outTxt}${borOut}${payTxt}${missTxt}</div>`; }
+  else if(termOnly) html+=`<div class="best"><div class="k">Likely best fit</div><div class="v">No IUL or whole life fits — term is the only option</div><div class="why">Term is never the recommended product; the term carriers below are what's left for this client.</div>${borOut}${payTxt}${missTxt}</div>`;
+  else html+=`<div class="best"><div class="k">Likely best fit</div><div class="v">Nothing clears on IUL, whole life or term with what's entered</div><div class="why">${client.uw!=="si"?"Check the gray \"not addressed\" carriers and call underwriting, or revisit the entries.":"Nothing simplified-issue fits — switch to <b>Both</b> or <b>Fully underwritten</b> above to see the paramed options."}</div>${payTxt}${missTxt}</div>`;
   for(const t of all){
     if(outTypes.includes(t) && outTypes.length<all.length) continue;
     const n={ok:0,tier:0,na:0,no:0}; t.list.forEach(x=>n[x.worst]++);
-    const shown=DATA[t.key].carriers.filter(c=>{if(!mine(t.key,c)) return false; const fu=c.tag==="Fully underwritten", uw=uwFor(t.key); if(!(fu?uw!=="si":uw!=="fu")) return false; if(t.key==="iul"&&client.focus!=="both"&&c.focus&&c.focus!=="both"&&c.focus!==client.focus) return false; return true;}).length;
+    const shown=DATA[t.key].carriers.filter(c=>{if(!mine(t.key,c)) return false; if(!payOK(c)) return false; const fu=c.tag==="Fully underwritten", uw=uwFor(t.key); if(!(fu?uw!=="si":uw!=="fu")) return false; if(t.key==="iul"&&client.focus!=="both"&&c.focus&&c.focus!=="both"&&c.focus!==client.focus) return false; return true;}).length;
     const hidden=shown-t.list.length;
     html+=`<div class="ptype"><h3>${esc(t.label)}${t.key==="iul"&&client.uwIul?` <span class="uwiul">${{si:"Simplified issue",both:"Both",fu:"Fully underwritten"}[client.uwIul]} &middot; from the $/m${client.uwSet?", overruled by Show":""}</span>`:""} <small>${n.ok} clean · ${n.tier} with conditions · ${n.na} unclear${hidden?` · ${hidden} not eligible (hidden)`:""}</small></h3>${borFor(t.key)}<div class="lane">`;
     if(!t.list.length) html+=`<div class="card na"><div class="name">Nothing available</div><div class="prod">No ${esc(t.label.toLowerCase())} product on the grid issues at age ${client.age??"—"} under the current filter.</div></div>`;
@@ -2038,6 +2066,12 @@ function apply(c){
   set("#wt", (typeof c.wt === "number") ? c.wt : "");
   set("#sex", (c.sex==="m"||c.sex==="f") ? c.sex : "");
   set("#lb", c.lb==="nolb" ? "nolb" : "lb");
+  /* The script asks how the premium will be drawn before it quotes; honour it if it came. */
+  if(c.pay === "dx" || c.pay === "app" || c.pay === "bank"){
+    client.pay = c.pay;
+    document.querySelectorAll("#paySeg button").forEach(b =>
+      b.setAttribute("aria-pressed", b.dataset.pay === c.pay ? "true" : "false"));
+  }
   readClient();
 
   /* The medication list rides along, so this page counts blood pressure medications the same way. */
