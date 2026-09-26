@@ -196,6 +196,9 @@
   .card .prod{color:var(--muted);font-size:12.5px;margin-bottom:8px}
   .card .prod b{color:var(--slate)}
   .card .reason{font-size:12.5px;color:var(--no);font-weight:600;margin:2px 0 6px}
+  .filemsg{font-family:var(--sans);font-size:12.5px;color:var(--green);background:var(--greensoft);
+    border:1px solid #CFE2D6;border-radius:8px;padding:7px 11px;margin:10px 0 0}
+  .filemsg.bad{color:var(--rust);background:var(--rustsoft);border-color:#E7CFC8}
   .card .reason.tier{color:var(--golddk)}
   /* A ruled-out card is washed so it reads as closed at a glance, before any of it is read. */
   .card.out{background:var(--no-bg);border-color:#E7CFC8}
@@ -344,6 +347,8 @@ body.embed .embed-note{display:block;font-size:11.5px;color:var(--muted);
   <a class="o-pill" id="goatBtn" href="https://goatleads.com/registration/new?affiliate_id=66c4aa379e0123651ad2f0e6"
      target="_blank" rel="noopener">&#9733; FREE Agent Website, Digital Business Card &amp; Booking Calendar</a>
   <div class="o-suite"><button type="button">More free tools &#9662;</button><div class="o-suite-menu"></div></div>
+  <button type="button" class="gear" id="loadBtn" aria-label="Open a saved client file">&#8593; Open a client file</button>
+  <input type="file" id="clientFile" accept=".json,application/json" hidden>
   <button type="button" class="gear" id="gearBtn" aria-label="My carriers">&#9881; My carriers</button>
 </header>
 <div class="recstrip">Free for every agent, period.<button type="button" class="recopen" aria-haspopup="dialog">Not a Family First Life agent?</button></div>
@@ -410,8 +415,11 @@ body.embed .embed-note{display:block;font-size:11.5px;color:var(--muted);
       <label>Height <span class="hw"><select id="hft"><option value="">ft</option><option>4</option><option>5</option><option>6</option></select><select id="hin"><option value="">in</option><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option></select></span></label>
       <label>Weight <input id="wt" type="number" min="50" max="600" inputmode="numeric" placeholder="lbs"></label>
       <label>Sex <select id="sex"><option value="">—</option><option value="m">Male</option><option value="f">Female</option></select></label>
+      <label>State <input id="state" list="statelist" maxlength="2" placeholder="e.g. NY" autocomplete="off" style="text-transform:uppercase;width:5.5ch"></label>
       <label>Living benefits <select id="lb"><option value="lb">Wants them</option><option value="nolb">Doesn't need them</option></select></label>
     </div>
+    <datalist id="statelist"><option>AL</option><option>AK</option><option>AZ</option><option>AR</option><option>CA</option><option>CO</option><option>CT</option><option>DE</option><option>FL</option><option>GA</option><option>HI</option><option>ID</option><option>IL</option><option>IN</option><option>IA</option><option>KS</option><option>KY</option><option>LA</option><option>ME</option><option>MD</option><option>MA</option><option>MI</option><option>MN</option><option>MS</option><option>MO</option><option>MT</option><option>NE</option><option>NV</option><option>NH</option><option>NJ</option><option>NM</option><option>NY</option><option>NC</option><option>ND</option><option>OH</option><option>OK</option><option>OR</option><option>PA</option><option>RI</option><option>SC</option><option>SD</option><option>TN</option><option>TX</option><option>UT</option><option>VT</option><option>VA</option><option>WA</option><option>WV</option><option>WI</option><option>WY</option><option>DC</option></datalist>
+    <p class="filemsg" id="fileMsg" hidden></p>
     <div class="uwpick" role="radiogroup" aria-label="Underwriting type"><span>Show</span>
       <div class="seg" id="uwSeg">
         <button type="button" data-uw="si" aria-pressed="true">Simplified issue</button>
@@ -993,7 +1001,37 @@ const PAY = {
 };
 const PAY_LABEL = {bank:"a bank account", dx:"a Direct Express card", app:"Chime or Cash App"};
 const payOK = c => { const a = PAY[client.pay]; return !a || a.some(n => c.name.indexOf(n) === 0); };
-const client={age:null,hin:null,wt:null,sex:"",face:null,lb:"lb",uw:"si",uwSet:false,focus:"both",iulpm:null,pay:"bank"};
+const client={age:null,hin:null,wt:null,sex:"",face:null,lb:"lb",uw:"si",uwSet:false,focus:"both",iulpm:null,pay:"bank",state:""};
+
+/* ---------- WHERE A PRODUCT CAN BE WRITTEN ----------
+   Not from the underwriting guides. Those answer "will this carrier take a diabetic" - health,
+   build, medications - and say nothing about licensing. State availability lives in a carrier's
+   product-approval grid, which is a different document and is not loaded here.
+
+   So this table holds only what is actually known, and every entry says where it came from.
+   A product with no entry is NOT checked, and the page says so rather than implying it cleared.
+
+   NY_ONLY is Jesse's rule (2026-09-26): "National Life Group products are allowed to be written
+   in New York. And that's pretty much all from my understanding." New York is handled as an
+   allow-list because that is how he stated it and how the market works - everything not named
+   is out, rather than everything not named being fine. */
+const NY_ONLY = ["nlg","rapid","nlgiul"];        // National Life Group: Term LSW/NL, RapidProtect IUL, FlexLife
+const STATE_OUT = {                              // product id -> states it is NOT sold in
+  rnwl: ["AK","HI","AL","LA","NH","NY","MA"],    // Jet Whole Life, Field UW Guide 2980-B rev 3-2020
+  rnel: ["AL","AK","HI","LA","MA","NH","NY"]     // Ensured Legacy, agent training guide 2996-1-B Rev 1-2024
+};
+/* Products whose state position we simply do not hold. Counted on the page so the silence is
+   visible - an unchecked product must never read as a cleared one. */
+function stateKnown(id){ return NY_ONLY.indexOf(id)>-1 || !!STATE_OUT[id]; }
+function stateBlock(id){
+  const st=(client.state||"").toUpperCase();
+  if(!st) return null;
+  if(st==="NY") return NY_ONLY.indexOf(id)>-1 ? null
+    : "Not available in New York — National Life Group is the only carrier here that writes NY";
+  const out=STATE_OUT[id];
+  if(out && out.indexOf(st)>-1) return `Not sold in ${st} — per the carrier's own guide`;
+  return null;
+}
 /* ---------- MY CARRIERS (saved in this browser only) ---------- */
 const MC_KEY="ipw.myCarriers.v2";
 let myOff=new Set();   // carrier names the agent has unticked
@@ -1090,24 +1128,37 @@ var MEDS=[
 ["Sertraline","Zoloft"],["Escitalopram","Lexapro"],["Fluoxetine","Prozac"],["Citalopram","Celexa"],
 ["Bupropion","Wellbutrin"],["Venlafaxine","Effexor"],["Trazodone"],["Mirtazapine","Remeron"],
 ["Alprazolam","Xanax"],["Lorazepam","Ativan"],["Clonazepam","Klonopin"],["Diazepam","Valium"],
-["Buspirone","Buspar"],["Lithium"],["Lamotrigine","Lamictal"],["Quetiapine","Seroquel"],
+["Buspirone","Buspar"],["Lithium"],["Lamotrigine","Lamictal"],["Quetiapine","Seroquel","Latuda","lurasidone"],
 ["Aripiprazole","Abilify"],["Risperidone","Risperdal"],["Olanzapine","Zyprexa"],["Haloperidol","Haldol"],
-["Donepezil","Aricept"],["Memantine","Namenda"],["Levodopa","Sinemet","carbidopa"],["Ropinirole"],
-["Phenytoin","Dilantin"],["Levetiracetam","Keppra"],["Topiramate","Topamax"],["Valproate","Depakote"],
+["Donepezil","Aricept"],["Memantine","Namenda","Exelon","rivastigmine"],["Levodopa","Sinemet","carbidopa"],["Ropinirole"],
+["Phenytoin","Dilantin"],["Levetiracetam","Keppra"],["Topiramate","Topamax"],["Valproate","Depakote","Carbamazepine","Tegretol"],
 ["Oxycodone","Percocet","OxyContin"],["Hydrocodone","Norco","Vicodin"],["Tramadol","Ultram"],
-["Morphine","MS Contin"],["Fentanyl"],["Methadone"],["Suboxone","buprenorphine"],["Naltrexone"],
+["Morphine","MS Contin"],["Fentanyl"],["Methadone"],["Suboxone","buprenorphine"],["Naltrexone","Vivitrol"],
 ["Meloxicam","Mobic"],["Ibuprofen","Motrin","Advil"],["Naproxen","Aleve"],["Celecoxib","Celebrex"],
 ["Omeprazole","Prilosec"],["Pantoprazole","Protonix"],["Famotidine","Pepcid"],
 ["Allopurinol","Zyloprim"],["Colchicine"],["Tamsulosin","Flomax"],["Finasteride","Proscar"],
-["Sildenafil","Viagra"],["Tadalafil","Cialis"],["Alendronate","Fosamax"],["Vitamin D"],
-["Furosemide"],["Potassium","K-Dur"],["Amoxicillin"],["Azithromycin","Z-Pak"],["Doxycycline"],
+["Sildenafil","Viagra"],["Tadalafil","Cialis"],["Alendronate","Fosamax"],["Vitamin D"],["Potassium","K-Dur"],["Amoxicillin"],["Azithromycin","Z-Pak"],["Doxycycline"],
 ["Tamoxifen"],["Anastrozole","Arimidex"],["Letrozole","Femara"],["Keytruda","pembrolizumab"],
 ["Revlimid","lenalidomide"],["Imbruvica","ibrutinib"],["Gleevec","imatinib"],
-["Entecavir"],["Epclusa"],["Harvoni"],["Truvada"],["Biktarvy"],["Descovy"],
-["Dialysis"],["Sevelamer","Renvela"],["Epogen","epoetin"],["Tacrolimus","Prograf"],["Cyclosporine"],
-["Mycophenolate","CellCept"],["Hydroxyurea"],["Eliquis"]
+["Entecavir"],["Epclusa"],["Harvoni"],["Truvada","Descovy"],["Biktarvy","Tivicay","Genvoya","Atripla"],["Descovy"],
+["Dialysis"],["Sevelamer","Renvela"],["Epogen","epoetin"],["Tacrolimus","Prograf"],["Cyclosporine","Sirolimus","Rapamune"],
+["Mycophenolate","CellCept"],["Hydroxyurea"]
 ];
 var MED_FOR={
+ /* Added 2026-09-26 after an audit found these drugs recognised but inert - the name was in
+    the list, nothing was pointed at a condition, so typing them raised no flag at all.
+    Every target below is an existing grid row; no new cells were needed.
+    Levothyroxine was REMOVED from Autoimmune disorder in the same pass: hypothyroidism is
+    not the disease that decline is written for (Sjogren's, lupus, myasthenia gravis), and
+    deriving nothing is the correct behaviour for it, the same as aspirin. */
+ "Suboxone":["Alcohol / drug abuse or treatment"],
+ "Methadone":["Alcohol / drug abuse or treatment","Chronic pain (narcotic prescriptions)"],
+ "Naltrexone":["Alcohol / drug abuse or treatment"],
+ "Memantine":["Alzheimer's / dementia"],
+ "Haloperidol":["Schizophrenia / psychosis"],
+ "Valproate":["Epilepsy / seizures","Bipolar"],
+ "Imuran":["Autoimmune disorder"],
+
  "Eliquis":["Arrhythmia / AFib","Blood clots / DVT"],"Xarelto":["Arrhythmia / AFib","Blood clots / DVT"],
  "Warfarin":["Arrhythmia / AFib","Blood clots / DVT"],"Plavix":["Heart attack","Stent"],
  "Brilinta":["Heart attack","Stent"],"Pradaxa":["Arrhythmia / AFib"],
@@ -1125,7 +1176,7 @@ var MED_FOR={
  "Nitroglycerin":["Angina (chest pain)"],"Isosorbide":["Angina (chest pain)"],
  "Albuterol":["Asthma (chronic)","COPD"],"Symbicort":["COPD","Asthma (chronic)"],"Advair":["COPD","Asthma (chronic)"],
  "Trelegy":["COPD"],"Spiriva":["COPD"],"Breo":["COPD"],"Singulair":["Asthma (chronic)"],
- "Levothyroxine":["Autoimmune disorder"],"Methotrexate":["Rheumatoid arthritis","Autoimmune disorder"],
+ "Methotrexate":["Rheumatoid arthritis","Autoimmune disorder"],
  "Humira":["Autoimmune disorder"],"Enbrel":["Rheumatoid arthritis"],"Plaquenil":["Lupus","Rheumatoid arthritis"],
  "Sertraline":["Depression"],"Escitalopram":["Anxiety","Depression"],"Fluoxetine":["Depression"],
  "Bupropion":["Depression"],"Venlafaxine":["Depression"],"Mirtazapine":["Depression"],
@@ -1317,6 +1368,7 @@ function readClient(){
   client.hin=(isNaN(ft)||isNaN(inch))?null:ft*12+inch;
   const w=parseInt($("#wt").value,10); client.wt=isNaN(w)?null:w;
   client.sex=$("#sex").value; client.lb=$("#lb").value;
+  client.state=(($("#state")||{}).value||"").trim().toUpperCase();
   const pm=parseFloat($("#iulpm").value);
   if(pm!==client.iulpm) client.uwSet=false;      /* a new contribution gets its say again */
   client.iulpm=isNaN(pm)?null:pm;
@@ -1338,7 +1390,7 @@ function readClient(){
   const uwSeg=$("#uwSeg"); if(uwSeg) uwSeg.classList.toggle("hot", client.uw!=="si");
   const fcSeg=$("#focusSeg"); if(fcSeg) fcSeg.classList.toggle("eye", client.iulpm!=null);
 }
-["#age","#hft","#hin","#wt","#sex","#lb","#iulpm"].forEach(sel=>$(sel).addEventListener("input",()=>{readClient();render();}));
+["#age","#hft","#hin","#wt","#sex","#lb","#iulpm","#state"].forEach(sel=>$(sel).addEventListener("input",()=>{readClient();render();}));
 document.querySelectorAll("#focusSeg button").forEach(b=>b.addEventListener("click",()=>{client.focus=b.dataset.focus;document.querySelectorAll("#focusSeg button").forEach(x=>x.setAttribute("aria-pressed",x===b));render();}));
 /* Each click used to attach another full set of listeners to the focus buttons as well. */
 document.querySelectorAll("#paySeg button").forEach(b=>b.addEventListener("click",()=>{client.pay=b.dataset.pay;document.querySelectorAll("#paySeg button").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));render();}));
@@ -1361,6 +1413,11 @@ function ordered(key){
 function ftin(h){return Math.floor(h/12)+"'"+(h%12)+'"';}
 function eligChecks(key,car){
   const e=(ELIG[key]||{})[car.id]||{}; const out=[];
+  /* State first. It decides whether the product can be sold at all and has nothing to do with
+     the client's health, so it is not something a better build or a cleaner history can fix. */
+  const sb=stateBlock(car.id);
+  if(sb) out.push({s:"no",state:true,t:sb});
+
   if(client.age!=null && e.ages){ if(client.age<e.ages[0]||client.age>e.ages[1]) out.push({s:"no",age:true,t:`Issue ages ${e.ages[0]}–${e.ages[1]}${e.note?" ("+e.note+")":""}`}); else out.push({s:"ok",t:`Issue ages ${e.ages[0]}–${e.ages[1]}`}); }
   else if(client.age!=null && !e.ages) out.push({s:"na",t:"Issue ages not in the guide loaded"});
   /* Guaranteed issue is never a clean card: it always pays a graded benefit at first. */
@@ -1877,14 +1934,25 @@ function renderVerdict(){
      than disappearing into the "not eligible" count. */
   const payGone = client.pay === "bank" ? 0 : TYPE_ORDER.reduce((n,[k]) =>
     n + DATA[k].carriers.filter(c => mine(k,c) && !payOK(c)).length, 0);
+  /* What the tool does NOT know about this state, said once. The underwriting guides loaded
+     here cover health, not licensing, so for most products there is simply no state position
+     on file - and a product nobody checked must not read as a product that cleared. */
+  let stateTxt="";
+  if(client.state){
+    const ids=new Set(); TYPE_ORDER.forEach(([k])=>DATA[k].carriers.forEach(c=>{ if(mine(k,c)) ids.add(c.id); }));
+    const unchecked=[...ids].filter(id=>!stateKnown(id)).length;
+    stateTxt = client.state==="NY"
+      ? `<div class="why"><b>New York:</b> only National Life Group products are shown. Everything else is ruled out below &mdash; that is Jesse's rule, not a carrier guide, so confirm anything you are unsure of.</div>`
+      : (unchecked ? `<div class="why">State set to <b>${esc(client.state)}</b>. The underwriting guides loaded cover health, not licensing &mdash; <b>${unchecked}</b> product${unchecked===1?" has":"s have"} no state position on file, so confirm availability before quoting.</div>` : "");
+  }
   const payTxt = payGone
     ? `<div class="why">Paying by ${esc(PAY_LABEL[client.pay])}: <b>${payGone}</b> product${payGone===1?"":"s"} hidden that will not bill it. They are not ineligible — switch to <b>Bank account</b> above to see them.</div>`
     : "";
   const missTxt=(missing.length?`<div class="why">Not checked yet: ${missing.join(", ")}. Add them to tighten the list.</div>`:"")+(picked.length?`<div class="why"><button type="button" id="finePrint" class="fine-link">See what every carrier says about ${picked.map(p=>COND[p.i].name).join(", ")} ↓</button></div>`:"");
   if(best){ const x=best.hit;
-    html+=`<div class="best"><div class="k">Likely best fit</div><div class="v">${esc(best.t.label)} — ${esc(x.car.name)}</div><div class="why">${esc(x.car.prod)}${x.car.tag?" · "+esc(x.car.tag):""}</div><div class="why">${x.worst==="ok"?"Nothing entered knocks this out.":"Eligible, but expect a lower tier, rating or waiting period — see the notes on the card."}</div>${outTxt}${borOut}${payTxt}${missTxt}</div>`; }
-  else if(termOnly) html+=`<div class="best"><div class="k">Likely best fit</div><div class="v">No IUL or whole life fits — term is the only option</div><div class="why">Term is never the recommended product; the term carriers below are what's left for this client.</div>${borOut}${payTxt}${missTxt}</div>`;
-  else html+=`<div class="best"><div class="k">Likely best fit</div><div class="v">Nothing clears on IUL, whole life or term with what's entered</div><div class="why">${client.uw!=="si"?"Check the gray \"not addressed\" carriers and call underwriting, or revisit the entries.":"Nothing simplified-issue fits — switch to <b>Both</b> or <b>Fully underwritten</b> above to see the paramed options."}</div>${payTxt}${missTxt}</div>`;
+    html+=`<div class="best"><div class="k">Likely best fit</div><div class="v">${esc(best.t.label)} — ${esc(x.car.name)}</div><div class="why">${esc(x.car.prod)}${x.car.tag?" · "+esc(x.car.tag):""}</div><div class="why">${x.worst==="ok"?"Nothing entered knocks this out.":"Eligible, but expect a lower tier, rating or waiting period — see the notes on the card."}</div>${outTxt}${borOut}${stateTxt}${payTxt}${missTxt}</div>`; }
+  else if(termOnly) html+=`<div class="best"><div class="k">Likely best fit</div><div class="v">No IUL or whole life fits — term is the only option</div><div class="why">Term is never the recommended product; the term carriers below are what's left for this client.</div>${borOut}${stateTxt}${payTxt}${missTxt}</div>`;
+  else html+=`<div class="best"><div class="k">Likely best fit</div><div class="v">Nothing clears on IUL, whole life or term with what's entered</div><div class="why">${client.uw!=="si"?"Check the gray \"not addressed\" carriers and call underwriting, or revisit the entries.":"Nothing simplified-issue fits — switch to <b>Both</b> or <b>Fully underwritten</b> above to see the paramed options."}</div>${stateTxt}${payTxt}${missTxt}</div>`;
   for(const t of all){
     if(outTypes.includes(t) && outTypes.length<all.length) continue;
     const n={ok:0,tier:0,na:0,no:0}; t.list.forEach(x=>n[x.worst]++);
@@ -2098,6 +2166,99 @@ if (embedded) document.body.classList.add("embed");
 function set(sel, val){ var el = document.querySelector(sel); if(el) el.value = (val==null?"":String(val)); }
 function idxOf(name){ for(var i=0;i<COND.length;i++) if(COND[i].name===name) return i; return -1; }
 
+/* ============================================================================
+   OPEN A CLIENT FILE
+
+   The Wizard reads. It does not write. What it produces - which carriers will take this
+   client - is derived from the client's own facts, so saving it into a file would only
+   mean carrying around an answer that goes stale the next time an underwriting grid moves.
+   Drop in a profile from the Script Navigator or a quote from MyPOP Pro and the carriers
+   appear; nothing is written back.
+   ============================================================================ */
+function inchesFromWords(v){                       /* 5'11" -> 71 */
+  var m=String(v||"").match(/(\d+)\s*'\s*(\d+)?/); if(!m) return null;
+  var n=(+m[1])*12+(+(m[2]||0)); return (n>=36 && n<=95) ? n : null;
+}
+function isoDate(v){                               /* 04/12/1968 -> 1968-04-12 */
+  var m=String(v||"").match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})$/); if(!m) return "";
+  var p=function(x){ return (x.length<2?"0":"")+x; };
+  return m[3]+"-"+p(m[1])+"-"+p(m[2]);
+}
+
+/* A Script Navigator profile. Mirrors wizClient() at the other end - same keys, same rules -
+   so a file and a live push land identically. */
+function fromNavigator(P){
+  var c={}, a=parseInt(P.age,10);
+  if(a) c.age=a;
+  var d=isoDate(P.dob); if(d) c.dob=d;
+  var hin=inchesFromWords(P.height); if(hin) c.hin=hin;
+  var w=parseInt(String(P.weight||"").replace(/[^0-9]/g,""),10); if(w) c.wt=w;
+  if(P.sex==="Male") c.sex="m"; else if(P.sex==="Female") c.sex="f";
+  c.lb="lb";
+  var bk=String(P.bank_kind||"");
+  if(bk==="Direct Express") c.pay="dx";
+  else if(bk.indexOf("Online only")===0) c.pay="app";
+  else if(bk==="Credit union"||bk==="National bank") c.pay="bank";
+  if(P.state) c.state=String(P.state).toUpperCase();
+  c.meds=(P.meds_list||[]).map(function(m){ return String(m).replace(/\s*\(.*\)$/,""); });
+  if((P.med_skip||[]).length) c.medSkip=P.med_skip.slice();
+  c.conds=(P.conds||[]).map(function(n){
+    var o={name:n};
+    if(n==="High blood pressure"){ var bm=String(P.bp_meds||"").replace(/[^0-9]/g,""); if(bm) o.m=bm; if(P.bp_meds_set) o.mSet=true; }
+    /* Every follow-up answer the script collected, under the key this page already reads. */
+    var det={};
+    Object.keys(P).forEach(function(k){
+      if(/^(dx_|a1c|dia_|ca_|ha_|stent_|hs_|str_|pace_|copd_|kid_|liv_|bp_)/.test(k) && P[k]!=null && String(P[k]).trim()!=="")
+        det[k]=String(P[k]).trim();
+    });
+    if(Object.keys(det).length) o.d=det;
+    return o;
+  });
+  return c;
+}
+
+/* A MyPOP Pro quote. Its medications are ticked per person; this page rates ONE life, so it
+   takes the applicant's. The spouse's are left behind on purpose rather than silently mixed
+   into one person's history. */
+function fromPopProQuote(S){
+  var C=S.client||{}, I=S.intake||{}, c={};
+  var a=parseInt(C.age||C.page,10); if(a) c.age=a;
+  var d=isoDate(C.dob||C.date); if(d) c.dob=d;
+  var h=parseInt(I.pheight,10); if(h>=36&&h<=95) c.hin=h;
+  var w=parseInt(I.pweight,10); if(w) c.wt=w;
+  if(I.psex==="M") c.sex="m"; else if(I.psex==="F") c.sex="f";
+  c.lb="lb";
+  if(C.state) c.state=String(C.state).toUpperCase();
+  c.meds=(I.medList||[]).filter(function(m){ return m && m.name && m.forS!==true; })
+                        .map(function(m){ return String(m.name); });
+  c.conds=(I.conds||[]).filter(function(x){ return x && x.name; })
+                       .map(function(x){ return {name:x.name, yr:x.yr||"", mo:x.mo||""}; });
+  return c;
+}
+
+function openClientFile(file){
+  var r=new FileReader();
+  r.onload=function(){
+    var o, c, from;
+    try{ o=JSON.parse(r.result); }catch(e){ return showFileMsg("That file is not readable JSON.", true); }
+    if(o && o.format==="optimum-client" && o.client){ c=o.client; from="a suite client file"; }
+    else if(o && o.intake && (o.client||o.packages||o.aca)){ c=fromPopProQuote(o); from="a MyPOP Pro quote"; }
+    else if(o && (o.first||o.last||o.dob||o.conds||o.meds_list)){ c=fromNavigator(o); from="a Script Navigator profile"; }
+    else return showFileMsg("That does not look like a client file from the suite.", true);
+    var who=((o.first||"")+" "+(o.last||"")).trim() || ((o.client&&o.client.pname)||"") ||
+            (((o.client||{}).first||"")+" "+((o.client||{}).last||"")).trim();
+    apply(c);
+    if(c.state){ var el=$("#state"); if(el){ el.value=c.state; readClient(); render(); } }
+    showFileMsg("Opened "+from+(who?" — "+who:"")+". Nothing was written back to it.", false);
+  };
+  r.readAsText(file);
+}
+function showFileMsg(t,bad){
+  var el=$("#fileMsg"); if(!el) return;
+  el.textContent=t; el.hidden=false; el.className="filemsg"+(bad?" bad":"");
+  clearTimeout(showFileMsg._t); showFileMsg._t=setTimeout(function(){ el.hidden=true; }, bad?9000:6000);
+}
+
 function apply(c){
   if(!c || typeof c !== "object") return;
   /* The navigator sends the date of birth as well as the age it worked out from it, and
@@ -2199,6 +2360,15 @@ if(embedded && window.parent && window.parent !== window){
   document.addEventListener("click", function(){ setTimeout(report,0); });
   setTimeout(report, 0);
 }
+
+/* Wired in here rather than with the other buttons: this block is an IIFE, so apply() and the
+   file readers only exist inside it. */
+(function(){
+  var btn=document.getElementById("loadBtn"), inp=document.getElementById("clientFile");
+  if(!btn||!inp) return;
+  btn.addEventListener("click",function(){ inp.click(); });
+  inp.addEventListener("change",function(){ var f=this.files&&this.files[0]; if(f) openClientFile(f); this.value=""; });
+})();
 })();
 </script>
 <!-- ===== /OPTIMUM SUITE — EMBEDDED CLIENT FEED ===== -->
