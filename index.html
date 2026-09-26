@@ -760,7 +760,7 @@ iul: {
   carriers: [
     {id:"iule", name:"Mutual of Omaha", prod:"IUL Express", tag:"Simplified issue", focus:"protection"},
     {id:"rapid", name:"National Life Group", prod:"RapidProtect IUL", tag:"Instant decision"},
-    {id:"ffiulx", name:"Transamerica", prod:"FFIUL II Express", tag:"Instant decision"},
+    {id:"ffiulx", name:"Transamerica", prod:"FFIUL II Express", tag:"Instant decision", pay:["bank"]},   // ACH / EFT only - Jesse from the eApp; the brochure does not document payment modes
     {id:"nlgiul", name:"National Life Group", prod:"FlexLife", tag:"Fully underwritten"},
     {id:"smartul", name:"Foresters", prod:"SMART UL", tag:"Non-medical", focus:"protection"},
     {id:"ffiul", name:"Transamerica", prod:"Financial Foundation IUL", tag:"Fully underwritten"},
@@ -944,7 +944,7 @@ const ELIG={
          ages, so it inherits Super's per Jesse's rule that anyone eligible for one is eligible for
          the other - revisit if Transamerica publishes them separately. */
       talb:{ages:[18,80],face:[25000,2000000],build:"TA",termAge:[[50,30],[65,20],[75,15],[80,10]],termNote:"the older age applies over $100,000 face \u2014 30-yr to 58, 20-yr to 70, 15-yr to 78"} },
- iul:{ amiul:{ages:[18,70],face:[50000,450000],build:"AM"}, fgpath:{ages:[0,80],face:[50000,10000000]}, fgever:{ages:[0,80],face:[100000,10000000],build:"NLGP1",buildBorrowed:"National Life Group RapidProtect"}, iule:{ages:[18,75],face:[25000,550000],faceAge:[[50,550000],[60,450000],[75,350000]],build:"MOOX"}, rapid:{ages:[0,60],face:[50000,500000],build:"NLGP1"}, ffiulx:{ages:[0,70],face:[50000,500000],faceAge:[[17,250000],[60,500000],[70,300000]],bmi:39,bmiMin:16}, nlgiul:{ages:[0,85],build:"NLGT"}, smartul:{ages:[0,75],face:[25000,400000],faceAge:[[55,400000],[75,150000]],build:"FSF"}, ffiul:{ages:[0,85],face:[25000,20000000],build:"TA"} }
+ iul:{ amiul:{ages:[18,70],face:[50000,450000],build:"AM"}, fgpath:{ages:[0,80],face:[50000,10000000]}, fgever:{ages:[0,80],face:[100000,10000000],build:"NLGP1",buildBorrowed:"National Life Group RapidProtect"}, iule:{ages:[18,75],face:[25000,550000],faceAge:[[50,550000],[60,450000],[75,350000]],build:"MOOX"}, rapid:{ages:[0,60],face:[50000,500000],build:"NLGP1"}, ffiulx:{ages:[0,70],face:[50000,500000],faceAge:[[17,250000],[60,500000],[70,300000]],bmi:39,bmiMin:16}, nlgiul:{ages:[0,85],build:"NLGT"}, smartul:{ages:[0,75],face:[25000,400000],faceAge:[[55,400000],[75,150000]],build:"FSF"}, ffiul:{ages:[0,85],face:[25000,null],build:"TA"}   /* min $25,000 per the FCIUL/FFIUL differences flyer 2470814R1_0823_D; no maximum published in anything loaded - the old $20,000,000 was Transamerica's jumbo limit, not a face maximum */ }
 };
 const TYPE_ORDER=[["iul","IUL"],["wl","Whole Life"],["term","Term"]];
 /* WL row name -> term/IUL row name, for the unified condition list */
@@ -1015,7 +1015,11 @@ const PAY = {
   app: ["American Amicable", "Transamerica", "InstaBrain", "Accendo (Aetna/CVS)"]
 };
 const PAY_LABEL = {bank:"a bank account", dx:"a Direct Express card", app:"Chime or Cash App"};
-const payOK = c => { const a = PAY[client.pay]; return !a || a.some(n => c.name.indexOf(n) === 0); };
+/* PAY is per carrier, which is how Jesse framed it and is right for most of them. A product can
+   still differ from its own carrier - Transamerica FE Express bills a Direct Express card, and
+   FFIUL II Express is bank draft only - so a product-level `pay` list overrides the carrier. */
+const payOK = c => { if(c.pay) return c.pay.indexOf(client.pay)>-1;
+  const a = PAY[client.pay]; return !a || a.some(n => c.name.indexOf(n) === 0); };
 const client={age:null,hin:null,wt:null,sex:"",face:null,lb:"lb",uw:"si",uwSet:false,focus:"both",iulpm:null,pay:"bank",state:""};
 
 /* ---------- WHERE A PRODUCT CAN BE WRITTEN ----------
@@ -1458,7 +1462,11 @@ function eligChecks(key,car){
     let max=e.face[1], note="";
     if(e.faceAge&&client.age!=null){ const band=e.faceAge.find(b=>client.age<=b[0]);
       if(band&&band[1]!==max){ max=band[1]; note=` at age ${client.age}`; } }
-    out.push({s:"ok",t:`Coverage ${money(e.face[0])}–${money(max)}${note}`});
+    /* A null maximum means nothing we hold publishes one. Saying so beats printing a jumbo or
+       reinsurance limit as though it were the most the agent can actually sell. */
+    out.push(max==null
+      ? {s:"ok",t:`Coverage ${money(e.face[0])} and up — no published maximum in the guides loaded`}
+      : {s:"ok",t:`Coverage ${money(e.face[0])}–${money(max)}${note}`});
   }
   /* Term length is its own limit and nothing else expresses it: a 60-year-old inside the issue
      ages still cannot have the 30-year an agent is about to quote. The band shown is the one
