@@ -197,6 +197,18 @@
   .card .prod b{color:var(--slate)}
   .card .reason{font-size:12.5px;color:var(--no);font-weight:600;margin:2px 0 6px}
   .card .reason.tier{color:var(--golddk)}
+  /* A ruled-out card is washed so it reads as closed at a glance, before any of it is read. */
+  .card.out{background:var(--no-bg);border-color:#E7CFC8}
+  .card.out .name{color:var(--no)}
+  .card.out .prod{color:#9A6154}
+  .card.out ul li span{color:#7E4436}
+  .card.out .outmark{display:inline-block;font-family:var(--sans);font-size:10.5px;font-weight:800;
+    letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--no);
+    border-radius:4px;padding:2px 7px;margin:0 0 7px}
+  /* It closes the results, so it gets a rule above it rather than running on from the last lane. */
+  .ptype.knocked{margin-top:26px;padding-top:20px;border-top:2px solid #E7CFC8}
+  .ptype.knocked h3{color:var(--no)}
+  .ptype.knocked h3 small{color:#9A6154;font-weight:500}
   .card{position:relative}
   .cardtools{position:absolute;top:10px;right:10px;display:flex;gap:6px;align-items:center;z-index:2}
   .ctool{width:26px;height:26px;border-radius:50%;border:1px solid var(--rule);background:#fff;cursor:pointer;
@@ -439,7 +451,7 @@ body.embed .embed-note{display:block;font-size:11.5px;color:var(--muted);
   <div class="legend">
     <span><i class="dot ok"></i> Allowed / best tier available</span>
     <span><i class="dot tier"></i> Takes it, but lower tier, rating or time window applies</span>
-    <span><i class="dot no"></i> Not eligible (hidden from results; shown in the grids)</span>
+    <span><i class="dot no"></i> Not eligible &mdash; listed at the end with the reason</span>
     <span><i class="dot na"></i> Not addressed — check meds / call underwriting</span>
   </div>
 
@@ -1599,6 +1611,7 @@ const PROD_BENEFITS={"wl:americo": ["Terminal illness accelerated benefit - 12 m
    never be shown the simplified issue IULs, even when the agent asked for them. */
 function uwFor(key){ return (key==="iul" && client.uwIul && !client.uwSet) ? client.uwIul : client.uw; }
 const BORROWED_OUT={};
+const KNOCKED_OUT={};
 function verdictsFor(key){
   const d=DATA[key];
   const uw=uwFor(key), showFU=uw!=="si", showSI=uw!=="fu";
@@ -1660,6 +1673,17 @@ function verdictsFor(key){
   });
   /* A carrier removed on a borrowed build chart is named on the page, since the chart is not its own. */
   BORROWED_OUT[key]=all.filter(x=>!x.ageOut && x.borrowedOut).map(x=>`${x.car.name} ${x.car.prod} removed on a borrowed build chart (${ELIG[key][x.car.id].buildBorrowed}) — confirm with ${x.car.name}`);
+  /* The ones that did not make it. They used to vanish, which reads as "this carrier does not
+     exist" rather than "this carrier said no" - and the agent has no way to tell the client
+     why, or to know whether they mis-entered something. Kept here and shown at the end. */
+  KNOCKED_OUT[key]=all.filter(x=>x.ageOut || x.worst==="no").map(x=>{
+    const why=[];
+    /* The condition reasons come first: they are the ones that just changed under the agent's
+       hands. Age and build are fixed facts about the client and read as context after. */
+    x.lines.forEach(l=>{ if(l.cell.s==="no" && !l.cell.offGrid) why.push({t:l.row, d:l.cell.t}); });
+    x.checks.forEach(c=>{ if(c.s==="no") why.push({t:c.age?"Outside the issue ages":"Eligibility", d:c.t}); });
+    return {...x, why};
+  }).sort((a,b)=>a.i-b.i);
   return all.filter(x=>!x.ageOut && x.worst!=="no").sort((a,b)=>b.sc-a.sc || a.i-b.i);
 }
 function renderChips(){
@@ -1866,7 +1890,7 @@ function renderVerdict(){
     const n={ok:0,tier:0,na:0,no:0}; t.list.forEach(x=>n[x.worst]++);
     const shown=DATA[t.key].carriers.filter(c=>{if(!mine(t.key,c)) return false; if(!payOK(c)) return false; const fu=c.tag==="Fully underwritten", uw=uwFor(t.key); if(!(fu?uw!=="si":uw!=="fu")) return false; if(t.key==="iul"&&client.focus!=="both"&&c.focus&&c.focus!=="both"&&c.focus!==client.focus) return false; return true;}).length;
     const hidden=shown-t.list.length;
-    html+=`<div class="ptype"><h3>${esc(t.label)}${t.key==="iul"&&client.uwIul?` <span class="uwiul">${{si:"Simplified issue",both:"Both",fu:"Fully underwritten"}[client.uwIul]} &middot; from the $/m${client.uwSet?", overruled by Show":""}</span>`:""} <small>${n.ok} clean · ${n.tier} with conditions · ${n.na} unclear${hidden?` · ${hidden} not eligible (hidden)`:""}</small></h3>${borFor(t.key)}<div class="lane">`;
+    html+=`<div class="ptype"><h3>${esc(t.label)}${t.key==="iul"&&client.uwIul?` <span class="uwiul">${{si:"Simplified issue",both:"Both",fu:"Fully underwritten"}[client.uwIul]} &middot; from the $/m${client.uwSet?", overruled by Show":""}</span>`:""} <small>${n.ok} clean · ${n.tier} with conditions · ${n.na} unclear${hidden?` · ${hidden} not eligible &mdash; listed below`:""}</small></h3>${borFor(t.key)}<div class="lane">`;
     if(!t.list.length) html+=`<div class="card na"><div class="name">Nothing available</div><div class="prod">No ${esc(t.label.toLowerCase())} product on the grid issues at age ${client.age??"—"} under the current filter.</div></div>`;
     html+=t.list.map(x=>{ const ck=`${t.key}:${x.car.id}`, ql=QUOTE_LINK[ck], bn=PROD_BENEFITS[ck]||[];
       const tools=`<div class="cardtools">`+
@@ -1881,6 +1905,26 @@ function renderVerdict(){
       x.lines.filter(l=>!l.cell.offGrid).map(l=>`<li><b><i class="dot ${l.cell.s}"></i>${esc(l.row)}</b><span>${strongDecline(esc(l.cell.t))}</span></li>`).join("")}</ul></div>`; }).join("");
     html+="</div></div>";
   }
+
+  /* Everything that was knocked out, in one block at the end rather than scattered through the
+     lanes - the eligible products stay in fit order at the top, and the question "why isn't
+     that carrier on here?" has an answer on the page instead of in the agent's head. */
+  const outAll=[];
+  for(const t of all){ (KNOCKED_OUT[t.key]||[]).forEach(x=>outAll.push({label:t.label,x})); }
+  if(outAll.length){
+    html+=`<div class="ptype knocked"><h3>Not eligible <small>${outAll.length} product${outAll.length===1?"":"s"} ruled out by what's entered</small></h3><div class="lane">`;
+    html+=outAll.map(({label,x})=>{
+      const why=x.why.length?x.why:[{t:"Not eligible",d:"Ruled out by the current entries"}];
+      return `<div class="card no out">`+
+        `<div class="outmark">Not eligible</div>`+
+        `<div class="name">${esc(x.car.name)}</div>`+
+        `<div class="prod">${esc(label)} &middot; ${esc(x.car.prod)}${x.car.tag?` · <b>${esc(x.car.tag)}</b>`:""}</div>`+
+        `<ul>`+why.map(w=>`<li><b><i class="dot no"></i>${esc(w.t)}</b><span>${strongDecline(esc(w.d))}</span></li>`).join("")+`</ul>`+
+      `</div>`;
+    }).join("");
+    html+="</div></div>";
+  }
+
   v.innerHTML=html;
   /* The benefits pop-up: one at a time, closes on a second click or anywhere outside. */
   v.querySelectorAll(".ctool.bene").forEach(b=>b.addEventListener("click",e=>{
