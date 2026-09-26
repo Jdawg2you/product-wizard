@@ -932,7 +932,7 @@ const ELIG={
       cbsi:{ages:[50,80],face:[5000,35000],faceAge:[[60,25000],[70,30000],[80,35000]],build:"CB",buildLevel:"CBL"}, cbgi:{ages:[50,80],face:[5000,25000],gi:"Guaranteed issue - graded death benefit in years 1-2 (110% of premiums paid)"},
       americo:{ages:[50,85],face:[5000,50000],build:"AM_ES",note:"ages from 2022 Eagle Premier sheet"}, accendo:{ages:[40,89],face:[2000,50000]}, amam:{ages:[0,85],face:[2500,35000],faceAge:[[75,35000],[85,20000]],build:"SC"},
       foresters:{ages:[50,85],face:[5000,35000],faceAge:[[80,35000],[85,15000]],build:"PR"}, moo:{ages:[45,85],face:[2000,50000],build:"LP"}, chubb:{ages:[0,80],face:[5000,50000]}, fidelity:{ages:[50,85],face:[5000,50000],faceAge:[[80,50000],[85,40000]],build:"FFE"}, fex:{ages:[18,85],face:[5000,100000],faceAge:[[75,100000],[85,25000]],bmi:48,bmiMin:15} },
- term:{ americo:{ages:[20,75],face:[25000,450000],build:"AM"}, moo:{ages:[18,75],face:[25000,550000],faceAge:[[50,550000],[60,450000],[75,350000]],build:"MOOX"}, amam:{face:[25000,300000],build:"AAT"}, foresters:{ages:[18,80],face:[20000,400000],faceAge:[[55,400000],[80,150000]],build:"FSF"},
+ term:{ americo:{ages:[20,75],face:[25000,450000],build:"AM"}, moo:{ages:[18,75],face:[25000,550000],faceAge:[[50,550000],[60,450000],[75,350000]],build:"MOOX",termAge:[[50,30],[60,20],[70,15],[75,10]]}, amam:{face:[25000,300000],build:"AAT"}, foresters:{ages:[18,80],face:[20000,400000],faceAge:[[55,400000],[80,150000]],build:"FSF"},
       ibt:{ages:[18,60],face:[50000,1000000],faceAge:[[55,1000000],[56,900000],[57,800000],[58,700000],[59,600000],[60,500000]],build:"IBT",termAge:[[50,30],[60,20]],termNote:"30-yr only to age 45 if tobacco"}, ibpt:{ages:[18,60],face:[50000,1000000],faceAge:[[55,1000000],[56,900000],[57,800000],[58,700000],[59,600000],[60,500000]],build:"IBPT",termAge:[[50,30],[60,20]],termNote:"30-yr only to age 45 if tobacco"},
       /* termAge: the longest level term still issued at that age, youngest band first. The band
          quoted is the tobacco-and-small-face case, the one that actually limits the client - the
@@ -1033,7 +1033,10 @@ const client={age:null,hin:null,wt:null,sex:"",face:null,lb:"lb",uw:"si",uwSet:f
 const NY_ONLY = ["nlg","rapid","nlgiul"];        // National Life Group: Term LSW/NL, RapidProtect IUL, FlexLife
 const STATE_OUT = {                              // product id -> states it is NOT sold in
   rnwl: ["AK","HI","AL","LA","NH","NY","MA"],    // Jet Whole Life, Field UW Guide 2980-B rev 3-2020
-  rnel: ["AL","AK","HI","LA","MA","NH","NY"]     // Ensured Legacy, agent training guide 2996-1-B Rev 1-2024
+  rnel: ["AL","AK","HI","LA","MA","NH","NY"],    // Ensured Legacy, agent training guide 2996-1-B Rev 1-2024
+  ffiulx: ["CA","NY","PR"]                       // FFIUL II Express brochure 4789512R1 10/25: "the express
+                                                 // application process is not available in California, Guam,
+                                                 // New York, or Puerto Rico" - the base FFIUL still is
 };
 /* Products whose state position we simply do not hold. Counted on the page so the silence is
    visible - an unchecked product must never read as a cleared one. */
