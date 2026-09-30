@@ -1349,7 +1349,7 @@ function renderMedSugg(){
   if(!medq.value.trim()){ medsugg.classList.remove("open"); medq.setAttribute("aria-expanded","false"); return; }
   if(!list.length) medsugg.innerHTML='<div class="none">No medication matches that — add the condition directly instead.</div>';
   list.forEach((n,k)=>{ const b=document.createElement("button"); b.type="button"; b.setAttribute("role","option");
-    b.className=k===medActive?"active":""; b.textContent=medBoth(n);
+    b.className=k===medActive?"active":""; b.textContent=medOption(n,medq.value);
     b.addEventListener("mousedown",e=>{e.preventDefault(); addMed(n);}); medsugg.appendChild(b); });
   medsugg.classList.add("open"); medq.setAttribute("aria-expanded","true");
 }
@@ -1359,6 +1359,25 @@ function renderMedSugg(){
    changes the label only. Jesse, 2026-09-30. */
 var MED_ALIASES=(function(){ var m={}; MEDS.forEach(function(r){ if(r.length>1) m[r[0]]=r.slice(1); }); return m; })();
 function medBoth(label){ var a=MED_ALIASES[label]; return a ? label+" ("+a.join(", ")+")" : label; }
+/* An option reads back the word the agent typed, with the other names after it. Typing PRIL and
+   being offered "Omeprazole" makes them think they typed something wrong, when Prilosec is very
+   much in the system - it just is not the name the row is filed under. So the list says
+   "Prilosec (Omeprazole)" and the chip, once chosen, settles to "Omeprazole (Prilosec)". */
+function medRow(label){ return [label].concat(MED_ALIASES[label]||[]); }
+function medTypedName(label,q){
+  var t=String(q||"").trim().toLowerCase(); if(!t) return label;
+  var best=label, bs=9;
+  medRow(label).forEach(function(n){
+    var ln=n.toLowerCase();
+    var s = ln===t ? 0 : ln.indexOf(t)===0 ? 1 : ln.indexOf(t)>0 ? 2 : 9;
+    if(s<bs){ bs=s; best=n; }
+  });
+  return best;
+}
+function medOption(label,q){
+  var lead=medTypedName(label,q), rest=medRow(label).filter(function(n){ return n!==lead; });
+  return rest.length ? lead+" ("+rest.join(", ")+")" : lead;
+}
 function medLabel(n){ const hit=MED_INDEX.filter(m=>m.n.toLowerCase()===String(n).toLowerCase())[0]; return hit?hit.label:n; }
 function addMed(n){ n=medLabel(n);   /* an alias like "Lipitor" must land as its label "Atorvastatin", or MED_FOR misses */
   if(meds.indexOf(n)<0) meds.push(n); medq.value=""; medActive=-1; medsugg.classList.remove("open"); render(); medq.focus(); }
