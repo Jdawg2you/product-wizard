@@ -505,7 +505,7 @@ wl: {
     {id:"amam",    name:"American Amicable", prod:"Senior Choice", src:"Products at a Glance rev 8/25"},
     {id:"famch",   name:"American Amicable", prod:"Family Choice", src:"Products at a Glance rev 8/25"},
     {id:"fex", name:"Transamerica", prod:"FE Express Solution", tag:"Instant decision"},
-    {id:"foresters", name:"Foresters", prod:"PlanRight"},
+    {id:"foresters", name:"Foresters", prod:"PlanRight (OTP)"},   /* (OTP) is Jesse's label, 2026-09-30 */
     {id:"accendo", name:"Accendo (Aetna/CVS)", prod:"Final Expense (only 6-month advance)"},
     {id:"cbgi", name:"Corebridge", prod:"Guaranteed Issue Whole Life (GIWL)", tag:"Guaranteed issue", gi:true, src:"Agent guide 9/25"},
     {id:"rnel", name:"Royal Neighbors", prod:"Ensured Legacy Final Expense (SIWL / GDB)", tag:"Instant decision", src:"Agent training guide 2996-1-B (1/24)"},
@@ -518,7 +518,7 @@ wl: {
     {name:"Royal Neighbors — Jet Whole Life", pts:["Ages 0-80; MIB, MVR and Rx profile on everyone; must be completed face to face", "Accelerated underwriting (no exam): ages 0-17 $10,000-$49,999; 18-50 $25,000-$500,000; 51-60 $25,000-$250,000. Ages 61-80 and larger amounts are fully underwritten (paramed, blood/UA; mature assessment at 66+)", "Accelerated classes: Preferred and Standard non-tobacco, Standard tobacco, two substandard classes (the first up to Table 4); fully underwritten adds Super Preferred and tables to 16", "The guide's medical chart is only check / call / decline: grid cells reading 'individual consideration' are its call-for-risk-assessment mark, 800-627-4762 option 1. No knock-out medication list", "Build (accelerated): Standard to the first weight, substandard rates to the second, decline above - 5'9\": 226 / 287. Fully underwritten Standard maximums are lower for women", "Fraternal society: no criminal background, no foreign nationals or visas, no applications from AK, HI, AL, LA, NH, NY or MA; income up to 20x (18-40), 15x (41-50), 10x (51-69), 5x (70+)"]},
     {name:"Accendo (Aetna / CVS Health) — Final Expense", pts:["Ages 40-89, $2,000-$50,000 depending on age", "Preferred = all app questions No; Standard = one Yes in Part C, still immediate", "Modified = ROP if death in first 2 yrs", "No height/weight chart"]},
     {name:"American Amicable — Senior Choice", pts:["Immediate: 100% all years — ages 0-49 to $35K; 50-75 to $35K; 76-85 to $20K", "Graded: 30% yr 1, 70% yr 2, 100% after — ages 50-85 to $20K", "ROP: return of premium +10% (≤3 yrs ages 0-64; ≤2 yrs ages 65-85) — 18-49 and 50-85 to $20K", "100% accidental death all years; min $10K under 50, $2,500 over 50 ($5K WA)"]},
-    {name:"Foresters — PlanRight", pts:["Preferred / Standard: ages 50-85, 100% face; Basic: ages 50-80, ROP+10% yrs 1-2 then 100%", "Max face: Preferred $35K (81-85: $15K); Standard $20K (81-85: $10K); Basic $15K", "Min face $5,000; premiums level to age 121", "Accelerated death (terminal) included on Preferred/Standard; common carrier & family health riders included"]},
+    {name:"Foresters — PlanRight (OTP)", pts:["Preferred / Standard: ages 50-85, 100% face; Basic: ages 50-80, ROP+10% yrs 1-2 then 100%", "Max face: Preferred $35K (81-85: $15K); Standard $20K (81-85: $10K); Basic $15K", "Min face $5,000; premiums level to age 121", "Accelerated death (terminal) included on Preferred/Standard; common carrier & family health riders included"]},
     {name:"Mutual of Omaha — Living Promise", pts:["Level: ages 45-85, $2,000-$50,000; Graded: ages 45-80, $2,000-$20,000 (not in AR, MT, NC) — per April 2026 guide", "Any Yes in Part One - not eligible; any Yes in Part Two - Graded only; all No - Level", "Rx exclusion list applies (asterisked drugs may still qualify for Graded); random phone interview"]},
     {name:"Chubb / Combined — Generational Life", pts:["Ages 0-80; Preferred & Standard $5K-$50K; Non-standard $5K-$25K", "Graded (Class 4): $5K-$25K, ROP + 3.75% for first 2 yrs, full benefit after; full benefit for accidental death", "All-digital app with instant decision; MIB + Rx + labs check; monthly ACH or card incl. Direct Express; $50 policy fee", "Rule of thumb: any Yes to a modification question = Graded. Pending tests, biopsy or surgery = postpone. Cancer/stroke/heart attack diagnosed within 6 months = do not submit. On disability = Graded."]},
     {name:"InstaBrain (Fidelity Life) — RAPIDecision Final Expense / Guaranteed Issue", pts:["FE: ages 50-85; $5K-$50K (81-85: $5K-$40K); full benefit day one; 12 knockout questions, mostly 2-yr lookbacks", "GI: ages 50-85, $5K-$25K, no underwriting; yrs 1-3 pay ROP + 5% (accidental death pays full), 100% from yr 4", "Any Yes on the FE app routes the client to GI automatically", "Also GI-routed: hospitalized 2+ times in 6 mos, pending tests/appointments, life expectancy ≤24 mos; $85 policy fee; monthly card/EFT"]}
@@ -1349,10 +1349,16 @@ function renderMedSugg(){
   if(!medq.value.trim()){ medsugg.classList.remove("open"); medq.setAttribute("aria-expanded","false"); return; }
   if(!list.length) medsugg.innerHTML='<div class="none">No medication matches that — add the condition directly instead.</div>';
   list.forEach((n,k)=>{ const b=document.createElement("button"); b.type="button"; b.setAttribute("role","option");
-    b.className=k===medActive?"active":""; b.textContent=n;
+    b.className=k===medActive?"active":""; b.textContent=medBoth(n);
     b.addEventListener("mousedown",e=>{e.preventDefault(); addMed(n);}); medsugg.appendChild(b); });
   medsugg.classList.add("open"); medq.setAttribute("aria-expanded","true");
 }
+/* What the agent sees. Type "rivaroxaban" and the list used to answer "Xarelto", which reads as
+   "your drug is not on here" - it is, under its other name. Both names show now. The STORED value
+   is still row[0], because MED_FOR, the navigator sync and check.sh are all keyed on it; this
+   changes the label only. Jesse, 2026-09-30. */
+var MED_ALIASES=(function(){ var m={}; MEDS.forEach(function(r){ if(r.length>1) m[r[0]]=r.slice(1); }); return m; })();
+function medBoth(label){ var a=MED_ALIASES[label]; return a ? label+" ("+a.join(", ")+")" : label; }
 function medLabel(n){ const hit=MED_INDEX.filter(m=>m.n.toLowerCase()===String(n).toLowerCase())[0]; return hit?hit.label:n; }
 function addMed(n){ n=medLabel(n);   /* an alias like "Lipitor" must land as its label "Atorvastatin", or MED_FOR misses */
   if(meds.indexOf(n)<0) meds.push(n); medq.value=""; medActive=-1; medsugg.classList.remove("open"); render(); medq.focus(); }
@@ -1375,7 +1381,7 @@ function medFlags(){
   return out;
 }
 function renderMeds(){
-  $("#medchips").innerHTML = meds.map(m=>`<span class="medchip">${esc(m)}<button type="button" data-med="${esc(m)}" aria-label="Remove ${esc(m)}">&times;</button></span>`).join("");
+  $("#medchips").innerHTML = meds.map(m=>`<span class="medchip">${esc(medBoth(m))}<button type="button" data-med="${esc(m)}" aria-label="Remove ${esc(medBoth(m))}">&times;</button></span>`).join("");
   $("#medchips").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>delMed(b.dataset.med)));
   const flags=medFlags();
   $("#medask").innerHTML = flags.map(f=>{
