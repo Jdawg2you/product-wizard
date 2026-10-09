@@ -134,6 +134,7 @@
   .sugg button{display:block;width:100%;text-align:left;padding:9px 14px;border:0;background:var(--card);cursor:pointer}
   .sugg button:hover,.sugg button.active{background:var(--bluesoft)}
   .sugg .none{padding:10px 14px;color:var(--muted)}
+  .sugg button.typed{border-top:1px dashed var(--line,#ddd);font-weight:600}
   .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;min-height:34px;align-items:center}
   .chips .hint{color:var(--muted);font-size:14px}
   .qlabel .sub{font-weight:400;color:var(--muted)}
@@ -1337,20 +1338,54 @@ q.addEventListener("keydown",e=>{ const list=matches();
 function pick(i){ if(!pickedIdx().includes(i)) picked.push({i,y:null}); q.value=""; activeIdx=-1; sugg.classList.remove("open"); render(); q.focus(); }
 function unpick(i){ picked=picked.filter(x=>x.i!==i); render(); }
 
+/* ===== The big medication list (MED-FDA) =====
+   meds/fda-meds.json: every prescription brand and generic on the FDA NDC directory, generic vs brand from
+   the latest CMS NADAC week. Built by POP Pro's tools/build-fda-meds.py; the same file and this same block
+   are in POP Pro, the navigator and the wizard. Rows are [name, other name, 'g'|'b'].
+   These names are found and recorded, but never linked to a condition - that stays MEDS/MED_FOR, which
+   always rank first. Anything can still be added exactly as typed. */
+var MED_FDA=[], MED_FDA_BY={};
+function medFdaLoad(done){ if(!window.fetch) return; fetch('meds/fda-meds.json').then(function(r){ return r.json(); }).then(function(d){
+    MED_FDA=(d.meds||[]).map(function(r){ return {r:r, n:r[0].toLowerCase(), o:(r[1]||'').toLowerCase(), k:medKey(r[0]), k2:medKey2(r[0])}; });
+    MED_FDA_BY={}; MED_FDA.forEach(function(x){ MED_FDA_BY[x.n]=x.r; }); if(done) done(); }).catch(function(){}); }
+function medFdaRow(n){ return MED_FDA_BY[String(n||'').trim().toLowerCase()]||null; }
+/* Core dictionary first, then the big list. sure = the typed word is in the name; sounds-like guesses
+   (a misspelling) only show when nothing contains what was typed. */
+function medSuggestAll(q,limit){ limit=limit||8; var t=String(q||'').trim(), lt=t.toLowerCase(); if(t.length<2) return [];
+  var out=[], had={}, core={};
+  MEDS.forEach(function(r){ r.forEach(function(n){ core[n.toLowerCase()]=1; }); });
+  var add=function(label,other,src,sure){ var k=label.toLowerCase(); if(had[k]) return; had[k]=1; out.push({label:label,other:other,src:src,sure:sure}); };
+  medSuggest(t,limit).forEach(function(h){ add(h,'','core',medRow(h).some(function(n){ return n.toLowerCase().indexOf(lt)>=0; })); });
+  if(MED_FDA.length){ var kt=medKey(t), k2=medKey2(t), sc=[];
+    MED_FDA.forEach(function(x){ if(core[x.n]) return;
+      var s=x.n===lt?0:x.n.indexOf(lt)===0?1+x.n.length/1000:x.o.indexOf(lt)===0?2:x.n.indexOf(lt)>0?3:x.o.indexOf(lt)>0?3.5:
+        (kt.length>=3&&x.k.indexOf(kt)===0)?4+Math.abs(x.k.length-kt.length)/10:(k2.length>=3&&x.k2.indexOf(k2)===0)?6+Math.abs(x.k2.length-k2.length):-1;
+      if(s>=0) sc.push([s,x]); });
+    sc.sort(function(a,b){ return a[0]-b[0]; }).slice(0,limit*2).forEach(function(p){ add(p[1].r[0],p[1].r[1],'fda',p[0]<4); }); }
+  var sure=out.filter(function(h){ return h.sure; });
+  return (sure.length?sure:out.slice(0,4)).slice(0,limit); }
+medFdaLoad();
+
 /* ---------- MEDICATION SEARCH ----------
    Type a drug, confirm what it is treating, and the condition lands on the list with whatever
    follow-up that condition needs (years since, or medication count). Answering No is remembered
    in medSkip so the same pair is not asked twice. */
 const medq=$("#medq"), medsugg=$("#medsugg");
 let medActive=-1;
-function medMatches(){ return medSuggest(medq.value, 8).filter(n=>meds.indexOf(n)<0); }
+/* Suggestions: the core list, then the big list, then "add as typed" - so a drug that isn't anywhere
+   (or is spelled oddly) can still go on the case. Jesse, 2026-10-08: Adderall and Vyvanse wouldn't go in. */
+function medMatches(){ const q=medq.value.trim(); if(q.length<2) return [];
+  const list=medSuggestAll(q,8).filter(h=>meds.indexOf(h.label)<0);
+  if(!list.some(h=>h.label.toLowerCase()===q.toLowerCase()) && meds.indexOf(q)<0) list.push({label:q,other:'',src:'typed',sure:false,typed:true});
+  return list; }
 function renderMedSugg(){
   const list=medMatches(); medsugg.innerHTML="";
   if(!medq.value.trim()){ medsugg.classList.remove("open"); medq.setAttribute("aria-expanded","false"); return; }
-  if(!list.length) medsugg.innerHTML='<div class="none">No medication matches that — add the condition directly instead.</div>';
-  list.forEach((n,k)=>{ const b=document.createElement("button"); b.type="button"; b.setAttribute("role","option");
-    b.className=k===medActive?"active":""; b.textContent=medOption(n,medq.value);
-    b.addEventListener("mousedown",e=>{e.preventDefault(); addMed(n);}); medsugg.appendChild(b); });
+  list.forEach((h,k)=>{ const b=document.createElement("button"); b.type="button"; b.setAttribute("role","option");
+    b.className=(k===medActive?"active":"")+(h.typed?" typed":"");
+    b.textContent=h.typed?'+ Add “'+h.label+'” as typed':(h.sure?'':'did you mean ')+(h.src==='core'?medOption(h.label,medq.value):h.label+(h.other?' ('+h.other+')':''));
+    b.addEventListener("mousedown",e=>{e.preventDefault(); addMed(h.label);}); medsugg.appendChild(b); });
+  if(list.length && !list.some(h=>h.src==='core')) { const n=document.createElement("div"); n.className="none"; n.textContent="Not linked to a condition — if it treats one, add the condition too."; medsugg.appendChild(n); }
   medsugg.classList.add("open"); medq.setAttribute("aria-expanded","true");
 }
 /* What the agent sees. Type "rivaroxaban" and the list used to answer "Xarelto", which reads as
@@ -1388,7 +1423,9 @@ medq.addEventListener("blur",()=>setTimeout(()=>medsugg.classList.remove("open")
 medq.addEventListener("keydown",e=>{ const list=medMatches();
   if(e.key==="ArrowDown"){e.preventDefault();medActive=Math.min(medActive+1,list.length-1);renderMedSugg();}
   else if(e.key==="ArrowUp"){e.preventDefault();medActive=Math.max(medActive-1,0);renderMedSugg();}
-  else if(e.key==="Enter"){e.preventDefault(); if(list.length) addMed(list[Math.max(medActive,0)]);}
+  /* Enter: the row the agent arrowed to; otherwise the first CONFIDENT match; otherwise exactly what was typed */
+  else if(e.key==="Enter"){e.preventDefault(); const pick=medActive>=0?list[medActive]:list.filter(h=>h.sure)[0];
+    const v=pick?pick.label:medq.value.trim(); if(v) addMed(v);}
   else if(e.key==="Escape") medsugg.classList.remove("open"); });
 
 /* conditions a chosen medication implies that are not already on the list and not declined */

@@ -224,6 +224,15 @@ elif [ -z "$NAV" ]; then
   echo "warn  navigator not found locally or online - sync with it was not checked"
 fi
 
+# ---- the big medication list (meds/fda-meds.json) must be the same file everywhere ----
+# Built by POP Pro's tools/build-fda-meds.py and copied here; a stale copy would offer different names.
+if [ ! -f meds/fda-meds.json ]; then
+  echo "FAIL  meds/fda-meds.json is missing - the medication type-ahead has no big list"; FAIL=1
+elif [ -f "$HOME/script-navigator/meds/fda-meds.json" ]; then
+  if cmp -s meds/fda-meds.json "$HOME/script-navigator/meds/fda-meds.json"; then echo "ok    meds/fda-meds.json matches the navigator"
+  else echo "FAIL  meds/fda-meds.json differs from the navigator ($HOME/script-navigator/meds/fda-meds.json) - copy the newer one over"; FAIL=1; fi
+fi
+
 echo
 if [ "$FAIL" -eq 0 ]; then
   echo "PASS  $N script block(s) parse; all grid rows aligned; in step with the navigator."
