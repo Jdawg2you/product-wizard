@@ -77,7 +77,37 @@ if [ "$FAIL" -eq 0 ] && [ -f "$TMP/block0.js" ]; then
           if (r.cells.length !== n) bad.push(k + ' \"' + r.name + '\" has ' + r.cells.length + ' cells, expected ' + n);
         });
       });
-      if (bad.length) { print('MISALIGNED:'); bad.slice(0,10).forEach(print); }
+      /* Counting cells does not catch a column landing in the wrong slot - adding Your Term by
+         appending to each row put every column from Foresters rightward two places out, and the
+         width check still passed. These two guards cover the ways that actually happens. */
+      /* Pairs that SHOULD be identical: one carrier, one underwriting shelf, two products. Edit one
+         of a pair and you must edit the other, which is the whole point of listing them here. */
+      var TWINS = {
+        wl:   [['amam','famch']],                                    /* Senior Choice / Family Choice */
+        term: [['americo','amcbo'], ['amam','hprot'], ['ta','talb'], ['fyt','fytlb']],
+        iul:  [['fgpath','fgever']]                                  /* Pathsetter / Everlast */
+      };
+      Object.keys(TWINS).forEach(function(k){
+        var ids = app.DATA[k].carriers.map(function(c){ return c.id; });
+        if (!ids.length) return;
+        TWINS[k].forEach(function(pair){
+          var a = ids.indexOf(pair[0]), b = ids.indexOf(pair[1]);
+          if (a < 0 || b < 0) { bad.push(k + ' twin ' + pair.join('/') + ' - carrier missing'); return; }
+          var diff = app.DATA[k].rows.filter(function(r){ return r.cells[a].t !== r.cells[b].t; });
+          if (diff.length) bad.push(k + ' ' + pair[0] + ' and ' + pair[1] + ' must stay identical - ' +
+            diff.length + ' row(s) drifted, first: \"' + diff[0].name + '\"');
+        });
+      });
+      ['wl','term','iul'].forEach(function(k){
+        var ids = app.DATA[k].carriers.map(function(c){ return c.id; });
+        var twins = (TWINS[k]||[]).map(function(p){ return p.join('|'); });
+        var sig = ids.map(function(_,i){ return app.DATA[k].rows.map(function(r){ return r.cells[i].t; }).join('\u0001'); });
+        for (var a=0;a<ids.length;a++) for (var b=a+1;b<ids.length;b++) {
+          if (sig[a] === sig[b] && twins.indexOf(ids[a]+'|'+ids[b]) < 0)
+            bad.push(k + ' columns ' + ids[a] + ' and ' + ids[b] + ' are identical and are not declared twins');
+        }
+      });
+      if (bad.length) { print('MISALIGNED:'); bad.slice(0,10).forEach(function(x){ print('  ' + x); }); }
       else print('ALIGNED ' + ['wl','term','iul'].map(function(k){
         return k + '=' + app.DATA[k].carriers.length + 'x' + app.DATA[k].rows.length; }).join(' '));
     } catch (e) { print('RUNTIME ERROR: ' + e.message); }
