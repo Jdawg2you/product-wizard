@@ -2231,8 +2231,8 @@ readClient(); render(); renderProducts(); if(myOff.size){$("#gearBtn").classList
 <!-- ===== OPTIMUM SUITE: cross-links to the other free tools (shared across all tools) ===== -->
 <style>
 .o-suite{position:relative;margin-left:8px;font-family:'Inter',-apple-system,'Segoe UI',Roboto,sans-serif}
-.o-suite>button{font:inherit;font-size:12px;font-weight:600;color:#fff;background:transparent;border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:7px 14px;cursor:pointer;white-space:nowrap}
-.o-suite>button:hover,.o-suite>button[aria-expanded="true"]{border-color:#fff}
+.o-suite>button,.o-suite>a{text-decoration:none;display:inline-block;font:inherit;font-size:12px;font-weight:600;color:#fff;background:transparent;border:1px solid rgba(255,255,255,.3);border-radius:999px;padding:7px 14px;cursor:pointer;white-space:nowrap}
+.o-suite>button:hover,.o-suite>a:hover,.o-suite>button[aria-expanded="true"]{border-color:#fff}
 .o-suite-menu{display:none;position:absolute;right:0;top:calc(100% + 8px);width:340px;max-width:calc(100vw - 24px);background:#fff;border:1px solid #E3DFD4;border-radius:12px;box-shadow:0 14px 34px rgba(22,32,60,.18);padding:8px;z-index:200;text-align:left}
 .o-suite.open .o-suite-menu{display:block}
 .o-suite-menu .k{font-size:11px;font-weight:600;color:#8B8A82;padding:8px 10px 4px}
@@ -2282,14 +2282,18 @@ function SUITE_LIVE(t){ return !!(t && t.url && t.url.indexOf('REPLACE-ME') < 0)
     return h;
   }
   function init(){
+    /* Jesse, 2026-10-10: "More free tools" goes straight to the tools page in a new tab. No
+       dropdown, in any tool - one click instead of two, and the same thing everywhere. The three
+       objection sheets were already built this way; this brings the rest into line. menuHTML()
+       is left in place deliberately, so the menu is one line away if it is ever wanted back. */
     document.querySelectorAll('.o-suite').forEach(function(s){
       var btn=s.querySelector('button'), menu=s.querySelector('.o-suite-menu');
-      if(!btn||!menu) return;
-      menu.innerHTML=menuHTML();
-      btn.setAttribute('aria-haspopup','true'); btn.setAttribute('aria-expanded','false');
-      btn.addEventListener('click',function(e){e.stopPropagation();var o=!s.classList.contains('open');
-        document.querySelectorAll('.o-suite.open').forEach(function(x){x.classList.remove('open');x.querySelector('button').setAttribute('aria-expanded','false');});
-        s.classList.toggle('open',o); btn.setAttribute('aria-expanded',o?'true':'false');});
+      if(menu && menu.parentNode) menu.parentNode.removeChild(menu);
+      if(!btn || !btn.parentNode) return;
+      var a=document.createElement('a');
+      a.href=SUITE.planning.url; a.target='_blank'; a.rel='noopener';
+      a.innerHTML='More free tools &#8599;';
+      btn.parentNode.replaceChild(a,btn);
     });
     document.addEventListener('click',function(){document.querySelectorAll('.o-suite.open').forEach(function(x){x.classList.remove('open');x.querySelector('button').setAttribute('aria-expanded','false');});});
     document.addEventListener('keydown',function(e){if(e.key==='Escape')document.querySelectorAll('.o-suite.open').forEach(function(x){x.classList.remove('open');x.querySelector('button').setAttribute('aria-expanded','false');});});
