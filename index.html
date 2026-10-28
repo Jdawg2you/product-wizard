@@ -2323,7 +2323,8 @@ function SUITE_LIVE(t){ return !!(t && t.url && t.url.indexOf('REPLACE-ME') < 0)
 (function(){
 "use strict";
 
-var ALLOWED = ["https://script.ffloptimum.com"];
+/* MyPopPro sends the primary applicant from its Enroll step (28 Oct 2026), same contract as the navigator. */
+var ALLOWED = ["https://script.ffloptimum.com", "https://mypoppro.com", "https://www.mypoppro.com"];
 /* Loosen only when this page is itself being served locally for testing. */
 var DEV = location.protocol === "file:" || /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
 

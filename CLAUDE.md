@@ -113,7 +113,7 @@ Conditions are addressed **by exact `COND` name**, which is a grid row name. Ren
 The navigator has `tools/sync-conditions.sh` to regenerate its copy of the names and a check that
 fails on drift; run it after any row rename.
 
-The origin allowlist is in that block (`https://script.ffloptimum.com`), relaxed only when this page
+The origin allowlist is in that block (`https://script.ffloptimum.com`, plus `https://mypoppro.com` and its `www.` since 28 Oct 2026 — MyPopPro's Enroll step pushes the primary applicant with the same `optimum-suite` / `client` message), relaxed only when this page
 is itself served from localhost or a file. Nothing crosses but `postMessage`: the two tools are
 separate origins, so no storage is shared, and client health answers deliberately never touch a
 cookie, a query string or a server.
